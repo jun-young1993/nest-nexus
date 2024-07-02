@@ -4,9 +4,17 @@ import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config/config.type';
+import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+ 
+  
+  const app = await NestFactory.create(AppModule,{
+    httpsOptions: (process.env.APP_SSL_KEY && process.env.APP_SSL_CRT) ? {
+      key: fs.readFileSync(process.env.APP_SSL_KEY),
+      cert: fs.readFileSync(process.env.APP_SSL_CRT)
+    } : null
+  });
   
   const configService = app.get(ConfigService<AllConfigType>);
   

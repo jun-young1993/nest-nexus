@@ -11,8 +11,8 @@ export class AlieAuthController {
 
   @Get('callback')
   @ApiOperation({ summary: `alie auth callback`} )
-
-  async queryHotProduct() {
+  async callback() {
+	console.log('in callback');
     return await this.alieService.callback();
   }
 }

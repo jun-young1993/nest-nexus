@@ -11,6 +11,14 @@ class EnviromentVariablesValidator {
 
 	@IsString()
 	APP_HOST: AppConfig['host']
+
+	@IsString()
+	@IsOptional()
+	HTTP_SSL_KEY: AppConfig['ssl_key']
+
+	@IsString()
+	@IsOptional()
+	HTTP_SSL_CERT: AppConfig['ssl_cert']
 }
 
 export default registerAs<AppConfig>('app',()=>{
@@ -21,6 +29,9 @@ export default registerAs<AppConfig>('app',()=>{
 		? parseInt(process.env.APP_PORT, 10)
 		: process.env.PORT
 		  ? parseInt(process.env.PORT, 10)
-		  : 3000
+		  : 3000,
+		ssl_cert: process.env.HTTP_SSL_KEY,
+		ssl_key: process.env.HTTP_SSL_CERT
 	}
 });
+
