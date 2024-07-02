@@ -13,6 +13,9 @@ class EnviromentVariablesValidator {
 
 	@IsString()
 	ALIE_APP_KEY: AlieConfig['app_key']
+
+	@IsString()
+	ALIE_APP_SECRET: AlieConfig['app_secret']
 }
 
 export default registerAs<AlieConfig>('alie',()=>{
@@ -20,6 +23,7 @@ export default registerAs<AlieConfig>('alie',()=>{
 	return {
 		url: process.env.ALIE_API_URL,
 		auth_callback_url: process.env.ALIE_AUTH_CALLBACK_URL,
-		app_key: process.env.ALIE_APP_KEY
+		app_key: process.env.ALIE_APP_KEY,
+		app_secret: process.env.ALIE_APP_SECRET
 	}
 })

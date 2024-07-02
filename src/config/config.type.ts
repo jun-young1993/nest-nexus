@@ -8,6 +8,7 @@ export type AlieConfig = {
 	url: string
 	auth_callback_url: string,
 	app_key: string
+	app_secret: string
 }
 export type AllConfigType = {
 	app: AppConfig

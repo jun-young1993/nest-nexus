@@ -11,8 +11,7 @@ export class AlieAffiliateController {
 
   @Get('hot-products')
   @ApiOperation({ summary: `get hotproducts`} )
-  @ApiBody({ type: QueryHotProductDto })
-  async queryHotProduct(@Query() query: QueryHotProductDto) {
-    return await this.alieAffiliateService.queryHotProduct(query);
+  async queryHotProduct() {
+    return await this.alieAffiliateService.queryHotProducts();
   }
 }

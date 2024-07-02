@@ -27,4 +27,10 @@ export class AlieAuthController {
   async getAuthorizationCode(){
 	return await this.alieAuthService.getAuthorizationCode();
   }
+
+  @Get('access-token')
+  @ApiOperation({ summary: `alie get AuthorizationCode`} )
+  async createAccessToken(){
+    return await this.alieAuthService.createAccessToken();
+  }
 }
