@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import {HttpModule} from "./http/http.module";
-import { AlieAffiliateModule } from './alie/alie.module';
-
+import { AlieModule } from './alie/alie.module';
 @Module({
   imports: [
       HttpModule,
-      AlieAffiliateModule
+      AlieModule
   ],
   controllers: [],
   providers: [],

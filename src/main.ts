@@ -2,10 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from './config/config.type';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  
+  const configService = app.get(ConfigService<AllConfigType>);
+  
   app.enableVersioning({
     type: VersioningType.URI,
   });
@@ -18,6 +22,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(3000);
+  await app.listen(
+    configService.getOrThrow('app.port', { infer: true }),
+    configService.getOrThrow('app.host', { infer: true }),
+    () => {
+      console.log(`[START HTTP APP ] ${configService.getOrThrow('app.host', { infer: true })}:${configService.getOrThrow('app.port', { infer: true })}`)
+    }
+  );
 }
 bootstrap();
