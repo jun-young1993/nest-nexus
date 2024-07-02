@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {HttpService} from "@nestjs/axios";
-import {lastValueFrom} from "rxjs";
+import {lastValueFrom, map} from "rxjs";
 import {QueryHotProductDto} from "./dto/query-hot-product.dto";
 
 @Injectable()
@@ -17,7 +17,7 @@ export class AlieAffiliateService {
         this.httpService.post(url, data.toString(), { headers })
     );
 
-    return response.data;
+    return response;
   }
 
 }

@@ -1,4 +1,4 @@
-import {Controller, Get} from '@nestjs/common';
+import {Body, Controller, Get, Post, Query} from '@nestjs/common';
 
 import {ApiOperation, ApiTags} from "@nestjs/swagger";
 import { AlieAuthService } from './alie-auth.service';
@@ -11,7 +11,14 @@ export class AlieAuthController {
 
   @Get('callback')
   @ApiOperation({ summary: `alie auth callback`} )
-  async callback() {
+  async callback(@Query() query) {
+    console.log("=>(alie-auth.controller.ts:16) query", query);
+    return await this.alieAuthService.callback();
+  }
+  @Post('callback')
+  @ApiOperation({ summary: `alie auth callback`} )
+  async callback2(@Body() body) {
+    console.log("=>(alie-auth.controller.ts:22) body", body);
     return await this.alieAuthService.callback();
   }
 

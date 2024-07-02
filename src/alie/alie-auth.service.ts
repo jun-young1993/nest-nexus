@@ -11,11 +11,12 @@ export class AlieAuthService {
     private readonly configService: ConfigService<AllConfigType>,
   ) {}
   async callback() {
+
     return 'test';
   }
   async getAuthorizationCode(){
     
-    
+
     const body = {
       action: '/authrize_action',
       event_submit_do_auth: 'event_submit_do_auth',
