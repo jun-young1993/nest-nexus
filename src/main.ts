@@ -29,13 +29,13 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
-
+  const listenEvent = () => {
+    console.log(`[START HTTP APP ] ${configService.getOrThrow('app.host', { infer: true })}:${configService.getOrThrow('app.port', { infer: true })}`)
+  }
   await app.listen(
     configService.getOrThrow('app.port', { infer: true }),
-    configService.getOrThrow('app.host', { infer: true }),
-    () => {
-      console.log(`[START HTTP APP ] ${configService.getOrThrow('app.host', { infer: true })}:${configService.getOrThrow('app.port', { infer: true })}`)
-    }
+    (configService.getOrThrow('app.host', { infer: true }) && configService.getOrThrow('app.host', { infer: true })),
+    () => listenEvent
   );
 }
 bootstrap();
