@@ -18,21 +18,21 @@ export class AlieAuthService {
     
 
     const body = {
-      action: '/authrize_action',
-      event_submit_do_auth: 'event_submit_do_auth',
       response_type: 'code',
       force_auth: 'true',
       redirect_uri: this.configService.get('alie.auth_callback_url',{infer: true}),
       client_id: this.configService.get('alie.app_key',{infer: true})
     }
     
-    const response = lastValueFrom(this.httpService.post(
-        this.configService.get('alie.url',{infer: true}),
-        {body}
-      ))
+    const response = await lastValueFrom(
+        this.httpService.post(
+          this.configService.get('alie.url',{infer: true}),
+            {body}
+      )
+    )
+
     
-    
-    return await response;
+    return response.data;
   }
 
 }
