@@ -1,7 +1,7 @@
 import {Controller, Get, Post, Body, Patch, Param, Delete, Query} from '@nestjs/common';
 import { AlieAffiliateService } from './alie-affiliate.service';
 import {QueryHotProductDto} from "./dto/query-hot-product.dto";
-import {ApiBody, ApiTags} from "@nestjs/swagger";
+import {ApiBody, ApiOperation, ApiTags} from "@nestjs/swagger";
 
 
 @ApiTags('alie-affiliate')
@@ -9,7 +9,8 @@ import {ApiBody, ApiTags} from "@nestjs/swagger";
 export class AlieAffiliateController {
   constructor(private readonly alieAffiliateService: AlieAffiliateService) {}
 
-  @Get()
+  @Get('hot-products')
+  @ApiOperation({ summary: `get hotproducts`} )
   @ApiBody({ type: QueryHotProductDto })
   async queryHotProduct(@Query() query: QueryHotProductDto) {
     return await this.alieAffiliateService.queryHotProduct(query);
