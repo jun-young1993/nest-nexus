@@ -10,6 +10,7 @@ class EnviromentVariablesValidator {
 	APP_PORT: AppConfig['port']
 
 	@IsString()
+	@IsOptional()
 	APP_HOST: AppConfig['host']
 
 	@IsString()
