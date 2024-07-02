@@ -7,12 +7,17 @@ import { AlieAuthService } from './alie-auth.service';
 @ApiTags('alie-auth')
 @Controller('alie-auth')
 export class AlieAuthController {
-  constructor(private readonly alieService: AlieAuthService) {}
+  constructor(private readonly alieAuthService: AlieAuthService) {}
 
   @Get('callback')
   @ApiOperation({ summary: `alie auth callback`} )
   async callback() {
-	console.log('in callback');
-    return await this.alieService.callback();
+    return await this.alieAuthService.callback();
+  }
+
+  @Get('authrization-code')
+  @ApiOperation({ summary: `alie get AuthorizationCode`} )
+  async getAuthorizationCode(){
+	return await this.alieAuthService.getAuthorizationCode();
   }
 }
