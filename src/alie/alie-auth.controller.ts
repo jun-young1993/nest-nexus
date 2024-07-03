@@ -2,6 +2,7 @@ import {Body, Controller, Get, Post, Query} from '@nestjs/common';
 
 import {ApiOperation, ApiTags} from "@nestjs/swagger";
 import { AlieAuthService } from './alie-auth.service';
+import { CallbackQueryDto } from './dto/callback-dto';
 
 
 @ApiTags('alie-auth')
@@ -11,26 +12,17 @@ export class AlieAuthController {
 
   @Get('callback')
   @ApiOperation({ summary: `alie auth callback`} )
-  async callback(@Query() query) {
-    console.log("=>(alie-auth.controller.ts:16) query", query);
-    return await this.alieAuthService.callback();
-  }
-  @Post('callback')
-  @ApiOperation({ summary: `alie auth callback`} )
-  async callback2(@Body() body) {
-    console.log("=>(alie-auth.controller.ts:22) body", body);
+  async callback(@Query() {code}: CallbackQueryDto) {
+    console.log("=>(alie-auth.controller.ts:16) query code", code);
     return await this.alieAuthService.callback();
   }
 
-  @Get('authrization-code')
-  @ApiOperation({ summary: `alie get AuthorizationCode`} )
-  async getAuthorizationCode(){
-	return await this.alieAuthService.getAuthorizationCode();
+  @Get('o-auth')
+  @ApiOperation({ summary: `alie oAuth`} )
+  async oAuth(){
+    return await this.alieAuthService.oAuth();
   }
 
-  @Get('access-token')
-  @ApiOperation({ summary: `alie get AuthorizationCode`} )
-  async createAccessToken(){
-    return await this.alieAuthService.createAccessToken();
-  }
+
+
 }
