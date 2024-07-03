@@ -3,7 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
 import { AllConfigType } from 'src/config/config.type';
-import {generateSign} from "../utils/alie";
+import { CallbackQueryDto } from './dto/callback-dto';
+import { generateSign } from 'src/utils/alie';
 
 @Injectable()
 export class AlieAuthService {
@@ -34,5 +35,31 @@ export class AlieAuthService {
     return response.data;
   }
 
+  async getGenerateToken({code}: CallbackQueryDto){
+    console.log('code',code);
+    const params = {
+      app_key: this.configService.get('alie.app_key',{infer: true}),
+      timestamp: new Date().getTime(),
+      sign_method: "sha256",
+      code: code,
+      uuid: 'uuid'
+    }
+    console.log(params);
+    const sign = generateSign(
+      '/rest/auth/token/create',
+      this.configService.get('alie.app_secret',{infer: true}),
+      params
+    );
+    
+    params['sign'] = sign;
+    const response = await lastValueFrom(
+      this.httpService.get(
+        `${this.configService.get('alie.url',{infer: true})}/rest/auth/token/create`,
+        {params}
+      )
+    );
 
+    console.log(response.data);
+    return response.data;
+  }
 }

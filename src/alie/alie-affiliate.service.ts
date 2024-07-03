@@ -50,10 +50,10 @@ export class AlieAffiliateService {
       ship_to_country: 'US',
     };
 
-    params['sign'] = generateSign(
-        this.configService.get('alie.app_secret',{infer: true}),
-        params
-    )
+    // params['sign'] = generateSign(
+    //     this.configService.get('alie.app_secret',{infer: true}),
+    //     params
+    // )
 
     const queryString = stringify(params);
 
