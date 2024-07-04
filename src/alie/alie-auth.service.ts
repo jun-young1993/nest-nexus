@@ -5,6 +5,7 @@ import { lastValueFrom } from 'rxjs';
 import { AllConfigType } from 'src/config/config.type';
 import { CallbackQueryDto } from './dto/callback-dto';
 import { generateSign } from 'src/utils/alie';
+import {stringify} from 'qs';
 
 @Injectable()
 export class AlieAuthService {
@@ -36,30 +37,25 @@ export class AlieAuthService {
   }
 
   async getGenerateToken({code}: CallbackQueryDto){
-    console.log('code',code);
+    const apiPath = '/auth/token/create';
+    const signMethod = 'sha256'
     const params = {
       app_key: this.configService.get('alie.app_key',{infer: true}),
-      timestamp: new Date().getTime(),
-      sign_method: "sha256",
-      code: code,
-      uuid: 'uuid'
-    }
-    console.log(params);
+      timestamp: Date.now().toString(),
+      sign_method: signMethod,
+      code: code
+    };
     const sign = generateSign(
-      '/rest/auth/token/create',
+      apiPath, 
+      params, 
       this.configService.get('alie.app_secret',{infer: true}),
-      params
+      signMethod
     );
-    
     params['sign'] = sign;
-    const response = await lastValueFrom(
-      this.httpService.get(
-        `${this.configService.get('alie.url',{infer: true})}/rest/auth/token/create`,
-        {params}
-      )
-    );
+    const url = `${this.configService.get('alie.url',{infer: true})}/rest${apiPath}?${stringify(params)}`
+    console.log(url);
 
-    console.log(response.data);
+    const response = await lastValueFrom(this.httpService.get(url));
     return response.data;
   }
 }
