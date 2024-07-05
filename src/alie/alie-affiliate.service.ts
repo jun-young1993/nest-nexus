@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import {HttpService} from "@nestjs/axios";
-import {lastValueFrom, map} from "rxjs";
-import {QueryHotProductDto} from "./dto/query-hot-product.dto";
 import {ConfigService} from "@nestjs/config";
 import {AllConfigType} from "../config/config.type";
 import {stringify} from "querystring";
-import {generateSign} from "../utils/alie";
+import {generateSignature} from "../utils/alie";
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class AlieAffiliateService {
@@ -13,20 +12,30 @@ export class AlieAffiliateService {
       private readonly httpService: HttpService,
       private readonly configService: ConfigService<AllConfigType>,
   ) {}
-  async queryHotProduct() {
-    const url = 'https://api.example.com/aliexpress.affiliate.hotproduct.query';
-    const headers = {
-      'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
-    };
 
-
-    const response = await lastValueFrom(
-        this.httpService.post(url,
-            { headers })
+  async getCategories(){
+    const apiPath = '/sync';
+    const signMethod = 'sha256'
+    const params = {
+      access_token: this.configService.get('alie.access_token',{infer: true}),
+      app_key: this.configService.get('alie.app_key',{infer: true}),
+      timestamp: Date.now().toString(),
+      sign_method: signMethod,
+      method: 'aliexpress.affiliate.category.get',
+    }
+  
+    const sign = generateSignature(
+      params, 
+      this.configService.get('alie.app_secret',{infer: true}),
     );
-
-    return response;
+    params['sign'] = sign;
+      
+    const url = `${this.configService.get('alie.url',{infer: true})}${apiPath}?${stringify(params)}`;
+  
+    const response = await lastValueFrom(this.httpService.post(url))
+    return response.data;
   }
+
   async queryHotProducts(): Promise<any> {
 
     const params = {

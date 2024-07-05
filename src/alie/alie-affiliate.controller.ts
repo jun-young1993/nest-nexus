@@ -14,4 +14,10 @@ export class AlieAffiliateController {
   async queryHotProduct() {
     return await this.alieAffiliateService.queryHotProducts();
   }
+
+  @Get('categories')
+  @ApiOperation({summary: 'get categories'})
+  async getCategories(){
+    return await this.alieAffiliateService.getCategories();
+  }
 }

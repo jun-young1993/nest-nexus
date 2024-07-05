@@ -53,7 +53,6 @@ export class AlieAuthService {
     );
     params['sign'] = sign;
     const url = `${this.configService.get('alie.url',{infer: true})}/rest${apiPath}?${stringify(params)}`
-    console.log(url);
 
     const response = await lastValueFrom(this.httpService.get(url));
     return response.data;

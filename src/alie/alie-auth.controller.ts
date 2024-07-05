@@ -1,6 +1,6 @@
 import {Body, Controller, Get, Post, Query} from '@nestjs/common';
 
-import {ApiOperation, ApiTags} from "@nestjs/swagger";
+import {ApiBody, ApiOperation, ApiTags} from "@nestjs/swagger";
 import { AlieAuthService } from './alie-auth.service';
 import { CallbackQueryDto } from './dto/callback-dto';
 import { GenerateTokenDto } from './dto/generate-token.dto';
@@ -26,6 +26,10 @@ export class AlieAuthController {
 
   @Post('generate-token')
   @ApiOperation({ summary: `alie oAuth`} )
+  @ApiBody({
+    description: 'Request body for generating token',
+    type: GenerateTokenDto
+  })
   async getGenerateToken(@Body() body: GenerateTokenDto){
     return await this.alieAuthService.getGenerateToken(body);
   }
