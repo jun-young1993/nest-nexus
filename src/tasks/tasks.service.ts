@@ -18,7 +18,7 @@ export class TasksService {
     @Cron(CronExpression.EVERY_HOUR)
     async createAlieHotProductPromotion(){
         const githubAlieRepository = 'alie-promotion-blog-storage';
-        const limitCount = 20;
+        const limitCount = 5;
         let startCount = 0;
         try{
             this.logger.info('[START CREATE ALIE HOT PRODUCT PROMOTION]');
