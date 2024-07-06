@@ -105,10 +105,12 @@ export class TasksService {
                                                             model: 'gpt-4o'
                                                         });
                                                         this.logger.info(JSON.stringify(completion));
-                                                        const mainLinkImage = `[![${productImageUrl}](${productUrl})](${promotionLink})`;
+                                                        const mainLinkImage = `[![${productImageUrl}](${productImageUrl})](${promotionLink})`;
                                                         const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content
                                                         await this.githubContentService.createContent(githubAlieRepository,blogPath,resultContent);
                                                         startCount++;
+                                                        console.log(blogPath);
+                                                        return true;
                                                         if(limitCount < startCount){
                                                             this.logger.info('[create complete]');
                                                             return true;
