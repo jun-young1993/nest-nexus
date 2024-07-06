@@ -115,7 +115,7 @@ export class TasksService {
                                                             return true;
                                                         }
                                                     }
-
+                                                    continue;
                                                 }
                                             }
 
