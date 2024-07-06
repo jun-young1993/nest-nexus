@@ -106,10 +106,8 @@ export class TasksService {
                                                         });
                                                         this.logger.info(JSON.stringify(completion));
                                                         const mainLinkImage = `[![${productImageUrl}](${productUrl})](${promotionLink})`;
-                                                        await this.githubContentService.createContent(githubAlieRepository,blogPath,`
-                                                            ${mainLinkImage}
-                                                            ${completion.choices[0].message.content}
-                                                        `);
+                                                        const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content
+                                                        await this.githubContentService.createContent(githubAlieRepository,blogPath,resultContent);
                                                         startCount++;
                                                         if(limitCount < startCount){
                                                             this.logger.info('[create complete]');
