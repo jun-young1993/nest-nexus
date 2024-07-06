@@ -35,6 +35,9 @@ export class TasksService {
                             if(Array.isArray(categories)){
                                 const emptyCategoryIds = [];
                                 for(const category of categories){
+                                    if(startCount > limitCount){
+                                        return true;
+                                    }
                                     const parentCategoryId = category.parent_category_id;
                                     if(parentCategoryId){
                                         if(emptyCategoryIds.includes(parentCategoryId)){
@@ -106,17 +109,15 @@ export class TasksService {
                                                         });
                                                         this.logger.info(JSON.stringify(completion));
                                                         const mainLinkImage = `[![${productImageUrl}](${productImageUrl})](${promotionLink})`;
-                                                        const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content
+                                                        const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content.replace(/```markdown/g, '\r\n');
                                                         await this.githubContentService.createContent(githubAlieRepository,blogPath,resultContent);
                                                         startCount++;
                                                         emptyCategoryIds.push(category.category_id);
-                                                        if(limitCount < startCount){
-                                                            this.logger.info('[create complete]');
-                                                            return true;
-                                                        }
+                                                        break;
                                                     }
 
                                                 }
+                                                continue;
                                             }
 
 
