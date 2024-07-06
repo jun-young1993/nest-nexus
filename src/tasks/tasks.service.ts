@@ -105,8 +105,9 @@ export class TasksService {
                                                             model: 'gpt-4o'
                                                         });
                                                         this.logger.info(JSON.stringify(completion));
+                                                        const mainLinkImage = `[![${productImageUrl}](${productUrl})](${promotionLink})`;
                                                         await this.githubContentService.createContent(githubAlieRepository,blogPath,`
-                                                            [![${productImageUrl}](${productUrl})](${promotionLink})
+                                                            ${mainLinkImage}
                                                             ${completion.choices[0].message.content}
                                                         `);
                                                         startCount++;
