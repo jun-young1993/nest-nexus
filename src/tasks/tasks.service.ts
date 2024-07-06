@@ -35,8 +35,10 @@ export class TasksService {
                             if(Array.isArray(categories)){
                                 const emptyCategoryIds = [];
                                 for(const category of categories){
+                                    this.logger.info(`${startCount}>${limitCount}`);
                                     if(startCount > limitCount){
-                                        return true;
+                                        this.logger.info(`[END]`);
+                                        process.exit(0);
                                     }
                                     const parentCategoryId = category.parent_category_id;
                                     if(parentCategoryId){
