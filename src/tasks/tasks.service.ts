@@ -109,14 +109,13 @@ export class TasksService {
                                                         const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content
                                                         await this.githubContentService.createContent(githubAlieRepository,blogPath,resultContent);
                                                         startCount++;
-                                                        console.log(blogPath);
-                                                        return true;
+                                                        emptyCategoryIds.push(category.category_id);
                                                         if(limitCount < startCount){
                                                             this.logger.info('[create complete]');
                                                             return true;
                                                         }
                                                     }
-                                                    continue;
+
                                                 }
                                             }
 
