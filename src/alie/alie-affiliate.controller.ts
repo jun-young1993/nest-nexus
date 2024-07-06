@@ -10,10 +10,11 @@ export class AlieAffiliateController {
   constructor(private readonly alieAffiliateService: AlieAffiliateService) {}
 
   @Get('hot-products')
-  @ApiOperation({ summary: `get hotproducts`} )
-  async queryHotProduct() {
-    return await this.alieAffiliateService.queryHotProducts();
+  @ApiOperation({ summary: `get hot products`} )
+  async queryHotProduct(@Query() query: {category_id : number}) {
+    return await this.alieAffiliateService.queryHotProducts(query.category_id);
   }
+
 
   @Get('categories')
   @ApiOperation({summary: 'get categories'})

@@ -3,6 +3,7 @@ export type AppConfig = {
 	port: number;
 	ssl_key?: string;
 	ssl_cert?: string;
+	log_dir: string
 }
 export type AlieConfig = {
 	url: string
@@ -11,7 +12,19 @@ export type AlieConfig = {
 	app_secret: string
 	access_token: string
 }
+
+export type GithubConfig = {
+	access_token: string
+}
+
+export type GptConfig = {
+	key: string
+	organization: string
+	project_id: string
+}
 export type AllConfigType = {
 	app: AppConfig
 	alie: AlieConfig
+	github: GithubConfig
+	gpt: GptConfig
 }

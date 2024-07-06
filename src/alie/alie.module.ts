@@ -7,5 +7,6 @@ import { AlieAuthService } from './alie-auth.service';
 @Module({
   controllers: [AlieAffiliateController, AlieAuthController],
   providers: [AlieAffiliateService, AlieAuthService],
+  exports: [AlieAffiliateService]
 })
 export class AlieModule {}

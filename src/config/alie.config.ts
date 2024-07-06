@@ -3,7 +3,7 @@ import { AlieConfig } from "./config.type";
 import { IsString } from "class-validator";
 import validateConfig from "src/utils/validate-config";
 
-class EnviromentVariablesValidator {
+class EnvironmentVariablesValidator {
 
 	@IsString()
 	ALIE_API_URL: AlieConfig['url']
@@ -22,7 +22,7 @@ class EnviromentVariablesValidator {
 }
 
 export default registerAs<AlieConfig>('alie',()=>{
-	validateConfig(process.env, EnviromentVariablesValidator);
+	validateConfig(process.env, EnvironmentVariablesValidator);
 	return {
 		url: process.env.ALIE_API_URL,
 		auth_callback_url: process.env.ALIE_AUTH_CALLBACK_URL,
