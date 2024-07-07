@@ -46,6 +46,7 @@ export class TasksService {
                                     this.logger.info(`${startCount}>${limitCount}`);
                                     if(startCount > limitCount){
                                         this.logger.info(`[END]`);
+                                         return ;
                                     }
                                     const parentCategoryId = category.parent_category_id;
                                     if(parentCategoryId){
