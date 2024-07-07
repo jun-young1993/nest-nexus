@@ -4,10 +4,11 @@ import {TasksService} from "./tasks.service";
 import {AlieModule} from "../alie/alie.module";
 import {GithubModule} from "../github/github.module";
 import {OpenaiModule} from "../openai/openai.module";
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
-    imports: [AlieModule, GithubModule, OpenaiModule],
+    imports: [AlieModule, GithubModule, OpenaiModule,ScheduleModule.forRoot(),],
     controllers: [TasksController],
-    providers: [TasksService],
+    providers: [TasksService, ScheduleModule],
 })
 export class TasksModule {}

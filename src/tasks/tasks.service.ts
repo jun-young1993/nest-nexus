@@ -5,6 +5,7 @@ import {Logger} from 'winston'
 import {AlieAffiliateService} from "../alie/alie-affiliate.service";
 import {GithubContentService} from "../github/github-content.service";
 import {OpenaiService} from "../openai/openai.service";
+import shuffle from "../utils/shuffle";
 
 @Injectable()
 export class TasksService {
@@ -15,6 +16,12 @@ export class TasksService {
         @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     ) {
     }
+
+    @Cron(CronExpression.EVERY_5_MINUTES)
+    async test(){
+        this.logger.info('[START TEST CRON]');
+    }
+
     @Cron(CronExpression.EVERY_HOUR)
     async createAlieHotProductPromotion(){
         const githubAlieRepository = 'alie-promotion-blog-storage';
@@ -30,15 +37,15 @@ export class TasksService {
                     const respResult = alieExpressAffiliateCategoryGetResponse?.resp_result;
                     if(respResult?.resp_code && respResult?.resp_msg){
                         if(respResult?.resp_code === 200){
-                            const categories:[{category_id: number, parent_category_id?: number, category_name: string}] = respResult.result.categories.category;
+                            let categories:[{category_id: number, parent_category_id?: number, category_name: string}] = respResult.result.categories.category;
 
                             if(Array.isArray(categories)){
+                                categories = shuffle(categories);
                                 const emptyCategoryIds = [];
                                 for(const category of categories){
                                     this.logger.info(`${startCount}>${limitCount}`);
                                     if(startCount > limitCount){
                                         this.logger.info(`[END]`);
-                                        process.exit(0);
                                     }
                                     const parentCategoryId = category.parent_category_id;
                                     if(parentCategoryId){
