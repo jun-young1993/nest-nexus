@@ -22,10 +22,10 @@ export class TasksService {
         this.logger.info('[START TEST CRON]');
     }
 
-    @Cron(CronExpression.EVERY_HOUR)
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
     async createAlieHotProductPromotion(){
         const githubAlieRepository = 'alie-promotion-blog-storage';
-        const limitCount = 5;
+        const limitCount = 10;
         let startCount = 0;
         try{
             this.logger.info('[START CREATE ALIE HOT PRODUCT PROMOTION]');
@@ -74,23 +74,35 @@ export class TasksService {
                                                         const productUrl = product.product_detail_url;
                                                         const productImageUrl = product.product_main_image_url;
                                                         const price =product.target_original_price;
+                                                        const salePrice = product.target_sale_price;
                                                         const category = product.second_level_category_name;
                                                         const promotionLink = product.promotion_link;
                                                         const evaluationRate = product.evaluate_rate;
                                                         const shopUrl = product.shop_url;
-
+                                                        const messages = [
+                                                            'Please write a promotional blog post for AliExpress in Markdown format that encourages people to click on the product link. The post should include an engaging introduction, a detailed product description, and a strong call-to-action. The tone should be friendly, conversational, and persuasive. Highlight the benefits of the product, include specific usage examples, emphasize the urgency of the sale, and incorporate customer reviews if possible. Make the content highly engaging and use social proof to attract more readers. Here is the product information:',
+                                                            'Please write a promotional blog post for AliExpress in Markdown format that encourages people to click on the product link. The post should include an engaging introduction, a detailed product description, and a strong call-to-action. The tone should be friendly, conversational, and persuasive. Share a personal experience or story related to the product, highlight the benefits, include specific usage examples, and emphasize the urgency of the sale. Make the content highly engaging to attract more readers. Here is the product information:',
+                                                            'Please write a promotional blog post for AliExpress in Markdown format that encourages people to click on the product link. The post should include an engaging introduction, a detailed product description, and a strong call-to-action. The tone should be friendly, conversational, and persuasive. Emphasize the limited-time nature of the sale, highlight the benefits of the product, include specific usage examples, and incorporate customer reviews if possible. Make the content highly engaging and create a sense of urgency to attract more readers. Here is the product information:',
+                                                            'Please write a promotional blog post for AliExpress in Markdown format that encourages people to click on the product link. The post should include an engaging introduction, a detailed product description, and a strong call-to-action. The tone should be friendly, conversational, and persuasive. Highlight the benefits of the product, include specific usage examples, and emphasize the social proof such as customer reviews and ratings. Make the content highly engaging to attract more readers. Here is the product information:'
+                                                        ];
+                                                        const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                                                        if(!randomMessage){
+                                                            continue;
+                                                        }
                                                         let userContent = `
-                                                            Please write a promotional blog post for AliExpress in Markdown format that encourages people to click on the product link. The post should include an engaging introduction, a detailed product description, and a strong call-to-action. Make it sound friendly and persuasive. Here is the product information:
-                                                            
+                                                              ${randomMessage}
+
                                                             - **Product Title**: ${title}
                                                             - **Product URL**: ${productUrl}
                                                             - **Image URL**: ${productImageUrl}
                                                             - **Price**: $${price}
+                                                            - **Sale Price**: $${salePrice}
                                                             - **Category**: ${category}
                                                             - **Promotion Link**: ${promotionLink}
                                                             - **Evaluation Rate**: ${evaluationRate}
                                                             - **Shop URL**: ${shopUrl}
                                                            `;
+                                                        this.logger.info(userContent);
                                                         const product_small_images = product?.product_small_image_urls;
                                                         if(product_small_images){
                                                             if(product_small_images?.string){
