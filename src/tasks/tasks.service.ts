@@ -134,7 +134,10 @@ export class TasksService {
                                                         const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content.replace(/```markdown/g, '\r\n');
                                                         await this.githubContentService.createContent(githubAlieRepository,blogPath,resultContent);
                                                         startCount++;
-                                                        emptyCategoryIds.push(category.category_id);
+                                                        if(completion.choices[0]){
+                                                            emptyCategoryIds.push(category.category_id);
+                                                        }
+                                                        
                                                         break;
                                                     }
 
