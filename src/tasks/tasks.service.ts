@@ -139,7 +139,7 @@ export class TasksService {
                                                            `;
                                                         this.logger.info('[ALIE HOT PRODUCT PROMOTION]\r\n'+userContent);
                                                         const product_small_images = product?.product_small_image_urls;
-                                                        
+                                                        const smallUrlLinks = [];
                                                         if(product_small_images){
                                                             if(product_small_images?.string){
                                                                 const urls = product_small_images?.string;
@@ -147,6 +147,9 @@ export class TasksService {
                                                                     for(const smallUrl of urls){
                                                                         userContent+=`
                                                                         - **product_small_image_urls**: ${smallUrl}`;
+                                                                        
+
+                                                                        smallUrlLinks.push(`[![${productImageUrl}](${smallUrl})](${promotionLink})`);
                                                                     }
 
                                                                 }
@@ -155,7 +158,7 @@ export class TasksService {
                                                         const mainLinkImage = `[![${productImageUrl}](${productImageUrl})](${promotionLink})`;
                                                         const hereLink = `# [**Click Here To Buy!**](${promotionLink})`;
                                                         const resultContent = await promptFunction(userContent);
-                                                        const uploadContnet = mainLinkImage+'\r\n'+hereLink+'\r\n'+resultContent.replace(/```markdown/g, '\r\n');
+                                                        const uploadContnet = mainLinkImage+'\r\n'+hereLink+'\r\n'+smallUrlLinks.join('\r\n')+'\r\n'+resultContent.replace(/```markdown/g, '\r\n');
                                                         this.logger.info('[ALIE HOT PRODUCT PROMOTION]\r\n'+uploadContnet);
                                                         const githubCreateContent = await this.githubContentService.createContent(githubAlieRepository,blogPath,uploadContnet);
                                                         this.logger.info('[ALIE HOT PRODUCT PROMOTION][GITHUB CREATE CONTENT]\r\n'+JSON.stringify(githubCreateContent));
