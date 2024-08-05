@@ -58,11 +58,11 @@ export class TasksService {
 
     }
 
-    async getAlieHotProductPromotion(promptFunction: (prompt: string) => Promise<string>){
+    async getAlieHotProductPromotion(promptFunction: (prompt: string) => Promise<string>, limitCount = 2){
         this.logger.info('[ALIE HOT PRODUCT PROMOTION][START]');
 
         const githubAlieRepository = 'alie-promotion-blog-storage';
-        const limitCount = 1;
+        
         let startCount = 0;
         try{
             const categoryResponse = await this.alieAffiliateService.getCategories();
@@ -211,6 +211,7 @@ export class TasksService {
 
     @Cron(CronExpression.EVERY_HOUR)
     async createAlieHotProductPromotionGemini(){
+        // 하루 50건 요청 한시간에 2개씩 
         if(this.configService.get('app.is_dev',{infer: true})){
             this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION GEMINI][SKIP CREATE ALIE HOT PRODUCT PROMOTION IN DEVELOPMENT]');
             return false;
