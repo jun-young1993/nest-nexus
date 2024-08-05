@@ -8,8 +8,12 @@ import alieConfig from './config/alie.config';
 import {LoggerModule} from "./logger/Logger.module";
 import { GithubModule } from './github/github.module';
 import { OpenaiModule } from './openai/openai.module';
+
 import githubConfig from "./config/github.config";
 import gptConfig from "./config/gpt.config";
+import { SocketEventModule } from './socket/events/socket-event.module';
+import { GeminiModule } from './gemini/gemini.module';
+import geminiConfig from './config/gemini.config';
 
 @Module({
   imports: [
@@ -19,7 +23,8 @@ import gptConfig from "./config/gpt.config";
           appConfig,
           alieConfig,
           githubConfig,
-            gptConfig
+          gptConfig,
+          geminiConfig
         ],
         envFilePath: ['.env']
       }),
@@ -28,7 +33,9 @@ import gptConfig from "./config/gpt.config";
       TasksModule,
       LoggerModule,
       GithubModule,
-      OpenaiModule
+      OpenaiModule,
+      SocketEventModule,
+      GeminiModule
   ],
   controllers: [],
   providers: [],

@@ -10,10 +10,17 @@ export class TasksController {
     ) {
     }
 
-    @Get('create-alie-hot-product-promotion')
+    @Get('create-alie-hot-product-promotion/open-ai')
     @ApiOperation({summary: 'create-alie-hot-product-promotion'})
     async createAlieHotProductPromotion()
     {
-        return await this.tasksService.createAlieHotProductPromotion();
+        return await this.tasksService.createAlieHotProductPromotionOpenAi();
+    }
+
+    @Get('create-alie-hot-product-promotion/gemini')
+    @ApiOperation({summary: 'get-alie-hot-product-promotion'})
+    async getAlieHotProductPromotion()
+    {
+        return await this.tasksService.createAlieHotProductPromotionGemini();
     }
 }

@@ -14,7 +14,6 @@ export class AlieAuthController {
   @Get('callback')
   @ApiOperation({ summary: `alie auth callback`} )
   async callback(@Query() {code}: CallbackQueryDto) {
-    console.log("=>(alie-auth.controller.ts:16) query code", code);
     return await this.alieAuthService.callback();
   }
 

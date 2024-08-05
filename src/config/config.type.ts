@@ -3,7 +3,8 @@ export type AppConfig = {
 	port: number;
 	ssl_key?: string;
 	ssl_cert?: string;
-	log_dir: string
+	node_env: 'development'|'production',
+	is_dev: boolean
 }
 export type AlieConfig = {
 	url: string
@@ -22,9 +23,19 @@ export type GptConfig = {
 	organization: string
 	project_id: string
 }
+
+export type LogConfig = {
+	dir: string
+}
+
+export type GeminiConfig = {
+	key: string
+}
 export type AllConfigType = {
 	app: AppConfig
 	alie: AlieConfig
 	github: GithubConfig
 	gpt: GptConfig
+	log: LogConfig
+	gemini: GeminiConfig
 }

@@ -24,7 +24,7 @@ export class AlieAffiliateService {
       method: method,
       ...(args && args)
     }
-
+    
     const sign = generateSignature(
         params,
         this.configService.get('alie.app_secret',{infer: true}),
@@ -62,4 +62,5 @@ export class AlieAffiliateService {
         }
     )
   }
+
 }

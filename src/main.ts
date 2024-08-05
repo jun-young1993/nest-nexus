@@ -5,6 +5,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrap() {
  
@@ -22,6 +23,7 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useWebSocketAdapter(new WsAdapter(app));
   
   const options = new DocumentBuilder()
     .setTitle('API')

@@ -6,6 +6,9 @@ import {AlieAffiliateService} from "../alie/alie-affiliate.service";
 import {GithubContentService} from "../github/github-content.service";
 import {OpenaiService} from "../openai/openai.service";
 import shuffle from "../utils/shuffle";
+import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from 'src/config/config.type';
+import { GeminiService } from 'src/gemini/gemini.service';
 
 @Injectable()
 export class TasksService {
@@ -13,24 +16,56 @@ export class TasksService {
         private readonly alieAffiliateService: AlieAffiliateService,
         private readonly githubContentService: GithubContentService,
         private readonly openaiService: OpenaiService,
+        private readonly configService: ConfigService<AllConfigType>,
+        private readonly geminiService: GeminiService,
         @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     ) {
     }
 
     @Cron(CronExpression.EVERY_5_MINUTES)
     async test(){
-        this.logger.info('[START TEST CRON]');
+        if(this.configService.get('app.is_dev',{infer: true})){
+            this.logger.info('[TEST][SKIP TEST CRON IN DEVELOPMENT]');
+            return false;
+        }
+        this.logger.info('[TEST][START]');
     }
 
     @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-    async createAlieHotProductPromotion(){
+    async createAlieHotProductPromotionOpenAi(){
+        if(true || this.configService.get('app.is_dev',{infer: true})){
+            this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION][SKIP CREATE ALIE HOT PRODUCT PROMOTION IN DEVELOPMENT]');
+            return false;
+        }
+
+        this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION][START]');
+        this.getAlieHotProductPromotion(async (userContent) => {
+            const completion = await this.openaiService.chatCompletions({
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a helpful assistant specialized in creating promotional blog posts in Markdown format."
+                    },
+                    {
+                        role: "user",
+                        content: userContent
+                    }
+                ],
+                model: 'gpt-4o'
+            });
+            return completion.choices[0].message.content
+        })
+
+    }
+
+    async getAlieHotProductPromotion(promptFunction: (prompt: string) => Promise<string>){
+        this.logger.info('[ALIE HOT PRODUCT PROMOTION][START]');
+
         const githubAlieRepository = 'alie-promotion-blog-storage';
-        const limitCount = 10;
+        const limitCount = 1;
         let startCount = 0;
         try{
-            this.logger.info('[START CREATE ALIE HOT PRODUCT PROMOTION]');
             const categoryResponse = await this.alieAffiliateService.getCategories();
-
             if(categoryResponse?.aliexpress_affiliate_category_get_response){
                 const alieExpressAffiliateCategoryGetResponse = categoryResponse.aliexpress_affiliate_category_get_response;
                 if(alieExpressAffiliateCategoryGetResponse?.resp_result){
@@ -45,7 +80,7 @@ export class TasksService {
                                 for(const category of categories){
                                     this.logger.info(`${startCount}>${limitCount}`);
                                     if(startCount > limitCount){
-                                        this.logger.info(`[END]`);
+                                        this.logger.info(`[ALIE HOT PRODUCT PROMOTION][END]`);
                                          return ;
                                     }
                                     const parentCategoryId = category.parent_category_id;
@@ -102,8 +137,9 @@ export class TasksService {
                                                             - **Evaluation Rate**: ${evaluationRate}
                                                             - **Shop URL**: ${shopUrl}
                                                            `;
-                                                        this.logger.info(userContent);
+                                                        this.logger.info('[ALIE HOT PRODUCT PROMOTION]\r\n'+userContent);
                                                         const product_small_images = product?.product_small_image_urls;
+                                                        
                                                         if(product_small_images){
                                                             if(product_small_images?.string){
                                                                 const urls = product_small_images?.string;
@@ -116,25 +152,16 @@ export class TasksService {
                                                                 }
                                                             }
                                                         }
-                                                        const completion = await this.openaiService.chatCompletions({
-                                                            messages: [
-                                                                {
-                                                                    role: "system",
-                                                                    content: "You are a helpful assistant specialized in creating promotional blog posts in Markdown format."
-                                                                },
-                                                                {
-                                                                    role: "user",
-                                                                    content: userContent
-                                                                }
-                                                            ],
-                                                            model: 'gpt-4o'
-                                                        });
-                                                        this.logger.info(JSON.stringify(completion));
                                                         const mainLinkImage = `[![${productImageUrl}](${productImageUrl})](${promotionLink})`;
-                                                        const resultContent = mainLinkImage+'\r\n'+completion.choices[0].message.content.replace(/```markdown/g, '\r\n');
-                                                        await this.githubContentService.createContent(githubAlieRepository,blogPath,resultContent);
+                                                        const hereLink = `# [**Click Here To Buy!**](${promotionLink})`;
+                                                        const resultContent = await promptFunction(userContent);
+                                                        const uploadContnet = mainLinkImage+'\r\n'+hereLink+'\r\n'+resultContent.replace(/```markdown/g, '\r\n');
+                                                        this.logger.info('[ALIE HOT PRODUCT PROMOTION]\r\n'+uploadContnet);
+                                                        const githubCreateContent = await this.githubContentService.createContent(githubAlieRepository,blogPath,uploadContnet);
+                                                        this.logger.info('[ALIE HOT PRODUCT PROMOTION][GITHUB CREATE CONTENT]\r\n'+JSON.stringify(githubCreateContent));
                                                         startCount++;
                                                         
+                                                        throw new Error('end');
                                                         emptyCategoryIds.push(category.category_id);
                                                         
                                                         
@@ -166,15 +193,31 @@ export class TasksService {
                     }
                     throw new Error('[The Key value "resp_code" OR "resp_msg" cannot be found]')
                 }
-                throw new Error('[The Key value "aliexpress_affiliate_category_get_response" cannot be found]')
+                throw new Error('[The Key value "aliexpress_affiliate_category_get_resp_result" cannot be found]')
             }
             throw new Error('[The Key value "aliexpress_affiliate_category_get_response" cannot be found]');
         }catch(error){
-
+            
+            this.logger.info('[ALIE HOT PRODUCT PROMOTION][EXCEPTION]');
             this.logger.info(error.toString());
         }
 
 
 
+    }
+
+    @Cron(CronExpression.EVERY_HOUR)
+    async createAlieHotProductPromotionGemini(){
+        if(this.configService.get('app.is_dev',{infer: true})){
+            this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION GEMINI][SKIP CREATE ALIE HOT PRODUCT PROMOTION IN DEVELOPMENT]');
+            return false;
+        }
+        this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION GEMINI][START]');
+        this.getAlieHotProductPromotion((prompt)=>{
+            return this.geminiService.sendMessage(
+                'You are a helpful assistant specialized in creating promotional blog posts in Markdown format. \r\n' 
+                + prompt
+            );
+        })
     }
 }
