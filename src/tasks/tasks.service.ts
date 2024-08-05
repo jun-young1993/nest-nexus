@@ -158,13 +158,12 @@ export class TasksService {
                                                         const mainLinkImage = `[![${productImageUrl}](${productImageUrl})](${promotionLink})`;
                                                         const hereLink = `# [**Click Here To Buy!**](${promotionLink})`;
                                                         const resultContent = await promptFunction(userContent);
-                                                        const uploadContnet = mainLinkImage+'\r\n'+hereLink+'\r\n'+smallUrlLinks.join('\r\n')+'\r\n'+resultContent.replace(/```markdown/g, '\r\n');
+                                                        const uploadContnet = mainLinkImage+'\r\n'+hereLink+'\r\n'+resultContent.replace(/```markdown/g, '\r\n')+'\r\n'+smallUrlLinks.join('\r\n');
                                                         this.logger.info('[ALIE HOT PRODUCT PROMOTION]\r\n'+uploadContnet);
                                                         const githubCreateContent = await this.githubContentService.createContent(githubAlieRepository,blogPath,uploadContnet);
                                                         this.logger.info('[ALIE HOT PRODUCT PROMOTION][GITHUB CREATE CONTENT]\r\n'+JSON.stringify(githubCreateContent));
                                                         startCount++;
                                                         
-                                                        throw new Error('end');
                                                         emptyCategoryIds.push(category.category_id);
                                                         
                                                         
