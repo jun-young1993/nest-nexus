@@ -14,6 +14,7 @@ import gptConfig from "./config/gpt.config";
 import { SocketEventModule } from './socket/events/socket-event.module';
 import { GeminiModule } from './gemini/gemini.module';
 import geminiConfig from './config/gemini.config';
+import logConfig from './config/log.config';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import geminiConfig from './config/gemini.config';
           alieConfig,
           githubConfig,
           gptConfig,
-          geminiConfig
+          geminiConfig,
+          logConfig
         ],
         envFilePath: ['.env']
       }),
