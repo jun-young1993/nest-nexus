@@ -127,6 +127,8 @@ export class TasksService {
                                                         let userContent = `
                                                               ${randomMessage}
 
+                                                            When including a product purchase link, always use Promotion Link.
+
                                                             - **Product Title**: ${title}
                                                             - **Product URL**: ${productUrl}
                                                             - **Image URL**: ${productImageUrl}
