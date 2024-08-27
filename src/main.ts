@@ -5,7 +5,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
-import { WsAdapter } from '@nestjs/platform-ws';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
  
@@ -23,7 +23,7 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.useWebSocketAdapter(new WsAdapter(app));
+  app.useWebSocketAdapter(new IoAdapter(app));
   
   const options = new DocumentBuilder()
     .setTitle('API')
@@ -38,7 +38,7 @@ async function bootstrap() {
   await app.listen(
     configService.getOrThrow('app.port', { infer: true }),
     (configService.getOrThrow('app.host', { infer: true }) && configService.getOrThrow('app.host', { infer: true })),
-    () => listenEvent
+    () => listenEvent()
   );
 }
 bootstrap();

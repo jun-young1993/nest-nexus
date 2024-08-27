@@ -1,20 +1,49 @@
+import { Inject } from '@nestjs/common';
 import {
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  WsResponse,
 } from '@nestjs/websockets';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Server } from 'ws';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Server, Socket } from 'socket.io';
+import { Logger } from 'winston';
 
-@WebSocketGateway(8080)
-export class SocketEventsGateway {
+@WebSocketGateway(8080,{
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+  transports: ['websocket'],
+})
+export class SocketEventsGateway 
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
+{
+
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ){}
+
   @WebSocketServer()
   server: Server;
 
-  @SubscribeMessage('events')
-  onEvent(client: any, data: any): Observable<WsResponse<number>> {
-    return from([1, 2, 3]).pipe(map(item => ({ event: 'events', data: item })));
+  @SubscribeMessage('ClientToServer')
+  async handleMessage(@MessageBody() data) {
+    this.server.emit('ServerToClient', data);
+  }
+
+  afterInit(server: Server) {
+    this.logger.info('웹소켓 서버 초기화 ✅');
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.info(`Client Disconnected : ${client.id}`);
+  }
+
+  handleConnection(client: Socket, ...args: any[]) {
+    this.logger.info(`Client Connected : ${client.id}`);
   }
 }
