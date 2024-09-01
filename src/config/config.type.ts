@@ -31,6 +31,15 @@ export type LogConfig = {
 export type GeminiConfig = {
 	key: string
 }
+
+export type DbConfig = {
+	host: string
+	port: number
+	username: string
+	password: string
+	database: string
+}
+
 export type AllConfigType = {
 	app: AppConfig
 	alie: AlieConfig
@@ -38,4 +47,5 @@ export type AllConfigType = {
 	gpt: GptConfig
 	log: LogConfig
 	gemini: GeminiConfig
+	db: DbConfig
 }
