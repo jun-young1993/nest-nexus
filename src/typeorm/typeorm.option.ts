@@ -20,7 +20,8 @@ export class TypeormOption implements TypeOrmOptionsFactory {
             entities: [__dirname + '/../**/*.entity{.ts,.js}'],
             synchronize: this.configService.get<boolean>('db.synchronize', { infer: true }),
             autoLoadEntities: true,
-            logging: true
+            logging: true,
+            migrations: ["src/migration/**/*.ts"],
         }
     }
 }

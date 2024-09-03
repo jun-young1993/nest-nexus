@@ -3,8 +3,9 @@ export type AppConfig = {
 	port: number;
 	ssl_key?: string;
 	ssl_cert?: string;
-	node_env: 'development'|'production',
-	is_dev: boolean
+	node_env: 'development'|'production';
+	is_dev: boolean;
+	secret_key: string;
 }
 export type AlieConfig = {
 	url: string
@@ -38,6 +39,7 @@ export type DbConfig = {
 	username: string
 	password: string
 	database: string
+	synchronize: boolean
 }
 
 export type AllConfigType = {

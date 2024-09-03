@@ -23,6 +23,9 @@ class EnvironmentVariablesValidator {
 
 	@IsString()
 	NODE_ENV: AppConfig['node_env']
+
+	@IsString()
+	APP_SECRET_KEY: AppConfig['secret_key']
 }
 
 export default registerAs<AppConfig>('app',()=>{
@@ -37,7 +40,8 @@ export default registerAs<AppConfig>('app',()=>{
 		ssl_cert: process.env.HTTP_SSL_KEY,
 		ssl_key: process.env.HTTP_SSL_CERT,
 		node_env: process.env.NODE_ENV as AppConfig['node_env'],
-		is_dev: process.env.NODE_ENV === 'development'
+		is_dev: process.env.NODE_ENV === 'development',
+		secret_key: process.env.APP_SECRET_KEY
 	}
 });
 

@@ -1,4 +1,4 @@
-import {IsNumber, IsPort, IsSemVer, IsString} from "class-validator";
+import {IsBoolean, IsNumber, IsOptional, IsPort, IsSemVer, IsString} from "class-validator";
 import {DbConfig} from "./config.type";
 import {registerAs} from "@nestjs/config";
 import validateConfig from "../utils/validate-config";
@@ -15,6 +15,8 @@ class EnvironmentVariablesValidator {
     DB_PASS: DbConfig['password']
     @IsString()
     DB_DATABASE: DbConfig['database']
+    @IsOptional()
+    DB_SYNCHRONIZE: DbConfig['synchronize']
 }
 
 export default registerAs<DbConfig>('db',() => {
@@ -24,6 +26,7 @@ export default registerAs<DbConfig>('db',() => {
         port: parseInt(process.env.DB_PORT),
         username: process.env.DB_USER,
         password: process.env.DB_PASS,
-        database: process.env.DB_DATABASE
+        database: process.env.DB_DATABASE,
+        synchronize: process.env.DB_SYNCHRONIZE === 'true' ? true : false
     }
 })

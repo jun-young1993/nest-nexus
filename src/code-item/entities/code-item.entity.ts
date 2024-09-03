@@ -18,7 +18,9 @@ export class CodeItem {
     @Column()
     key: string;
 
-    @Column()
+    @Column({
+        type: 'longtext',
+    })
     value: string;
 
     @Column({
