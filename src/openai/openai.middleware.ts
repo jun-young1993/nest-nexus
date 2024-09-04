@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { NextFunction } from "express";
 import { decrypt } from "src/utils/crypto.util";
 
+
 @Injectable()
 export class OpenaiMiddleware implements NestMiddleware {
 	constructor(private readonly configService: ConfigService) {} 
@@ -17,14 +18,22 @@ export class OpenaiMiddleware implements NestMiddleware {
 		try{
 			const secretKey = this.configService.getOrThrow('app.secret_key');
 			const decrypted = decrypt(token,secretKey);
-			console.log(decrypted);
+			
 			const [prefix, timestamp] = decrypted.split('-');
 			if(secretKey === prefix){
 				const tokenTime = new Date(parseInt(timestamp, 10));
 				const currentTime = new Date();
 				const timeDifference = (currentTime.getTime() - tokenTime.getTime()) / 1000 / 60; 
+				console.log('[timeDifference]',timeDifference);
+				if(
+					timeDifference < 5 
+					|| this.configService.getOrThrow('app.is_dev')
+				){
+					return next();
+				}else{
+					throw new UnauthorizedException('Invalid token: TimeOut');		
+				}
 				
-				return next();
 			}
 			throw new UnauthorizedException('Invalid token: Prefix');
 		} catch( error ){
