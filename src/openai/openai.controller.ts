@@ -24,7 +24,42 @@ export class OpenaiController {
 	    const token = encrypt(`${srcretKey}-${currentTime}`,srcretKey);
 	    return { token };
 	}
-
+	
+	/**
+	 *
+	 *
+	 * @param {string} templateCode
+	 * @param {CreateTemplateComplationChatDto} {message}
+	 * @returns {Promise<ChatCompletion>}
+	 * @memberof OpenaiController
+	 * @example
+	 * ```json
+	 * {
+	 * "id": "chatcmpl-A3ycy83HOD7iN3PigM1qepY66iRFH",
+	 * "object": "chat.completion",
+	 * "created": 1725511400,
+	 * "model": "gpt-4o-2024-05-13",
+	 * "choices": [
+	 *   {
+	 *     "index": 0,
+	 *     "message": {
+	 *       "role": "assistant",
+	 *       "content": "Hello! How can I assist you today?",
+	 *       "refusal": null
+	 *     },
+	 *     "logprobs": null,
+	 *     "finish_reason": "stop"
+	 *   }
+	 * ],
+	 * "usage": {
+	 *   "prompt_tokens": 13,
+	 *   "completion_tokens": 9,
+	 *   "total_tokens": 22
+	 * },
+	 * "system_fingerprint": "fp_157b3831f5"
+	 *}
+	 * ```
+	 */
 	@Post("send-message/:template_code")
 	@ApiBearerAuth()
 	@ApiBody({ type: CreateTemplateComplationChatDto})
@@ -40,22 +75,19 @@ export class OpenaiController {
 		@Body() {message} : CreateTemplateComplationChatDto
 	){
 		const templateCodeItem = await this.codeItemService.findOneByCodeAndKey('prompt_template',templateCode);
-		// await this.openaiService.chatCompletions({
-		// 	messages: [
-		// 	    {
-		// 		role: "system",
-		// 		content: templateCodeItem.value
-		// 	    },
-		// 	    {
-		// 		role: "user",
-		// 		content: message
-		// 	    }
-		// 	],
-		// 	model: 'gpt-4o'
-		//     });
-		console.log(templateCodeItem);
-		console.log(templateCode);
-		console.log(CreateTemplateComplationChatDto);
-		return CreateTemplateComplationChatDto;
+		
+		return await this.openaiService.chatCompletions({
+			messages: [
+			    {
+				role: "system",
+				content: templateCodeItem.value
+			    },
+			    {
+				role: "user",
+				content: message
+			    }
+			],
+			model: 'gpt-4o'
+		    });
 	}
 }

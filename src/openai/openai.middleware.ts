@@ -17,9 +17,12 @@ export class OpenaiMiddleware implements NestMiddleware {
 	
 		try{
 			const secretKey = this.configService.getOrThrow('app.secret_key');
+			console.log(token , secretKey);
 			const decrypted = decrypt(token,secretKey);
 			
 			const [prefix, timestamp] = decrypted.split('-');
+			console.log(prefix,timestamp);
+			throw new Error('hi');
 			if(secretKey === prefix){
 				const tokenTime = new Date(parseInt(timestamp, 10));
 				const currentTime = new Date();
