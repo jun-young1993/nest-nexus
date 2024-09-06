@@ -24,7 +24,7 @@ export class OpenaiController {
 	    const token = encrypt(`${srcretKey}-${currentTime}`,srcretKey);
 	    return { token };
 	}
-	
+
 	/**
 	 *
 	 *
@@ -75,7 +75,32 @@ export class OpenaiController {
 		@Body() {message} : CreateTemplateComplationChatDto
 	){
 		const templateCodeItem = await this.codeItemService.findOneByCodeAndKey('prompt_template',templateCode);
+		const result = {
+			"id": "chatcmpl-A3ycy83HOD7iN3PigM1qepY66iRFH",
+			"object": "chat.completion",
+			"created": 1725511400,
+			"model": "gpt-4o-2024-05-13",
+			"choices": [
+			  {
+			    "index": 0,
+			    "message": {
+			      "role": "assistant",
+			      "content": "Hello! How can I assist you today?",
+			      "refusal": null
+			    },
+			    "logprobs": null,
+			    "finish_reason": "stop"
+			  }
+			],
+			"usage": {
+			  "prompt_tokens": 13,
+			  "completion_tokens": 9,
+			  "total_tokens": 22
+			},
+			"system_fingerprint": "fp_157b3831f5"
+		       };
 		
+		return  result;
 		return await this.openaiService.chatCompletions({
 			messages: [
 			    {
