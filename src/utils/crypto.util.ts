@@ -16,9 +16,11 @@ export function encrypt(text: string, secret_key: string): string {
 }
 
 export function decrypt(encrypted: string, secret_key: string): string {
+
     const textParts = encrypted.split(':');
     const iv = Buffer.from(textParts.shift(), 'hex');
     const key = ensureKeyLength(secret_key); // 키 길이 보장
+
     const encryptedText = textParts.join(':');
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
