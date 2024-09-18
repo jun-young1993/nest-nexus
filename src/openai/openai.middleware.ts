@@ -8,7 +8,10 @@ import { decrypt } from "src/utils/crypto.util";
 export class OpenaiMiddleware implements NestMiddleware {
 	constructor(private readonly configService: ConfigService) {} 
 	use(req: Request, res: Response, next: NextFunction) {
-		
+		const isDev = this.configService.getOrThrow('app.is_dev');
+		if(isDev){
+			return next();
+		}
 		const token = req.headers['x-access-token'];
 		
 		if (!token) {
@@ -17,17 +20,17 @@ export class OpenaiMiddleware implements NestMiddleware {
 	
 		try{
 			const secretKey = this.configService.getOrThrow('app.secret_key');
-			console.log(token , secretKey);
+
 			const decrypted = decrypt(token,secretKey);
 			
 			const [prefix, timestamp] = decrypted.split('-');
-			console.log(prefix,timestamp);
+
 			
 			if(secretKey === prefix){
 				const tokenTime = new Date(parseInt(timestamp, 10));
 				const currentTime = new Date();
 				const timeDifference = (currentTime.getTime() - tokenTime.getTime()) / 1000 / 60; 
-				console.log('[timeDifference]',timeDifference);
+
 				if(
 					timeDifference < 5 
 					|| this.configService.getOrThrow('app.is_dev')
