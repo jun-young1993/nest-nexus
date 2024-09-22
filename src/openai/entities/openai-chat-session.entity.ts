@@ -1,4 +1,4 @@
-import {Entity, OneToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn} from "typeorm";
 import {ChatCompletion} from "./chat-completion.entity";
 
 @Entity()
@@ -6,6 +6,6 @@ export class  OpenaiChatSession {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @OneToMany(() => ChatCompletion, (completion) => completion.session)
-    completions: ChatCompletion[];
+    @OneToOne(() => ChatCompletion, (completion) => completion.session)
+    completions: ChatCompletion;
 }

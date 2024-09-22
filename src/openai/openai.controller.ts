@@ -92,6 +92,18 @@ export class OpenaiController {
 		return await this.openaiService.findOneOrFail(uuid);
 	}
 
+	@Get('chat-completion/session/:uuid')
+	@ApiOperation({ summary: 'Retrieve a chat completion by UUID' })  // API 엔드포인트 설명
+	// @ApiQuery({ name: 'uuid', required: true, description: 'a chat completion by UUID' })
+	@ApiParam({ name: 'uuid', description: 'The UUID of the ChatCompletion entity' })  // 경로 파라미터 설명
+	@ApiResponse({ status: 200, description: 'Successfully retrieved the chat completion.', type: ChatCompletion })  // 성공 시 응답 설명
+	@ApiResponse({ status: 404, description: 'ChatCompletion not found.' })  // 실패 시 응답 설명
+	async findOneBySession(
+		@Param('uuid') uuid: string,
+	): Promise<OpenaiChatSession | null> {
+		return await this.openaiService.findOneBySession(uuid);
+	}
+
 	@ApiOperation({ summary: 'Create Chat Completion Session' })  // API 엔드포인트 설명
 	@Post("session")
 	async createSession(): Promise<OpenaiChatSession>{

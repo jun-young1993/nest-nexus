@@ -33,7 +33,8 @@ export class ChatCompletion {
     @JoinColumn()
     usage: Usage;
 
-    @ManyToOne(() => OpenaiChatSession, (session) => session.completions)
+    @OneToOne(() => OpenaiChatSession, (session) => session.completions)
+    @JoinColumn()
     session: OpenaiChatSession;
 
     static fromJson(json: any): ChatCompletion {

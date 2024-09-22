@@ -54,6 +54,20 @@ export class OpenaiService {
         });
     }
 
+    async findOneBySession(uuid: string):  Promise<OpenaiChatSession | null> {
+        return this.openaiChatSessionRepository.findOne({
+            relations: [
+                'completions',
+                'completions.choices',
+                'completions.choices.message',
+                'completions.usage'
+            ],
+            where: {
+                id: uuid
+            }
+        });
+    }
+
     async findOneOrFail(uuid: string) : Promise<ChatCompletion> {
         const chatCompletion = await this.findOne(uuid);
         if(chatCompletion == null){
