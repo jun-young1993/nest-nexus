@@ -11,6 +11,12 @@ import {
 import { Choice } from './choice.entity';
 import { Usage } from './usage.entity';
 import {OpenaiChatSession} from "./openai-chat-session.entity";
+import { CodeItem } from 'src/code-item/entities/code-item.entity';
+
+export interface ChatCompletionCodeItem {
+    systemPromptCodeItem?: CodeItem,
+    userPromptCodeItem?: CodeItem
+}
 
 @Entity("openai_chat_completion")
 export class ChatCompletion {
@@ -33,11 +39,24 @@ export class ChatCompletion {
     @JoinColumn()
     usage: Usage;
 
-    @OneToOne(() => OpenaiChatSession, (session) => session.completions)
-    @JoinColumn()
+    @ManyToOne(() => OpenaiChatSession, (session) => session.completions)
     session: OpenaiChatSession;
 
-    static fromJson(json: any): ChatCompletion {
+     // systemPromptCodeItem 관계 추가
+     @ManyToOne(() => CodeItem, { nullable: false })
+     @JoinColumn()  // 시스템 프롬프트 코드 아이템 ID 컬럼명 설정
+     systemPromptCodeItem?: CodeItem;
+ 
+     // userPromptCodeItem 관계 추가
+     @ManyToOne(() => CodeItem, { nullable: false })
+     @JoinColumn()  // 사용자 프롬프트 코드 아이템 ID 컬럼명 설정
+     userPromptCodeItem?: CodeItem;
+
+    static fromJson(
+        json: any, 
+        session: OpenaiChatSession, 
+        options?: ChatCompletionCodeItem
+    ): ChatCompletion {
         const chatCompletion = new ChatCompletion();
         chatCompletion.id = json.id;
         chatCompletion.object = json.object;
@@ -46,7 +65,9 @@ export class ChatCompletion {
 
         chatCompletion.choices = json.choices.map((choice: any) => Choice.fromJson(choice));
         chatCompletion.usage = Usage.fromJson(json.usage);
-
+        chatCompletion.session = session;
+        chatCompletion.systemPromptCodeItem = options?.systemPromptCodeItem;
+        chatCompletion.userPromptCodeItem = options?.userPromptCodeItem;
         return chatCompletion;
     }
 }

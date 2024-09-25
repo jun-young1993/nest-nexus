@@ -4,7 +4,7 @@ import {ConfigService} from "@nestjs/config";
 import {AllConfigType} from "../config/config.type";
 import {ChatCompletionCreateParamsNonStreaming, ChatCompletion as OpenAIChatCompletion} from "openai/resources";
 import {InjectRepository} from "@nestjs/typeorm";
-import {ChatCompletion} from "./entities/chat-completion.entity";
+import {ChatCompletion, ChatCompletionCodeItem} from "./entities/chat-completion.entity";
 import {Repository} from "typeorm";
 import {Choice} from "./entities/choice.entity";
 import {Message} from "./entities/message.entity";
@@ -30,14 +30,22 @@ export class OpenaiService {
         });
     }
 
-    async chatCompletions(messages: ChatCompletionCreateParamsNonStreaming){
+    async chatCompletions(
+        messages: ChatCompletionCreateParamsNonStreaming, 
+        session: OpenaiChatSession,
+        options?: ChatCompletionCodeItem
+    ){
         const completion = await this.openAI.chat.completions.create(messages);
-        await this.saveCompletion(completion);
+        await this.saveCompletion(completion, session, options);
         return completion;
     }
 
-    async saveCompletion(completionData: OpenAIChatCompletion | any): Promise<ChatCompletion> {
-        const chatCompletion = ChatCompletion.fromJson(completionData);
+    async saveCompletion(
+        completionData: OpenAIChatCompletion | any, 
+        session: OpenaiChatSession, 
+        options?: ChatCompletionCodeItem
+    ): Promise<ChatCompletion> {
+        const chatCompletion = ChatCompletion.fromJson(completionData, session, options);
         return this.chatCompletionRepository.save(chatCompletion);
     }
 
@@ -60,7 +68,9 @@ export class OpenaiService {
                 'completions',
                 'completions.choices',
                 'completions.choices.message',
-                'completions.usage'
+                'completions.usage',
+                'completions.systemPromptCodeItem',
+                'completions.userPromptCodeItem',
             ],
             where: {
                 id: uuid

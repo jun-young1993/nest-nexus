@@ -40,6 +40,7 @@ export class TasksService {
 
         this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION][START]');
         this.getAlieHotProductPromotion(async (userContent) => {
+            const session = await this.openaiService.saveSession();
             const completion = await this.openaiService.chatCompletions({
                 messages: [
                     {
@@ -52,7 +53,7 @@ export class TasksService {
                     }
                 ],
                 model: 'gpt-4o'
-            });
+            }, session);
             return completion.choices[0].message.content
         })
 

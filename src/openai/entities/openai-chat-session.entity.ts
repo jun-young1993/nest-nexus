@@ -6,6 +6,6 @@ export class  OpenaiChatSession {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @OneToOne(() => ChatCompletion, (completion) => completion.session)
-    completions: ChatCompletion;
+    @OneToMany(() => ChatCompletion, (completion) => completion.session)
+    completions: ChatCompletion[];
 }

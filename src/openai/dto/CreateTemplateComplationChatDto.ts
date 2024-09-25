@@ -1,10 +1,32 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsString, ValidateNested } from "class-validator";
 
-export class CreateTemplateComplationChatDto {
+class MessageDto {
 	@IsString()
 	@ApiProperty({
 		example: 'hi?'
 	})
-	message: string
+	content: string
+
+	@IsString()
+	@ApiProperty({
+		example: 'assistant'
+	})
+	role: string
+}
+export class CreateTemplateComplationChatDto {
+	@IsArray()
+	@ValidateNested({ each: true })
+	@Type(() => MessageDto)
+	@ApiProperty({
+		example: [{
+			role: "user",
+			content: 'hi?'
+		},{
+			role: "assistant",
+			content: "hi~"
+		}]
+	})
+	messages: MessageDto[]
 }

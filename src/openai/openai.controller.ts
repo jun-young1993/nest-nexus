@@ -17,7 +17,7 @@ import { CreateTemplateComplationChatDto } from './dto/CreateTemplateComplationC
 import { OpenaiService } from './openai.service';
 import {ChatCompletion} from "./entities/chat-completion.entity";
 import {OpenaiChatSession} from "./entities/openai-chat-session.entity";
-
+import {ChatCompletionMessageParam} from "openai/resources";
 @ApiTags('openai')
 @Controller('openai')
 export class OpenaiController {
@@ -42,10 +42,11 @@ export class OpenaiController {
 	 * @returns {Promise<ChatCompletion>}
 	 * @memberof OpenaiController
 	 */
-	@Post("send-message/:template_code/:model_code")
+	@Post("send-message/:system_prompt_code/:user_prompt_code/:model_code/:session_id")
 	@ApiBearerAuth()
 	@ApiBody({ type: CreateTemplateComplationChatDto})
-	@ApiParam({ name: 'template_code', description: 'ID of the code item to retrieve' })
+	@ApiParam({ name: 'system_prompt_code', description: 'ID of the code item to retrieve' })
+	@ApiParam({ name: 'user_prompt_code', description: 'ID of the code item to retrieve' })
 	@ApiParam({ name: 'model_code', description: 'ID of the code item to retrieve' })
 	@ApiOperation({ summary: 'Open ai send message' })
 	@ApiHeader({
@@ -54,27 +55,47 @@ export class OpenaiController {
 		required: true,
 	})
 	async sendMessage(
-		@Param('template_code') templateCode: string,
+		@Param('system_prompt_code') systemPromptCode: string,
+		@Param('user_prompt_code') userPromptCode: string,
 		@Param('model_code') modelCode: string,
-		@Body() {message} : CreateTemplateComplationChatDto
+		@Param('session_id') sessionId: string,
+		@Body() {messages} : CreateTemplateComplationChatDto
 	){
-
+		const session = await this.openaiService.findOneBySession(sessionId);
 		const modelCodeItem = await this.codeItemService.findOneByCodeAndKey('openai-model',modelCode);
-		const templateCodeItem = await this.codeItemService.findOneByCodeAndKey('prompt_template',templateCode);
+		const systemPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('system-prompt-template',systemPromptCode);
+		const userPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('user-prompt_template',systemPromptCode);
+		console.log(modelCodeItem);
+		console.log(systemPromptCodeItem);
+		console.log(userPromptCodeItem);
+		console.log(session);
+		console.log(messages);
 
-		const result = await this.openaiService.chatCompletions({
-			messages: [
-			    {
-				role: "system",
-				content: templateCodeItem.value
-			    },
-			    {
-				role: "user",
-				content: message
-			    }
-			],
-			model: modelCodeItem.value
-		});
+		const messageParams = messages.map((message) => {
+			return {role: message.role, content: message.content}
+		}) as ChatCompletionMessageParam[];
+
+		const result = await this.openaiService.chatCompletions(
+			{
+				messages: [
+				{
+					role: "system",
+					content: systemPromptCodeItem.value
+				},
+				...messageParams,
+				{
+					role: 'user',
+					content: userPromptCodeItem.value
+				}
+				],
+				model: modelCodeItem.value
+			},
+			session,
+			{
+				systemPromptCodeItem: systemPromptCodeItem,
+				userPromptCodeItem: userPromptCodeItem
+			}
+		);
 		console.log(result);
 		console.log(result.choices[0].message.content);
 		return result;
