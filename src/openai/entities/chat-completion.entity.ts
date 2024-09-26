@@ -68,6 +68,8 @@ export class ChatCompletion {
         chatCompletion.session = session;
         chatCompletion.systemPromptCodeItem = options?.systemPromptCodeItem;
         chatCompletion.userPromptCodeItem = options?.userPromptCodeItem;
+        console.log('saved');
+        console.log(chatCompletion);
         return chatCompletion;
     }
 }

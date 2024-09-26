@@ -64,7 +64,7 @@ export class OpenaiController {
 		const session = await this.openaiService.findOneBySession(sessionId);
 		const modelCodeItem = await this.codeItemService.findOneByCodeAndKey('openai-model',modelCode);
 		const systemPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('system-prompt-template',systemPromptCode);
-		const userPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('user-prompt_template',systemPromptCode);
+		const userPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('user-prompt-template',userPromptCode);
 		console.log(modelCodeItem);
 		console.log(systemPromptCodeItem);
 		console.log(userPromptCodeItem);
