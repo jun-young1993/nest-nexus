@@ -1,4 +1,4 @@
-import {Body, Controller, Get, NotFoundException, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, NotFoundException, Param, Post, Query} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
 	ApiBearerAuth,
@@ -18,6 +18,7 @@ import { OpenaiService } from './openai.service';
 import {ChatCompletion} from "./entities/chat-completion.entity";
 import {OpenaiChatSession} from "./entities/openai-chat-session.entity";
 import {ChatCompletionMessageParam} from "openai/resources";
+import {FindOptionsWhere} from "typeorm";
 @ApiTags('openai')
 @Controller('openai')
 export class OpenaiController {
@@ -45,9 +46,10 @@ export class OpenaiController {
 	@Post("send-message/:system_prompt_code/:user_prompt_code/:model_code/:session_id")
 	@ApiBearerAuth()
 	@ApiBody({ type: CreateTemplateComplationChatDto})
-	@ApiParam({ name: 'system_prompt_code', description: 'ID of the code item to retrieve' })
-	@ApiParam({ name: 'user_prompt_code', description: 'ID of the code item to retrieve' })
-	@ApiParam({ name: 'model_code', description: 'ID of the code item to retrieve' })
+	@ApiParam({ name: 'system_prompt_code', description: 'ID of the code item to retrieve', example: 'four_pillars_of_destiny' })
+	@ApiParam({ name: 'user_prompt_code', description: 'ID of the code item to retrieve', example: 'fourPillarsOfDestiny' })
+	@ApiParam({ name: 'model_code', description: 'ID of the code item to retrieve', example: 'saju-base'})
+	@ApiParam({ name: 'session_id', description: 'ID of the code item to retrieve', example: 'fe10c0ec-8480-45e6-9f5b-f44cebfdabfb'})
 	@ApiOperation({ summary: 'Open ai send message' })
 	@ApiHeader({
 		name: 'x-access-token',
@@ -96,8 +98,7 @@ export class OpenaiController {
 				userPromptCodeItem: userPromptCodeItem
 			}
 		);
-		console.log(result);
-		console.log(result.choices[0].message.content);
+
 		return result;
 	}
 
@@ -117,12 +118,34 @@ export class OpenaiController {
 	@ApiOperation({ summary: 'Retrieve a chat completion by UUID' })  // API 엔드포인트 설명
 	// @ApiQuery({ name: 'uuid', required: true, description: 'a chat completion by UUID' })
 	@ApiParam({ name: 'uuid', description: 'The UUID of the ChatCompletion entity' })  // 경로 파라미터 설명
+	@ApiQuery({name: 'system_prompt_code_item_key', required: false, description: 'Optional system prompt code filter'})
+	@ApiQuery({name: 'user_prompt_code_item_key', required: false, description: 'Optional system prompt code filter'})
 	@ApiResponse({ status: 200, description: 'Successfully retrieved the chat completion.', type: ChatCompletion })  // 성공 시 응답 설명
 	@ApiResponse({ status: 404, description: 'ChatCompletion not found.' })  // 실패 시 응답 설명
 	async findOneBySession(
 		@Param('uuid') uuid: string,
+		@Query('system_prompt_code_item_key') systemPromptCodeItemKey?: string,
+		@Query('user_prompt_code_item_key') userPromptCodeItemKey?: string,
 	): Promise<OpenaiChatSession | null> {
-		return await this.openaiService.findOneBySession(uuid);
+		const where: FindOptionsWhere<OpenaiChatSession> = {
+			completions: {
+				...(
+					systemPromptCodeItemKey &&
+					{
+						systemPromptCodeItem: await this.codeItemService.findOneByCodeAndKey('system-prompt-template',systemPromptCodeItemKey)
+					}
+				),
+				...(
+					userPromptCodeItemKey &&
+					{
+						userPromptCodeItem: await this.codeItemService.findOneByCodeAndKey('user-prompt-template',userPromptCodeItemKey)
+					}
+				)
+			}
+		};
+
+		console.log(where);
+		return await this.openaiService.findOneBySession(uuid, where);
 	}
 
 	@ApiOperation({ summary: 'Create Chat Completion Session' })  // API 엔드포인트 설명

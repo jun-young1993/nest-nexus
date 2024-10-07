@@ -5,7 +5,7 @@ import {AllConfigType} from "../config/config.type";
 import {ChatCompletionCreateParamsNonStreaming, ChatCompletion as OpenAIChatCompletion} from "openai/resources";
 import {InjectRepository} from "@nestjs/typeorm";
 import {ChatCompletion, ChatCompletionCodeItem} from "./entities/chat-completion.entity";
-import {Repository} from "typeorm";
+import {FindOptionsWhere, Repository} from "typeorm";
 import {Choice} from "./entities/choice.entity";
 import {Message} from "./entities/message.entity";
 import {Usage} from "./entities/usage.entity";
@@ -20,6 +20,8 @@ export class OpenaiService {
         private readonly configService: ConfigService<AllConfigType>,
         @InjectRepository(ChatCompletion)
         private chatCompletionRepository: Repository<ChatCompletion>,
+        @InjectRepository(Usage)
+        private usageRepository: Repository<Usage>,
         @InjectRepository(OpenaiChatSession)
         private openaiChatSessionRepository: Repository<OpenaiChatSession>,
     ) {
@@ -46,7 +48,13 @@ export class OpenaiService {
         options?: ChatCompletionCodeItem
     ): Promise<ChatCompletion> {
         const chatCompletion = ChatCompletion.fromJson(completionData, session, options);
-        return this.chatCompletionRepository.save(chatCompletion);
+        const usage = await this.usageRepository.save(chatCompletion.usage);
+        return this.chatCompletionRepository.save(
+            {
+                ...chatCompletion,
+                usage: usage
+            }
+        );
     }
 
     async findOne(uuid: string):  Promise<ChatCompletion | null> {
@@ -62,7 +70,26 @@ export class OpenaiService {
         });
     }
 
-    async findOneBySession(uuid: string):  Promise<OpenaiChatSession | null> {
+    async findOneBySession(
+        uuid: string,
+        where?: FindOptionsWhere<OpenaiChatSession>
+    ):  Promise<OpenaiChatSession | null> {
+        console.log({
+            relations: [
+                'completions',
+                'completions.choices',
+                'completions.choices.message',
+                'completions.usage',
+                'completions.systemPromptCodeItem',
+                'completions.userPromptCodeItem',
+            ],
+            where: {
+                ...where,
+                id: uuid,
+
+            }
+
+        });
         return this.openaiChatSessionRepository.findOne({
             relations: [
                 'completions',
@@ -73,8 +100,11 @@ export class OpenaiService {
                 'completions.userPromptCodeItem',
             ],
             where: {
-                id: uuid
+                ...where,
+                id: uuid,
+
             }
+
         });
     }
 

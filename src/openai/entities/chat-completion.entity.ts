@@ -63,8 +63,12 @@ export class ChatCompletion {
         chatCompletion.created = new Date(json.created * 1000); // 유닉스 타임스탬프 변환
         chatCompletion.model = json.model;
 
-        chatCompletion.choices = json.choices.map((choice: any) => Choice.fromJson(choice));
+        chatCompletion.choices = json.choices.map((choice: any) => {
+            console.log(Choice.fromJson(choice));
+            return Choice.fromJson(choice);
+        });
         chatCompletion.usage = Usage.fromJson(json.usage);
+        console.log(Usage.fromJson(json.usage));
         chatCompletion.session = session;
         chatCompletion.systemPromptCodeItem = options?.systemPromptCodeItem;
         chatCompletion.userPromptCodeItem = options?.userPromptCodeItem;
