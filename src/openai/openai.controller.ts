@@ -124,6 +124,11 @@ export class OpenaiController {
 	@ApiQuery({name: 'end_date', required: false, description: 'created end date'})
 	@ApiResponse({ status: 200, description: 'Successfully retrieved the chat completion.', type: ChatCompletion })  // 성공 시 응답 설명
 	@ApiResponse({ status: 404, description: 'ChatCompletion not found.' })  // 실패 시 응답 설명
+	@ApiHeader({
+		name: 'x-access-token',
+		description: 'Authorization token',
+		required: true,
+	})
 	async findOneBySession(
 		@Param('uuid') uuid: string,
 		@Query('system_prompt_code_item_key') systemPromptCodeItemKey?: string,
