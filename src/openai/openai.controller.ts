@@ -18,7 +18,7 @@ import { OpenaiService } from './openai.service';
 import {ChatCompletion} from "./entities/chat-completion.entity";
 import {OpenaiChatSession} from "./entities/openai-chat-session.entity";
 import {ChatCompletionMessageParam} from "openai/resources";
-import {FindOptionsWhere} from "typeorm";
+import {Between, FindOptionsWhere} from "typeorm";
 @ApiTags('openai')
 @Controller('openai')
 export class OpenaiController {
@@ -120,13 +120,18 @@ export class OpenaiController {
 	@ApiParam({ name: 'uuid', description: 'The UUID of the ChatCompletion entity' })  // 경로 파라미터 설명
 	@ApiQuery({name: 'system_prompt_code_item_key', required: false, description: 'Optional system prompt code filter'})
 	@ApiQuery({name: 'user_prompt_code_item_key', required: false, description: 'Optional system prompt code filter'})
+	@ApiQuery({name: 'start_date', required: false, description: 'created start date'})
+	@ApiQuery({name: 'end_date', required: false, description: 'created end date'})
 	@ApiResponse({ status: 200, description: 'Successfully retrieved the chat completion.', type: ChatCompletion })  // 성공 시 응답 설명
 	@ApiResponse({ status: 404, description: 'ChatCompletion not found.' })  // 실패 시 응답 설명
 	async findOneBySession(
 		@Param('uuid') uuid: string,
 		@Query('system_prompt_code_item_key') systemPromptCodeItemKey?: string,
 		@Query('user_prompt_code_item_key') userPromptCodeItemKey?: string,
+		@Query('start_date') startDate?: String,
+		@Query('end_date') endDate?: String
 	): Promise<OpenaiChatSession | null> {
+		
 		const where: FindOptionsWhere<OpenaiChatSession> = {
 			completions: {
 				...(
@@ -140,11 +145,17 @@ export class OpenaiController {
 					{
 						userPromptCodeItem: await this.codeItemService.findOneByCodeAndKey('user-prompt-template',userPromptCodeItemKey)
 					}
+				),
+				...(
+					startDate && endDate &&
+					{
+						created: Between(new Date(startDate.toString()), new Date(endDate.toString()))
+					}
 				)
 			}
 		};
 
-		console.log(where);
+		
 		return await this.openaiService.findOneBySession(uuid, where);
 	}
 
