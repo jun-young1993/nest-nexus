@@ -161,7 +161,7 @@ export class OpenaiController {
 		};
 
 		
-		return await this.openaiService.findOneBySession(uuid, where);
+		return await this.openaiService.findOneBySessionOrFail(uuid, where);
 	}
 
 	@ApiOperation({ summary: 'Create Chat Completion Session' })  // API 엔드포인트 설명

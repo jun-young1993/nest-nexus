@@ -70,6 +70,17 @@ export class OpenaiService {
         });
     }
 
+    async findOneBySessionOrFail(
+        uuid: string,
+        where?: FindOptionsWhere<OpenaiChatSession>
+    ){
+        const result = await this.findOneBySession(uuid, where);
+        if(result == null){
+            throw new NotFoundException(`ChatCompletion with UUID ${uuid} not found`);
+        }
+        return result;
+    }
+
     async findOneBySession(
         uuid: string,
         where?: FindOptionsWhere<OpenaiChatSession>
