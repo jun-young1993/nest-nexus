@@ -67,11 +67,6 @@ export class OpenaiController {
 		const modelCodeItem = await this.codeItemService.findOneByCodeAndKey('openai-model',modelCode);
 		const systemPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('system-prompt-template',systemPromptCode);
 		const userPromptCodeItem = await this.codeItemService.findOneByCodeAndKey('user-prompt-template',userPromptCode);
-		console.log(modelCodeItem);
-		console.log(systemPromptCodeItem);
-		console.log(userPromptCodeItem);
-		console.log(session);
-		console.log(messages);
 
 		const messageParams = messages.map((message) => {
 			return {role: message.role, content: message.content}
