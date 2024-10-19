@@ -34,6 +34,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "mysql2": "^3.11.0",
+    "nest-admin-page": "^1.0.8",
     "nest-winston": "^1.10.0",
     "openai": "^4.52.3",
     "reflect-metadata": "^0.2.0",

@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-
+import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {
  
@@ -33,7 +33,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
-  AdminModule.setup('admin', app);
+  AdminPageModule.setup('admin', app);
   const listenEvent = () => {
     console.log(`[START HTTP APP ] ${configService.getOrThrow('app.host', { infer: true })}:${configService.getOrThrow('app.port', { infer: true })}`)
   }
