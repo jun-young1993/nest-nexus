@@ -19,6 +19,8 @@ import dbConfig from "./config/db.config";
 import {TypeormModule} from "./typeorm/typeorm.module";
 import {CodeModule} from "./code/code.module";
 import {CodeItemModule} from "./code-item/code-item.module";
+import { NexusModule } from './nexus/nexus.module';
+import { FourPillarsModule } from './four-pillars/four-pillars.module';
 
 @Module({
     imports: [
@@ -45,7 +47,9 @@ import {CodeItemModule} from "./code-item/code-item.module";
         SocketEventModule,
         GeminiModule,
         CodeModule,
-        CodeItemModule
+        CodeItemModule,
+        NexusModule,
+        FourPillarsModule
     ],
     controllers: [],
     providers: [],
