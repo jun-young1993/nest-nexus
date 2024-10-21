@@ -1,5 +1,7 @@
 import * as solarLunar from 'solarlunar';
 import isInTimeRange from 'src/utils/date/is-In-time-range';
+import HeavenlyStemBranch from './heavenly-stem-branch';
+import SolarLunarInterface from '../interfaces/solar-and-lunar.interface';
 // const ganByLunarYear = ['경','신','임','계','갑','을','병','정','무','기'];
 // const zodiacs = ['자','축','인','묘','진','사','오','미','신','유','술','해'];
 // const baseYear = 1936;
@@ -77,27 +79,9 @@ function getHourStem(dayStem: string) {
   
     return stemMap[dayStem];
   }
-  
+
 export class FourPillarsOfDestiny {
-    private solarAndLunar: {
-        lYear: number;
-        lMonth: number;
-        lDay: number;
-        animal: string;
-        IMonthCn: string;
-        IDayCn: string;
-        cMonth: number;
-        cDay: number;
-        gzYear: string;
-        gzMonth: string;
-        gzDay: string,
-        isToday: boolean,
-        isLeap: boolean,
-        nWeek: number,
-        ncWeek: string,
-        isTerm: boolean,
-        term: string
-    };
+    private solarAndLunar: SolarLunarInterface;
 
     public constructor(
         year: number,
@@ -108,27 +92,27 @@ export class FourPillarsOfDestiny {
         isLunar: boolean = false
     ){
         this.solarAndLunar = solarLunar[isLunar ? 'lunar2solar' : 'solar2lunar'](year, month, day);
+        new HeavenlyStemBranch(this.solarAndLunar);
+        // console.log(getHeavenlyAndEarthly(this.solarAndLunar.gzYear));
+        // console.log(getHeavenlyAndEarthly(this.solarAndLunar.gzMonth));
+        // console.log(getHeavenlyAndEarthly(this.solarAndLunar.gzDay));
+
+        // const yearHeavenlyAndEarthly = getHeavenlyAndEarthly(this.solarAndLunar.gzYear);
+        // const monthHeavenlyAndEarthly = getHeavenlyAndEarthly(this.solarAndLunar.gzMonth);
+        // const dayHeavenlyAndEarthly = getHeavenlyAndEarthly(this.solarAndLunar.gzDay);
         
-        console.log(getHeavenlyAndEarthly(this.solarAndLunar.gzYear));
-        console.log(getHeavenlyAndEarthly(this.solarAndLunar.gzMonth));
-        console.log(getHeavenlyAndEarthly(this.solarAndLunar.gzDay));
+        // // 일간(天干)을 추출
+        // const dayStem = this.solarAndLunar.gzDay[0];
 
-        const yearHeavenlyAndEarthly = getHeavenlyAndEarthly(this.solarAndLunar.gzYear);
-        const monthHeavenlyAndEarthly = getHeavenlyAndEarthly(this.solarAndLunar.gzMonth);
-        const dayHeavenlyAndEarthly = getHeavenlyAndEarthly(this.solarAndLunar.gzDay);
-        
-        // 일간(天干)을 추출
-        const dayStem = this.solarAndLunar.gzDay[0];
+        // // 시천간(時干)과 시지(時支) 계산
+        // const hourStem = getHourStem(dayStem);
+        // const hourBranch = getHourBranch(hour,minute);
 
-        // 시천간(時干)과 시지(時支) 계산
-        const hourStem = getHourStem(dayStem);
-        const hourBranch = getHourBranch(hour,minute);
-
-        // 시주 출력
-        console.log('시주:', {
-            ko: `${gz.heavenlyStems[hourStem].ko}${gz.earthlyBranches[hourBranch].ko}`,
-            hanja: `${hourStem}${hourBranch}`,
-        });
+        // // 시주 출력
+        // console.log('시주:', {
+        //     ko: `${gz.heavenlyStems[hourStem].ko}${gz.earthlyBranches[hourBranch].ko}`,
+        //     hanja: `${hourStem}${hourBranch}`,
+        // });
 
     }
 

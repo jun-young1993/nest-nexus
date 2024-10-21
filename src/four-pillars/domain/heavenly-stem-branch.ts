@@ -1,5 +1,7 @@
-class HeavenlyStemBranch {
-    private heavenlyStems = {
+import { EarthlyBranches, HeavenlyEarthlyInterface, HeavenlyStems } from "../interfaces/heavenly-earthly.interface";
+import SolarLunarInterface from "../interfaces/solar-and-lunar.interface";
+export default class HeavenlyStemBranch {
+    private heavenlyStems: HeavenlyStems = {
         '甲': { ko: '갑', hanja: '甲' },
         '乙': { ko: '을', hanja: '乙' },
         '丙': { ko: '병', hanja: '丙' },
@@ -12,7 +14,7 @@ class HeavenlyStemBranch {
         '癸': { ko: '계', hanja: '癸' },
     };
 
-    private earthlyBranches = {
+    private earthlyBranches: EarthlyBranches = {
         '子': { ko: '자', hanja: '子' },
         '丑': { ko: '축', hanja: '丑' },
         '寅': { ko: '인', hanja: '寅' },
@@ -27,9 +29,18 @@ class HeavenlyStemBranch {
         '亥': { ko: '해', hanja: '亥' },
     }
     
+    private solarLunar: SolarLunarInterface;
+
+    constructor(solarLunar){
+      this.solarLunar = solarLunar;
+      console.log(this.getHeavenlyAndEarthly(this.solarLunar.gzYear));
+      // this.year = this.getHeavenlyAndEarthly(this.solarLunar.gzYear);
+      // this.month = this.getHeavenlyAndEarthly(this.solarLunar.gzMonth);
+      // this.day = this.getHeavenlyAndEarthly(this.solarLunar.gzDay);
+    }
     
     // 천간과 지지를 분리하여 객체 반환
-    public getHeavenlyAndEarthly(heavenlyAndEarthly: string) {
+    private getHeavenlyAndEarthly(heavenlyAndEarthly: string): HeavenlyEarthlyInterface {
       const [heavenly, earthly] = heavenlyAndEarthly.split('');
       return {
         heavenly: this.heavenlyStems[heavenly],
