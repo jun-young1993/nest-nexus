@@ -55,6 +55,19 @@ export class CreateFourPillarDto {
     @IsNotEmpty()
     hour: number;
 
+    @ApiProperty({
+        example: 5,
+        description: 'The birth hour (in 24-hour format)',
+        minimum: 0,
+        maximum: 23,
+    })
+    @Transform(({ value }) => parseInt(value, 10))  // 문자열을 숫자로 변환
+    @IsInt()
+    @Min(0)
+    @Max(23)
+    @IsNotEmpty()
+    minute: number;
+
     // @ApiProperty({
     //     example: true,
     //     description: 'is lunar'
