@@ -16,15 +16,15 @@ export class FourPillarsController {
   @ApiResponse({ status: 200, description: 'Four pillars have been successfully calculated.', type: Code })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   calculateFourPillars(@Query() createFourPillarDto: CreateFourPillarDto) {
+    
     const result = new FourPillarsOfDestiny(
       createFourPillarDto.year,
       createFourPillarDto.month,
       createFourPillarDto.day,
       createFourPillarDto.hour,
       createFourPillarDto.minute,
-      false
+      createFourPillarDto.isLunar
     );
-    return result;
-    return this.fourPillarsService.calculateFourPillars(createFourPillarDto);
+    return result.toJson();
   }
 }

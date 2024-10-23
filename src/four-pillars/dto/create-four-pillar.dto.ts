@@ -1,4 +1,4 @@
-import {IsInt, IsNotEmpty, Min, Max, IsBoolean} from 'class-validator';
+import {IsInt, IsNotEmpty, Min, Max, IsBoolean, IsOptional} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -43,7 +43,7 @@ export class CreateFourPillarDto {
     day: number;
 
     @ApiProperty({
-        example: 11,
+        example: 9,
         description: 'The birth hour (in 24-hour format)',
         minimum: 0,
         maximum: 23,
@@ -68,10 +68,19 @@ export class CreateFourPillarDto {
     @IsNotEmpty()
     minute: number;
 
-    // @ApiProperty({
-    //     example: true,
-    //     description: 'is lunar'
-    // })
-    // @IsBoolean()
-    // isLunar: boolean;
+    @ApiProperty({
+        example: false,
+        description: 'Indicates if the date is based on the lunar calendar',
+        required: false,
+        default: false,
+    })
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+            return value.toLowerCase() === 'true';  // "true" -> true, "false" -> false
+        }
+        return Boolean(value);  // 숫자 또는 다른 값들을 boolean으로 변환
+    })
+    @IsOptional()  // 필수값이 아님
+    @IsBoolean()
+    isLunar?: boolean = false;  // 기본값 false로 설정
 }
