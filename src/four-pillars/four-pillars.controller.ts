@@ -3,7 +3,6 @@ import { FourPillarsService } from './four-pillars.service';
 import { CreateFourPillarDto } from './dto/create-four-pillar.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Code } from '../code/entities/code.entity';
-import {create} from "domain";
 import { FourPillarsOfDestiny } from './domain/four-pillars-of-destiny';
 
 @ApiTags('four-pillars')
