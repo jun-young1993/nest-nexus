@@ -7,9 +7,9 @@ export enum WuXing  {
 }
 
 export enum WuXingColor  {
-    BLUE = '#0000FF',   // 목
-    RED = '#FF0000',   // 화
-    YELLOW = '#FFFF00',  // 토
-    WHITE = '#FFFFFF',  // 금
-    BLACK = '#000000'   // 수
+    BLUE = '#006400',   // 목
+    RED = '#FF4500',   // 화
+    YELLOW = '#D2691E',  // 토
+    WHITE = '#C0C0C0',  // 금
+    BLACK = '#00008B'   // 수
 }

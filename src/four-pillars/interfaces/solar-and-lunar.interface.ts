@@ -5,6 +5,7 @@ export default interface SolarLunarInterface {
         animal: string;
         IMonthCn: string;
         IDayCn: string;
+        cYear: number;
         cMonth: number;
         cDay: number;
         gzYear: string;

@@ -18,6 +18,7 @@ export class FourPillarsOfDestiny {
           hour,
           minute
         );
+        console.log(this.solarLunar);
     }
 
     public toJson(){
@@ -41,6 +42,13 @@ export class FourPillarsOfDestiny {
         time: {
           ...time,
           ten: this.heavenlyStemBranch.getTenGods(time)
+        },
+        info: {
+          date: {
+            lunar: `${String(this.solarLunar.lYear)}-${String(this.solarLunar.lMonth).padStart(2, '0')}-${String(this.solarLunar.lDay).padStart(2, '0')}`,
+            solar: `${String(this.solarLunar.cYear)}-${String(this.solarLunar.cMonth).padStart(2, '0')}-${String(this.solarLunar.cDay).padStart(2, '0')}`,
+          },
+          animal: this.solarLunar.animal
         }
       }
     }

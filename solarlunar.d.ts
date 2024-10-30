@@ -44,6 +44,7 @@ declare module 'solarlunar' {
         animal: string;
         IMonthCn: string;
         IDayCn: string;
+        cYear: number;
         cMonth: number;
         cDay: number;
         gzYear: string;
@@ -64,6 +65,7 @@ declare module 'solarlunar' {
         animal: string;
         IMonthCn: string;
         IDayCn: string;
+        cYear: number;
         cMonth: number;
         cDay: number;
         gzYear: string;
