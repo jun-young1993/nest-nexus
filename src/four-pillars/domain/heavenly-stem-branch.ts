@@ -1,33 +1,39 @@
-import isInTimeRange from "src/utils/date/is-In-time-range";
-import { EarthlyBranches, HeavenlyEarthlyInterface, HeavenlyStems } from "../interfaces/heavenly-earthly.interface";
+import { EarthlyBranche, EarthlyBranches, HeavenlyEarthlyInterface, HeavenlyStem, HeavenlyStems, TenGod, TenGods } from "../interfaces/heavenly-earthly.interface";
 import SolarLunarInterface from "../interfaces/solar-and-lunar.interface";
+import { Direction } from "src/enums/direction.enum"
+import { WuXing, WuXingColor } from "src/enums/wuxing.enum";
+import { Yinyang } from "src/enums/yinyang.enum";
+
+/**
+ * - url: https://blog.naver.com/zoayo72/221462412590
+ */
 export default class HeavenlyStemBranch {
     private heavenlyStems: HeavenlyStems = {
-        '甲': { ko: '갑', hanja: '甲' },
-        '乙': { ko: '을', hanja: '乙' },
-        '丙': { ko: '병', hanja: '丙' },
-        '丁': { ko: '정', hanja: '丁' },
-        '戊': { ko: '무', hanja: '戊' },
-        '己': { ko: '기', hanja: '己' },
-        '庚': { ko: '경', hanja: '庚' },
-        '辛': { ko: '신', hanja: '辛' },
-        '壬': { ko: '임', hanja: '壬' },
-        '癸': { ko: '계', hanja: '癸' },
+        '甲': { ko: '갑', hanja: '甲', element: WuXing.WOOD, yinyang: Yinyang.YANG, color: WuXingColor.BLUE },
+        '乙': { ko: '을', hanja: '乙', element: WuXing.WOOD, yinyang: Yinyang.YIN, color: WuXingColor.BLUE },
+        '丙': { ko: '병', hanja: '丙', element: WuXing.FIRE, yinyang: Yinyang.YANG, color: WuXingColor.RED },
+        '丁': { ko: '정', hanja: '丁', element: WuXing.FIRE, yinyang: Yinyang.YIN, color: WuXingColor.RED },
+        '戊': { ko: '무', hanja: '戊', element: WuXing.EARTH, yinyang: Yinyang.YANG, color: WuXingColor.YELLOW },
+        '己': { ko: '기', hanja: '己', element: WuXing.EARTH, yinyang: Yinyang.YIN, color: WuXingColor.YELLOW },
+        '庚': { ko: '경', hanja: '庚', element: WuXing.METAL, yinyang: Yinyang.YANG, color: WuXingColor.WHITE },
+        '辛': { ko: '신', hanja: '辛', element: WuXing.METAL, yinyang: Yinyang.YIN, color: WuXingColor.WHITE },
+        '壬': { ko: '임', hanja: '壬', element: WuXing.WATER, yinyang: Yinyang.YANG, color: WuXingColor.BLACK },
+        '癸': { ko: '계', hanja: '癸', element: WuXing.WATER, yinyang: Yinyang.YIN, color: WuXingColor.BLACK },
     };
 
     private earthlyBranches: EarthlyBranches = {
-        '子': { ko: '자', hanja: '子' },
-        '丑': { ko: '축', hanja: '丑' },
-        '寅': { ko: '인', hanja: '寅' },
-        '卯': { ko: '묘', hanja: '卯' },
-        '辰': { ko: '진', hanja: '辰' },
-        '巳': { ko: '사', hanja: '巳' },
-        '午': { ko: '오', hanja: '午' },
-        '未': { ko: '미', hanja: '未' },
-        '申': { ko: '신', hanja: '申' },
-        '酉': { ko: '유', hanja: '酉' },
-        '戌': { ko: '술', hanja: '戌' },
-        '亥': { ko: '해', hanja: '亥' },
+        '子': { ko: '자', hanja: '子', element: WuXing.WATER, yinyang:Yinyang.YANG, color: WuXingColor.BLACK },
+        '丑': { ko: '축', hanja: '丑', element: WuXing.EARTH, yinyang:Yinyang.YIN, color: WuXingColor.YELLOW },
+        '寅': { ko: '인', hanja: '寅', element: WuXing.WOOD, yinyang:Yinyang.YANG, color: WuXingColor.BLUE },
+        '卯': { ko: '묘', hanja: '卯', element: WuXing.WOOD, yinyang:Yinyang.YIN, color: WuXingColor.BLUE },
+        '辰': { ko: '진', hanja: '辰', element: WuXing.EARTH, yinyang:Yinyang.YANG, color: WuXingColor.YELLOW },
+        '巳': { ko: '사', hanja: '巳', element: WuXing.FIRE, yinyang:Yinyang.YIN, color: WuXingColor.RED },
+        '午': { ko: '오', hanja: '午', element: WuXing.FIRE, yinyang:Yinyang.YANG, color: WuXingColor.RED },
+        '未': { ko: '미', hanja: '未', element: WuXing.EARTH, yinyang:Yinyang.YIN, color: WuXingColor.YELLOW },
+        '申': { ko: '신', hanja: '申', element: WuXing.METAL, yinyang:Yinyang.YANG, color: WuXingColor.WHITE },
+        '酉': { ko: '유', hanja: '酉', element: WuXing.METAL, yinyang:Yinyang.YIN, color: WuXingColor.WHITE },
+        '戌': { ko: '술', hanja: '戌', element: WuXing.EARTH, yinyang:Yinyang.YANG, color: WuXingColor.YELLOW },
+        '亥': { ko: '해', hanja: '亥', element: WuXing.WATER, yinyang:Yinyang.YIN, color: WuXingColor.BLACK },
     }
     
     private solarLunar: SolarLunarInterface;
@@ -59,6 +65,117 @@ export default class HeavenlyStemBranch {
 
     public getTime(): HeavenlyEarthlyInterface {
       return this.getHourHeavenlyAndEarthly();
+    }
+
+    public isGeneratingRelation(element1: WuXing, element2: WuXing): boolean {
+      const generatingRelations: { [key in WuXing]: WuXing } = {
+          [WuXing.WOOD]: WuXing.FIRE,    // 목 -> 화
+          [WuXing.FIRE]: WuXing.EARTH,   // 화 -> 토
+          [WuXing.EARTH]: WuXing.METAL,  // 토 -> 금
+          [WuXing.METAL]: WuXing.WATER,  // 금 -> 수
+          [WuXing.WATER]: WuXing.WOOD    // 수 -> 목
+      };
+  
+      return generatingRelations[element1] === element2;
+    }
+
+    public isControllingRelation(element1: WuXing, element2: WuXing): boolean {
+      const controllingRelations: { [key in WuXing]: WuXing } = {
+          [WuXing.WOOD]: WuXing.EARTH,    // 목 -> 토
+          [WuXing.EARTH]: WuXing.WATER,   // 토 -> 수
+          [WuXing.WATER]: WuXing.FIRE,    // 수 -> 화
+          [WuXing.FIRE]: WuXing.METAL,    // 화 -> 금
+          [WuXing.METAL]: WuXing.WOOD     // 금 -> 목
+      };
+  
+      return controllingRelations[element1] === element2;
+    }
+
+    public getTenGods(heavenlyAndEarthly: HeavenlyEarthlyInterface): TenGods {
+      return {
+        heavenly: this.getTenGod(heavenlyAndEarthly.heavenly),
+        earthly: this.getTenGod(heavenlyAndEarthly.earthly),
+      }
+    }
+
+    public getTenGod(heavenlyEarthly: HeavenlyStem | EarthlyBranche) : TenGod {
+      const dayHeavenly = this.getDay().heavenly;
+      // 오행이 동일하고 음양도 같으니 비견
+      if((heavenlyEarthly.element === dayHeavenly.element) && (heavenlyEarthly.yinyang === dayHeavenly.yinyang)){
+        return {
+          ko: '비견',
+          hanja: '比肩'
+        };
+      }
+      // 乙木은 갑목일간과 오행은 동일하나 음양이 다르니 겁재
+      if((heavenlyEarthly.element === dayHeavenly.element) && (heavenlyEarthly.yinyang !== dayHeavenly.yinyang)){
+        return {
+          ko: '겁재',
+          hanja: '劫財'
+        };
+      }
+      // 丙火는 갑목일간이 생하고 오행이 같으니 식신
+      if(this.isGeneratingRelation(dayHeavenly.element, heavenlyEarthly.element ) && (heavenlyEarthly.yinyang === dayHeavenly.yinyang)){
+        return {
+          ko: '식신',
+          hanja: '食神'
+        };
+      }
+      // 丁火는 갑목일간이 생하고 오행이 다르니 상관
+      if(this.isGeneratingRelation(dayHeavenly.element, heavenlyEarthly.element) && (heavenlyEarthly.yinyang !== dayHeavenly.yinyang)){
+        return {
+          ko: '상관',
+          hanja: '傷官'
+        };
+      }
+      // 戊土는 갑목일간이 극하고 오행이 같으니 편재
+      if(this.isControllingRelation(dayHeavenly.element, heavenlyEarthly.element ) && (heavenlyEarthly.yinyang === dayHeavenly.yinyang)){
+        return {
+          ko: '편재',
+          hanja: '偏財'
+        };
+      }
+      // 己土는 갑목일간이 극하고 오행이 다르니 정재
+      if(this.isControllingRelation(dayHeavenly.element, heavenlyEarthly.element ) && (heavenlyEarthly.yinyang !== dayHeavenly.yinyang)){
+        return {
+          ko: '정재',
+          hanja: '正財'
+        };
+      }
+      // 庚金은 갑목일간을 극하고 음양이 같으니 편관
+      if(this.isControllingRelation( heavenlyEarthly.element, dayHeavenly.element ) && (heavenlyEarthly.yinyang === dayHeavenly.yinyang)){
+        return {
+          ko: '편관',
+          hanja: '偏官'
+        };
+      }
+      // 辛金은 갑목일간을 극하고 음양이 다르니 정관
+      if(this.isControllingRelation(heavenlyEarthly.element, dayHeavenly.element ) && (heavenlyEarthly.yinyang !== dayHeavenly.yinyang)){
+        return {
+          ko: '정관',
+          hanja: '正官'
+        };
+      }
+      // 壬水는 갑목일간을 생하고 음양이 같으니 편인
+      if(this.isGeneratingRelation(heavenlyEarthly.element, dayHeavenly.element) && (heavenlyEarthly.yinyang === dayHeavenly.yinyang)){
+        return {
+          ko: '편인',
+          hanja: '偏印'
+        };
+      }
+      // 癸水는 갑목일간을 생하고 음양이 다르니 정인
+      if(this.isGeneratingRelation(heavenlyEarthly.element, dayHeavenly.element) && (heavenlyEarthly.yinyang !== dayHeavenly.yinyang)){
+        return {
+          ko: '정인',
+          hanja: '正印'
+        };
+      }
+
+      return {
+        ko: 'unknow',
+        hanja: 'unknow'
+      }
+      
     }
 
     // 천간과 지지를 분리하여 객체 반환

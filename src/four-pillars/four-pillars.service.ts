@@ -126,7 +126,7 @@ export class FourPillarsService {
   }
 
   // 사주 계산 함수
-  calculateFourPillars(createFourPillarDto: CreateFourPillarDto) {
+  public calculateFourPillars(createFourPillarDto: CreateFourPillarDto) {
     const { year, month, day, hour } = createFourPillarDto;
 
     // 태어난 날짜를 생성
