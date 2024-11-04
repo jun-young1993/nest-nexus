@@ -1,6 +1,7 @@
 import * as solarLunar from 'solarlunar';
 import HeavenlyStemBranch from './heavenly-stem-branch';
 import SolarLunarInterface from '../interfaces/solar-and-lunar.interface';
+import {WuXing} from "../../enums/wuxing.enum";
 export class FourPillarsOfDestiny {
     private solarLunar: SolarLunarInterface;
     private heavenlyStemBranch: HeavenlyStemBranch;
@@ -26,31 +27,47 @@ export class FourPillarsOfDestiny {
       const month = this.heavenlyStemBranch.getMonth();
       const day = this.heavenlyStemBranch.getDay();
       const time = this.heavenlyStemBranch.getTime();
-      return {
-        year: {
-          ...year,
-          ten: this.heavenlyStemBranch.getTenGods(year)
-        },
-        month: {
-          ...month,
-          ten: this.heavenlyStemBranch.getTenGods(month)
-        },
-        day: {
-          ...day,
-          ten: this.heavenlyStemBranch.getTenGods(day)
-        },
-        time: {
-          ...time,
-          ten: this.heavenlyStemBranch.getTenGods(time)
-        },
-        info: {
-          date: {
-            lunar: `${String(this.solarLunar.lYear)}-${String(this.solarLunar.lMonth).padStart(2, '0')}-${String(this.solarLunar.lDay).padStart(2, '0')}`,
-            solar: `${String(this.solarLunar.cYear)}-${String(this.solarLunar.cMonth).padStart(2, '0')}-${String(this.solarLunar.cDay).padStart(2, '0')}`,
+      const fourPillars = {
+          year: {
+              ...year,
+              ten: this.heavenlyStemBranch.getTenGods(year)
           },
-          animal: this.solarLunar.animal
-        }
-      }
-    }
+          month: {
+              ...month,
+              ten: this.heavenlyStemBranch.getTenGods(month)
+          },
+          day: {
+              ...day,
+              ten: this.heavenlyStemBranch.getTenGods(day)
+          },
+          time: {
+              ...time,
+              ten: this.heavenlyStemBranch.getTenGods(time)
+          },
+      };
 
+        const wuXingCounter = Object.values(WuXing).reduce((acc, element) => {
+            acc[element] = 0;
+            return acc;
+        }, {} as Record<string, number>);
+
+        for (let key of Object.keys(fourPillars)) {
+            wuXingCounter[fourPillars[key].heavenly.element.toString()]++;
+            wuXingCounter[fourPillars[key].earthly.element.toString()]++;
+        }
+
+        return {
+            ...fourPillars,
+            info: {
+                date: {
+                    lunar: `${String(this.solarLunar.lYear)}-${String(this.solarLunar.lMonth).padStart(2, '0')}-${String(this.solarLunar.lDay).padStart(2, '0')}`,
+                    solar: `${String(this.solarLunar.cYear)}-${String(this.solarLunar.cMonth).padStart(2, '0')}-${String(this.solarLunar.cDay).padStart(2, '0')}`,
+                },
+                animal: this.solarLunar.animal,
+                wuxing: {
+                    count: wuXingCounter
+                }
+            }
+        }
+    }
 }
