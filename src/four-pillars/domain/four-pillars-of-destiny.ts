@@ -1,7 +1,7 @@
 import * as solarLunar from 'solarlunar';
 import HeavenlyStemBranch from './heavenly-stem-branch';
 import SolarLunarInterface from '../interfaces/solar-and-lunar.interface';
-import {WuXing} from "../../enums/wuxing.enum";
+import {WuXing, WuXingColor} from "../../enums/wuxing.enum";
 export class FourPillarsOfDestiny {
     private solarLunar: SolarLunarInterface;
     private heavenlyStemBranch: HeavenlyStemBranch;
@@ -65,7 +65,14 @@ export class FourPillarsOfDestiny {
                 },
                 animal: this.solarLunar.animal,
                 wuxing: {
-                    count: wuXingCounter
+                    count: wuXingCounter,
+                    colors: {
+                        '木': WuXingColor.BLUE,
+                        '火': WuXingColor.RED,
+                        '土': WuXingColor.YELLOW,
+                        '金': WuXingColor.WHITE,
+                        '水': WuXingColor.BLACK 
+                    }
                 }
             }
         }
