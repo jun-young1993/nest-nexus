@@ -64,7 +64,7 @@ export class CreateFourPillarDto {
     @Transform(({ value }) => parseInt(value, 10))  // 문자열을 숫자로 변환
     @IsInt()
     @Min(0)
-    @Max(23)
+    @Max(60)
     @IsNotEmpty()
     minute: number;
 
