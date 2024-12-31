@@ -9,23 +9,24 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 // import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {
- 
-  
-  const app = await NestFactory.create(AppModule,{
-    httpsOptions: (process.env.APP_SSL_KEY && process.env.APP_SSL_CRT) ? {
-      key: fs.readFileSync(process.env.APP_SSL_KEY),
-      cert: fs.readFileSync(process.env.APP_SSL_CRT)
-    } : null
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions:
+      process.env.APP_SSL_KEY && process.env.APP_SSL_CRT
+        ? {
+            key: fs.readFileSync(process.env.APP_SSL_KEY),
+            cert: fs.readFileSync(process.env.APP_SSL_CRT),
+          }
+        : null,
   });
-  
+
   const configService = app.get(ConfigService<AllConfigType>);
-  
+
   app.enableVersioning({
     type: VersioningType.URI,
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useWebSocketAdapter(new IoAdapter(app));
-  
+
   const options = new DocumentBuilder()
     .setTitle('API')
     .setDescription('API docs')
@@ -35,12 +36,15 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
   // AdminPageModule.setup('admin', app);
   const listenEvent = () => {
-    console.log(`[START HTTP APP ] ${configService.getOrThrow('app.host', { infer: true })}:${configService.getOrThrow('app.port', { infer: true })}`)
-  }
+    console.log(
+      `[START HTTP APP ] ${configService.getOrThrow('app.host', { infer: true })}:${configService.getOrThrow('app.port', { infer: true })}`,
+    );
+  };
   await app.listen(
     configService.getOrThrow('app.port', { infer: true }),
-    (configService.getOrThrow('app.host', { infer: true }) && configService.getOrThrow('app.host', { infer: true })),
-    () => listenEvent()
+    configService.getOrThrow('app.host', { infer: true }) &&
+      configService.getOrThrow('app.host', { infer: true }),
+    () => listenEvent(),
   );
 }
 bootstrap();

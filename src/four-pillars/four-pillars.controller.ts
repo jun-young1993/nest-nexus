@@ -11,18 +11,23 @@ export class FourPillarsController {
   constructor(private readonly fourPillarsService: FourPillarsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Retrieve a four pillars based on year, month, day, and hour' })
-  @ApiResponse({ status: 200, description: 'Four pillars have been successfully calculated.', type: Code })
+  @ApiOperation({
+    summary: 'Retrieve a four pillars based on year, month, day, and hour',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Four pillars have been successfully calculated.',
+    type: Code,
+  })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   calculateFourPillars(@Query() createFourPillarDto: CreateFourPillarDto) {
-    
     const result = new FourPillarsOfDestiny(
       createFourPillarDto.year,
       createFourPillarDto.month,
       createFourPillarDto.day,
       createFourPillarDto.hour,
       createFourPillarDto.minute,
-      createFourPillarDto.isLunar
+      createFourPillarDto.isLunar,
     );
     return result.toJson();
   }

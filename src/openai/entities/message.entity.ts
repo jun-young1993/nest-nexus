@@ -1,25 +1,25 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity("openai_message")
+@Entity('openai_message')
 export class Message {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;  // 고유 ID
+  @PrimaryGeneratedColumn('uuid')
+  id: string; // 고유 ID
 
-    @Column()
-    role: string;  // role: 'assistant'
+  @Column()
+  role: string; // role: 'assistant'
 
-    @Column('text')
-    content: string;  // message content
+  @Column('text')
+  content: string; // message content
 
-    @Column({ nullable: true, type: 'text' })
-    refusal: string;  // refusal (nullable)
+  @Column({ nullable: true, type: 'text' })
+  refusal: string; // refusal (nullable)
 
-    static fromJson(json: any): Message {
-        const message = new Message();
-        message.role = json.role;
-        message.content = json.content;
-        message.refusal = json.refusal || null;
+  static fromJson(json: any): Message {
+    const message = new Message();
+    message.role = json.role;
+    message.content = json.content;
+    message.refusal = json.refusal || null;
 
-        return message;
-    }
+    return message;
+  }
 }

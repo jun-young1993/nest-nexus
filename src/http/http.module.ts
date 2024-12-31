@@ -3,7 +3,7 @@ import { HttpModule as AxiosHttpModule } from '@nestjs/axios';
 
 @Global()
 @Module({
-    imports: [AxiosHttpModule],
-    exports: [AxiosHttpModule],
+  imports: [AxiosHttpModule],
+  exports: [AxiosHttpModule],
 })
 export class HttpModule {}

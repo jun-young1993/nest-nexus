@@ -3,8 +3,8 @@ import { IsString } from 'class-validator';
 
 export class GenerateTokenDto {
   @ApiProperty({
-    description: "alie o auth code",
-    example: '123abs'
+    description: 'alie o auth code',
+    example: '123abs',
   })
   @IsString()
   code: string;

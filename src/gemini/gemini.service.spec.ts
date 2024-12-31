@@ -7,10 +7,7 @@ describe('GeminiService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        GeminiService,
-        ConfigService
-      ],
+      providers: [GeminiService, ConfigService],
     }).compile();
 
     service = module.get<GeminiService>(GeminiService);

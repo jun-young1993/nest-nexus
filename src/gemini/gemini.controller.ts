@@ -6,12 +6,12 @@ import { GeminiSendMessageDto } from './dto/send-message.dto';
 @ApiTags('gemini')
 @Controller('gemini')
 export class GeminiController {
-	constructor(private readonly geminiService: GeminiService){}
+  constructor(private readonly geminiService: GeminiService) {}
 
-	@Get('send-message')
-	@ApiOperation({summary: 'gemini send message'})
-	async sendMessage(@Query() {message}: GeminiSendMessageDto){
-		console.log('message',message);
-		return this.geminiService.sendMessage(message);
-	}
+  @Get('send-message')
+  @ApiOperation({ summary: 'gemini send message' })
+  async sendMessage(@Query() { message }: GeminiSendMessageDto) {
+    console.log('message', message);
+    return this.geminiService.sendMessage(message);
+  }
 }

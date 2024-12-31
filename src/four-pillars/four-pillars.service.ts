@@ -4,8 +4,32 @@ import { CreateFourPillarDto } from './dto/create-four-pillar.dto';
 @Injectable()
 export class FourPillarsService {
   // 천간과 지지 배열
-  private readonly gan = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
-  private readonly ji = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'];
+  private readonly gan = [
+    '갑',
+    '을',
+    '병',
+    '정',
+    '무',
+    '기',
+    '경',
+    '신',
+    '임',
+    '계',
+  ];
+  private readonly ji = [
+    '자',
+    '축',
+    '인',
+    '묘',
+    '진',
+    '사',
+    '오',
+    '미',
+    '신',
+    '유',
+    '술',
+    '해',
+  ];
 
   // 입춘 날짜 (예시로 양력 2월 4일 사용)
   private readonly solarTerms = {
@@ -21,8 +45,8 @@ export class FourPillarsService {
 
   // 천간과 지지를 구하는 함수
   private calculatePillars(daysDiff: number) {
-    const ganIndex = daysDiff % 10;  // 천간 계산
-    const jiIndex = daysDiff % 12;   // 지지 계산
+    const ganIndex = daysDiff % 10; // 천간 계산
+    const jiIndex = daysDiff % 12; // 지지 계산
     const dayGan = this.gan[ganIndex];
     const dayJi = this.ji[jiIndex];
     return { dayGan, dayJi };
@@ -30,7 +54,7 @@ export class FourPillarsService {
 
   // 연주 계산 함수
   private calculateYearPillar(year: number, birthDate: Date) {
-    const ganByLunarYear = ['경','신'];
+    const ganByLunarYear = ['경', '신'];
     // 입춘 기준으로 연주 변경
     if (birthDate < this.solarTerms.startYear) {
       year -= 1;
@@ -50,28 +74,28 @@ export class FourPillarsService {
     switch (yearGan) {
       case '갑':
       case '기':
-        monthGan = this.gan[(2 + month - 1) % 10];  // 병인월부터 시작
+        monthGan = this.gan[(2 + month - 1) % 10]; // 병인월부터 시작
         break;
       case '을':
       case '경':
-        monthGan = this.gan[(4 + month - 1) % 10];  // 무인월부터 시작
+        monthGan = this.gan[(4 + month - 1) % 10]; // 무인월부터 시작
         break;
       case '병':
       case '신':
-        monthGan = this.gan[(6 + month - 1) % 10];  // 경인월부터 시작
+        monthGan = this.gan[(6 + month - 1) % 10]; // 경인월부터 시작
         break;
       case '정':
       case '임':
-        monthGan = this.gan[(8 + month - 1) % 10];  // 임인월부터 시작
+        monthGan = this.gan[(8 + month - 1) % 10]; // 임인월부터 시작
         break;
       case '무':
       case '계':
-        monthGan = this.gan[(0 + month - 1) % 10];  // 갑인월부터 시작
+        monthGan = this.gan[(0 + month - 1) % 10]; // 갑인월부터 시작
         break;
     }
 
     // 월지 결정
-    const monthJi = this.ji[month];  // 월지: 인, 묘, 진, 사, 오, 미, 신, 유, 술, 해, 자, 축
+    const monthJi = this.ji[month]; // 월지: 인, 묘, 진, 사, 오, 미, 신, 유, 술, 해, 자, 축
 
     return `${monthGan}${monthJi}`;
   }
@@ -117,10 +141,12 @@ export class FourPillarsService {
       { start: 15, end: 17, ji: '신' },
       { start: 17, end: 19, ji: '유' },
       { start: 19, end: 21, ji: '술' },
-      { start: 21, end: 23, ji: '해' }
+      { start: 21, end: 23, ji: '해' },
     ];
 
-    const hourJi = hourPeriods.find(period => (hour >= period.start || hour < period.end)).ji;
+    const hourJi = hourPeriods.find(
+      (period) => hour >= period.start || hour < period.end,
+    ).ji;
 
     return `${hourGan}${hourJi}`;
   }
@@ -140,7 +166,7 @@ export class FourPillarsService {
 
     // 연주 계산
     const yearPillar = this.calculateYearPillar(year, birthDate);
-    const yearGan = yearPillar.charAt(0);  // 연주의 천간
+    const yearGan = yearPillar.charAt(0); // 연주의 천간
 
     // 월주 계산 (연주의 천간과 월을 기준으로 계산)
     const monthPillar = this.calculateMonthPillar(yearGan, month);
@@ -150,10 +176,10 @@ export class FourPillarsService {
 
     // 최종 사주 반환
     return {
-      yearPillar,              // 연주 계산 결과
-      monthPillar,             // 월주 계산 결과
+      yearPillar, // 연주 계산 결과
+      monthPillar, // 월주 계산 결과
       dayPillar: `${dayGan}${dayJi}`, // 일주 계산 결과
-      hourPillar,              // 시주 계산 결과
+      hourPillar, // 시주 계산 결과
     };
   }
 }

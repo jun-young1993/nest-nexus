@@ -4,6 +4,6 @@ import { NexusController } from './nexus.controller';
 
 @Module({
   providers: [NexusService],
-  controllers: [NexusController]
+  controllers: [NexusController],
 })
 export class NexusModule {}

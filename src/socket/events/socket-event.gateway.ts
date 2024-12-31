@@ -12,20 +12,19 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Server, Socket } from 'socket.io';
 import { Logger } from 'winston';
 
-@WebSocketGateway(8080,{
+@WebSocketGateway(8080, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
   },
   transports: ['websocket'],
 })
-export class SocketEventsGateway 
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
+export class SocketEventsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ){}
+  ) {}
 
   @WebSocketServer()
   server: Server;
