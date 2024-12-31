@@ -5,7 +5,7 @@ import { AllConfigType } from '../config/config.type';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class GithubContentService {
+export class GithubRepositoryService {
   private githubApiUrl = 'https://api.github.com';
   private githubApiVersion = '2022-11-28';
   private githubOwner = 'jun-young1993';

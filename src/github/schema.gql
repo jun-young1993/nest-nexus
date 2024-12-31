@@ -1,0 +1,12 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Directory {
+  name: String!
+  path: String!
+}
+
+type Query {
+  getRepositoryDirectories(repository: String!, path: String): [Directory!]!
+}
