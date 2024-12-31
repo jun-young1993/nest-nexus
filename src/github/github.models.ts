@@ -15,5 +15,20 @@ export class FileContent {
   name: string;
 
   @Field()
-  content: string;
+  path: string;
+
+  @Field()
+  content?: string;
+}
+
+@ObjectType()
+export class Content {
+  @Field()
+  name: string;
+
+  @Field()
+  path: string;
+
+  @Field()
+  content?: string;
 }

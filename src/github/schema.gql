@@ -7,6 +7,20 @@ type Directory {
   path: String!
 }
 
+type FileContent {
+  name: String!
+  path: String!
+  content: String!
+}
+
+type Content {
+  name: String!
+  path: String!
+  content: String!
+}
+
 type Query {
+  getRepositoryContents(repository: String!, path: String, type: String): [Content!]!
   getRepositoryDirectories(repository: String!, path: String): [Directory!]!
+  getRepositoryFiles(repository: String!, path: String): [FileContent!]!
 }
