@@ -2,25 +2,49 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Directory {
-  name: String!
-  path: String!
-}
-
-type FileContent {
-  name: String!
-  path: String!
-  content: String!
-}
-
 type Content {
   name: String!
   path: String!
   content: String!
 }
 
+type DetailCommitFile {
+  sha: String!
+  filename: String!
+  status: String!
+  additions: Float!
+  deletions: Float!
+  changes: Float!
+  blob_url: String!
+  raw_url: String!
+  contents_url: String!
+  patch: String!
+  content: String!
+}
+
+type DetailCommit {
+  sha: String!
+  files: [DetailCommitFile!]!
+}
+
+type UserInfo {
+  name: String!
+  email: String!
+  date: String!
+}
+
+type CommitInfo {
+  author: UserInfo!
+  committer: UserInfo!
+}
+
+type Commit {
+  sha: String!
+  commit: CommitInfo!
+  detail: DetailCommit!
+}
+
 type Query {
-  getRepositoryContents(repository: String!, path: String, type: String): [Content!]!
-  getRepositoryDirectories(repository: String!, path: String): [Directory!]!
-  getRepositoryFiles(repository: String!, path: String): [FileContent!]!
+  getContents(repository: String!, path: String, type: String): [Content!]!
+  getCommits(repository: String!, path: String): [Commit!]!
 }

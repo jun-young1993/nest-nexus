@@ -41,27 +41,12 @@ export class GithubContentService {
     );
     return response.data;
   }
-  async getContent(repository: string, path: string) {
-    try {
-      const url = `${this.githubApiUrl}/repos/${this.githubOwner}/${repository}/contents/${path}`;
 
-      const response = await lastValueFrom(
-        this.httpService.get(url, {
-          headers: {
-            Authorization: `Bearer ${this.configService.get('github.access_token', { infer: true })}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': this.githubApiVersion,
-          },
-        }),
-      );
-
-      return response.data;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  async getRepositoryDirectories(repository: string, path: string = '') {
+  async getContents(
+    repository: string,
+    isDir?: 'dir' | 'file',
+    path: string = '',
+  ) {
     const url = `${this.githubApiUrl}/repos/${this.githubOwner}/${repository}/contents/${path}`;
 
     try {
@@ -77,15 +62,17 @@ export class GithubContentService {
 
       // 필터링하여 디렉토리만 반환
       const data = response.data;
-      return data
-        .filter((item: any) => item.type === 'dir') // 디렉토리 타입 필터링
-        .map((dir: any) => ({
-          name: dir.name,
-          path: dir.path,
-        }));
+      const filteredData =
+        isDir && Array.isArray(data)
+          ? data.filter((item: any) => item.type === isDir) // 'dir' 또는 'file' 필터
+          : data; // 전체 조회 시 필터 없이 데이터 그대로 사용
+
+      return filteredData;
     } catch (error) {
       console.error('Error fetching directories:', error);
-      throw new Error('Failed to fetch directories');
+      throw new Error(
+        `[Failed to fetch contents] repository:${repository} isDir:${isDir} path:${path}`,
+      );
     }
   }
 }

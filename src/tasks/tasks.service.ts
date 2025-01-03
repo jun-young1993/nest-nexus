@@ -127,8 +127,9 @@ export class TasksService {
                           const title = product.product_title;
                           const blogPath = `${categoryName}/${title}.md`;
                           const githubContentResult =
-                            await this.githubContentService.getContent(
+                            await this.githubContentService.getContents(
                               githubAlieRepository,
+                              undefined,
                               blogPath,
                             );
                           if (githubContentResult === null) {

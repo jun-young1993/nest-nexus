@@ -6,6 +6,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { GithubRepositoryService } from './github-repository.service';
+import { GithubCommitService } from './github-commit.service';
 
 @Module({
   imports: [
@@ -15,8 +16,18 @@ import { GithubRepositoryService } from './github-repository.service';
       path: '/graphql/github',
     }),
   ],
-  providers: [GithubRepositoryService, GithubContentService, GithubResolver],
+  providers: [
+    GithubCommitService,
+    GithubRepositoryService,
+    GithubContentService,
+    GithubResolver,
+  ],
   controllers: [GithubController],
-  exports: [GithubRepositoryService, GithubContentService, GithubResolver],
+  exports: [
+    GithubCommitService,
+    GithubRepositoryService,
+    GithubContentService,
+    GithubResolver,
+  ],
 })
 export class GithubModule {}
