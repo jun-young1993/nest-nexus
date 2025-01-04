@@ -1,6 +1,20 @@
 import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
+export class Post {
+  @Field()
+  sha: string;
+  @Field()
+  filename: string;
+  @Field()
+  content: string;
+  @Field()
+  createdAt: Date;
+  @Field()
+  updatedAt: Date;
+}
+
+@ObjectType()
 export class Content {
   @Field()
   name: string;

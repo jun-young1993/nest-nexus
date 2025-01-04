@@ -1,6 +1,6 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { GithubRepositoryService } from './github-repository.service';
-import { Commit, Content } from './github.models';
+import {Commit, Content, Post} from './github.models';
 import { GithubCommitService } from './github-commit.service';
 import { GithubContentService } from './github-content.service';
 
@@ -53,5 +53,15 @@ export class GithubResolver {
         },
       };
     });
+  }
+
+  @Query(() => [Post])
+  async getPost(
+      @Args('limit', { nullable: true, type: () => Number}) limit
+  ){
+    const posts = await this.githubContnetService.findAll({
+      limit: limit
+    })
+    return posts
   }
 }

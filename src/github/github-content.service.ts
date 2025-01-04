@@ -3,6 +3,10 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from '../config/config.type';
 import { lastValueFrom } from 'rxjs';
+import {GithubCommitService} from "./github-commit.service";
+import {Repository} from "typeorm";
+import {GithubContent} from "./entities/github-content.entity";
+import {InjectRepository} from "@nestjs/typeorm";
 
 @Injectable()
 export class GithubContentService {
@@ -12,7 +16,10 @@ export class GithubContentService {
   private githubEmail = 'juny3738@gmail.com';
   constructor(
     private readonly httpService: HttpService,
+    @InjectRepository(GithubContent)
+    private readonly githubContentRepository: Repository<GithubContent>,
     private readonly configService: ConfigService<AllConfigType>,
+    private readonly githubCommitService: GithubCommitService
   ) {}
 
   async createContent(repository: string, path: string, content: string) {
@@ -74,5 +81,68 @@ export class GithubContentService {
         `[Failed to fetch contents] repository:${repository} isDir:${isDir} path:${path}`,
       );
     }
+  }
+
+  async store(repository: string, prefix: string = ''){
+    const files = await this.getContents(repository, undefined, prefix)
+    for(const file of files){
+
+      if(file.type === 'file'){
+        const contentResponse = await this.getContents(repository, undefined, file.path)
+        const commits = await this.githubCommitService.getCommits(repository, file.path)
+        const createdAt = new Date(commits[commits.length - 1].commit.committer.date);
+        const updatedAt = new Date(commits[commits.length - 1].commit.author.date);
+        const content = Buffer.from(contentResponse.content, 'base64').toString('utf8');
+        const githubContent = this.githubContentRepository.create({
+          sha: file.sha,
+          repository,
+          filename: file.name,
+          content,
+          path: file.path,
+          createdAt,
+          updatedAt,
+        });
+
+        await this.githubContentRepository.save(githubContent);
+      }else{
+        await this.store(repository, file.path)
+      }
+    }
+
+  }
+
+  async findAll(options: {
+    sortField?: keyof GithubContent; // 정렬 필드
+    sortOrder?: 'ASC' | 'DESC';      // 오름/내림차순
+    contentLike?: string;           // 콘텐츠 검색
+    limit?: number;
+  }){
+      const {
+      sortField = 'updatedAt',  // 기본 정렬 필드: createdAt
+      sortOrder = 'DESC',        // 기본 정렬 방향: ASC
+      contentLike = '',         // 기본 콘텐츠 검색: 빈 문자열
+      limit,               // 기본 최대 개수: 10
+    } = options;
+    // Query Builder를 사용한 조회
+    const queryBuilder = this.githubContentRepository.createQueryBuilder('content');
+
+    // 콘텐츠 필드에 대한 검색 조건 추가 (LIKE 검색)
+    if (contentLike) {
+      queryBuilder.andWhere('content.content LIKE :contentLike', {
+        contentLike: `%${contentLike}%`,
+      });
+    }
+
+    // 정렬 옵션 추가
+    queryBuilder.orderBy(`content.${sortField}`, sortOrder);
+
+    // 최대 개수 제한
+    if(limit){
+      queryBuilder.limit(limit);
+    }
+
+
+    // 최종 쿼리 실행 및 결과 반환
+    return queryBuilder.getMany();
   }
 }

@@ -7,9 +7,12 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { GithubRepositoryService } from './github-repository.service';
 import { GithubCommitService } from './github-commit.service';
+import {TypeOrmModule} from "@nestjs/typeorm";
+import {GithubContent} from "./entities/github-content.entity";
 
 @Module({
   imports: [
+      TypeOrmModule.forFeature([GithubContent]),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/github/schema.gql'),
