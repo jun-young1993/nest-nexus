@@ -56,7 +56,7 @@ export class GithubResolver {
   }
 
   @Query(() => [Post])
-  async getPost(
+  async getPosts(
       @Args('limit', { nullable: true, type: () => Number}) limit
   ){
     const posts = await this.githubContnetService.findAll({
@@ -64,4 +64,12 @@ export class GithubResolver {
     })
     return posts
   }
+
+  @Query(() => Post)
+  async getPost(
+      @Args('id', { type: () => String}) id
+  ){
+    return await this.githubContnetService.findOneById(id)
+  }
 }
+

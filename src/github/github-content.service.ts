@@ -145,4 +145,11 @@ export class GithubContentService {
     // 최종 쿼리 실행 및 결과 반환
     return queryBuilder.getMany();
   }
+
+  async findOneById(id: string): Promise<GithubContent | null>
+  {
+    return this.githubContentRepository.findOne({
+      where: { sha: id}
+    })
+  }
 }

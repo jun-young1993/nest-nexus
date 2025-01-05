@@ -60,5 +60,6 @@ type Commit {
 type Query {
   getContents(repository: String!, path: String, type: String): [Content!]!
   getCommits(repository: String!, path: String): [Commit!]!
-  getPost(limit: Float): [Post!]!
+  getPosts(limit: Float): [Post!]!
+  getPost(id: String!): Post!
 }
