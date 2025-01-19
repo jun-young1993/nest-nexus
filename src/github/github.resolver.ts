@@ -64,7 +64,7 @@ export class GithubResolver {
       limit: limit,
       page: page,
     })
-    console.log("=>(github.resolver.ts:68) posts", posts);
+
     return posts
   }
 
