@@ -1,6 +1,6 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { GithubRepositoryService } from './github-repository.service';
-import {Commit, Content, Post} from './github.models';
+import {Commit, Content, Post, Posts} from './github.models';
 import { GithubCommitService } from './github-commit.service';
 import { GithubContentService } from './github-content.service';
 
@@ -55,13 +55,16 @@ export class GithubResolver {
     });
   }
 
-  @Query(() => [Post])
+  @Query(() => Posts)
   async getPosts(
-      @Args('limit', { nullable: true, type: () => Number}) limit
+      @Args('limit', { nullable: true, type: () => Number}) limit,
+      @Args('page', { nullable: true, type: () => Number}) page
   ){
     const posts = await this.githubContnetService.findAll({
-      limit: limit
+      limit: limit,
+      page: page,
     })
+    console.log("=>(github.resolver.ts:68) posts", posts);
     return posts
   }
 

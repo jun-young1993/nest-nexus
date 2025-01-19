@@ -116,12 +116,14 @@ export class GithubContentService {
     sortOrder?: 'ASC' | 'DESC';      // 오름/내림차순
     contentLike?: string;           // 콘텐츠 검색
     limit?: number;
+    page?: number;
   }){
       const {
       sortField = 'updatedAt',  // 기본 정렬 필드: createdAt
       sortOrder = 'DESC',        // 기본 정렬 방향: ASC
       contentLike = '',         // 기본 콘텐츠 검색: 빈 문자열
-      limit,               // 기본 최대 개수: 10
+      limit = 10,               // 기본 최대 개수: 10
+      page = 1
     } = options;
     // Query Builder를 사용한 조회
     const queryBuilder = this.githubContentRepository.createQueryBuilder('content');
@@ -134,16 +136,32 @@ export class GithubContentService {
     }
 
     // 정렬 옵션 추가
+
     queryBuilder.orderBy(`content.${sortField}`, sortOrder);
 
+
+
+
     // 최대 개수 제한
-    if(limit){
-      queryBuilder.limit(limit);
-    }
+    queryBuilder.limit(limit);
+
+    const offset = (page - 1) * limit;
+    queryBuilder.skip(offset).take(limit);
 
 
     // 최종 쿼리 실행 및 결과 반환
-    return queryBuilder.getMany();
+    const [results, total] = await queryBuilder.getManyAndCount();
+
+    // 페이징 결과 반환
+    return {
+      data: results,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOneById(id: string): Promise<GithubContent | null>
