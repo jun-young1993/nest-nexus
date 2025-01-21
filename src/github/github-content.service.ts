@@ -3,10 +3,10 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from '../config/config.type';
 import { lastValueFrom } from 'rxjs';
-import {GithubCommitService} from "./github-commit.service";
-import {Repository} from "typeorm";
-import {GithubContent} from "./entities/github-content.entity";
-import {InjectRepository} from "@nestjs/typeorm";
+import { GithubCommitService } from './github-commit.service';
+import { Repository } from 'typeorm';
+import { GithubContent } from './entities/github-content.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class GithubContentService {
@@ -19,7 +19,7 @@ export class GithubContentService {
     @InjectRepository(GithubContent)
     private readonly githubContentRepository: Repository<GithubContent>,
     private readonly configService: ConfigService<AllConfigType>,
-    private readonly githubCommitService: GithubCommitService
+    private readonly githubCommitService: GithubCommitService,
   ) {}
 
   async createContent(repository: string, path: string, content: string) {
@@ -83,16 +83,28 @@ export class GithubContentService {
     }
   }
 
-  async store(repository: string, prefix: string = ''){
-    const files = await this.getContents(repository, undefined, prefix)
-    for(const file of files){
-
-      if(file.type === 'file'){
-        const contentResponse = await this.getContents(repository, undefined, file.path)
-        const commits = await this.githubCommitService.getCommits(repository, file.path)
-        const createdAt = new Date(commits[commits.length - 1].commit.committer.date);
-        const updatedAt = new Date(commits[commits.length - 1].commit.author.date);
-        const content = Buffer.from(contentResponse.content, 'base64').toString('utf8');
+  async store(repository: string, prefix: string = '') {
+    const files = await this.getContents(repository, undefined, prefix);
+    for (const file of files) {
+      if (file.type === 'file') {
+        const contentResponse = await this.getContents(
+          repository,
+          undefined,
+          file.path,
+        );
+        const commits = await this.githubCommitService.getCommits(
+          repository,
+          file.path,
+        );
+        const createdAt = new Date(
+          commits[commits.length - 1].commit.committer.date,
+        );
+        const updatedAt = new Date(
+          commits[commits.length - 1].commit.author.date,
+        );
+        const content = Buffer.from(contentResponse.content, 'base64').toString(
+          'utf8',
+        );
         const githubContent = this.githubContentRepository.create({
           sha: file.sha,
           repository,
@@ -104,29 +116,29 @@ export class GithubContentService {
         });
 
         await this.githubContentRepository.save(githubContent);
-      }else{
-        await this.store(repository, file.path)
+      } else {
+        await this.store(repository, file.path);
       }
     }
-
   }
 
   async findAll(options: {
     sortField?: keyof GithubContent; // 정렬 필드
-    sortOrder?: 'ASC' | 'DESC';      // 오름/내림차순
-    contentLike?: string;           // 콘텐츠 검색
+    sortOrder?: 'ASC' | 'DESC'; // 오름/내림차순
+    contentLike?: string; // 콘텐츠 검색
     limit?: number;
     page?: number;
-  }){
-      const {
-      sortField = 'updatedAt',  // 기본 정렬 필드: createdAt
-      sortOrder = 'DESC',        // 기본 정렬 방향: ASC
-      contentLike = '',         // 기본 콘텐츠 검색: 빈 문자열
-      limit = 10,               // 기본 최대 개수: 10
-      page = 1
+  }) {
+    const {
+      sortField = 'updatedAt', // 기본 정렬 필드: createdAt
+      sortOrder = 'DESC', // 기본 정렬 방향: ASC
+      contentLike = '', // 기본 콘텐츠 검색: 빈 문자열
+      limit = 10, // 기본 최대 개수: 10
+      page = 1,
     } = options;
     // Query Builder를 사용한 조회
-    const queryBuilder = this.githubContentRepository.createQueryBuilder('content');
+    const queryBuilder =
+      this.githubContentRepository.createQueryBuilder('content');
 
     // 콘텐츠 필드에 대한 검색 조건 추가 (LIKE 검색)
     if (contentLike) {
@@ -139,15 +151,11 @@ export class GithubContentService {
 
     queryBuilder.orderBy(`content.${sortField}`, sortOrder);
 
-
-
-
     // 최대 개수 제한
     queryBuilder.limit(limit);
 
     const offset = (page - 1) * limit;
     queryBuilder.skip(offset).take(limit);
-
 
     // 최종 쿼리 실행 및 결과 반환
     const [results, total] = await queryBuilder.getManyAndCount();
@@ -164,10 +172,9 @@ export class GithubContentService {
     };
   }
 
-  async findOneById(id: string): Promise<GithubContent | null>
-  {
+  async findOneById(id: string): Promise<GithubContent | null> {
     return this.githubContentRepository.findOne({
-      where: { sha: id}
-    })
+      where: { sha: id },
+    });
   }
 }

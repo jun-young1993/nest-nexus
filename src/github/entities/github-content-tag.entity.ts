@@ -3,12 +3,12 @@ import { GithubContent } from './github-content.entity';
 
 @Entity()
 export class GithubContentTag {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ unique: true })
-    name: string;
+  @Column({ unique: true })
+  name: string;
 
-    @ManyToMany(() => GithubContent, (content) => content.tags)
-    contents: GithubContent[];
+  @ManyToMany(() => GithubContent, (content) => content.tags)
+  contents: GithubContent[];
 }

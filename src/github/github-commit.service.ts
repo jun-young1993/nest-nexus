@@ -3,7 +3,6 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from '../config/config.type';
 import { lastValueFrom } from 'rxjs';
-import { DetailCommit } from './github.models';
 
 @Injectable()
 export class GithubCommitService {
@@ -46,10 +45,7 @@ export class GithubCommitService {
   /**
    * Fetch details of a single commit
    */
-  async getCommitDetails(
-    repository: string,
-    sha: string,
-  ): Promise<DetailCommit> {
+  async getCommitDetails(repository: string, sha: string): Promise<any> {
     const url = `${this.githubApiUrl}/repos/${this.githubOwner}/${repository}/commits/${sha}`;
 
     const response = await lastValueFrom(

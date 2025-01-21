@@ -21,6 +21,7 @@ import { CodeModule } from './code/code.module';
 import { CodeItemModule } from './code-item/code-item.module';
 import { NexusModule } from './nexus/nexus.module';
 import { FourPillarsModule } from './four-pillars/four-pillars.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { FourPillarsModule } from './four-pillars/four-pillars.module';
     CodeItemModule,
     NexusModule,
     FourPillarsModule,
+    PostModule,
   ],
   controllers: [],
   providers: [],
