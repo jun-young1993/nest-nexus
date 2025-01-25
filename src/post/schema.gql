@@ -27,7 +27,22 @@ type Posts {
   pagination: PaginationInfo!
 }
 
+type PostTags {
+  id: String!
+  name: String!
+  color: String!
+}
+
+type TagWithPostCount {
+  id: String!
+  name: String!
+  color: String!
+  postCount: Float!
+}
+
 type Query {
   getPosts(limit: Float, page: Float): Posts!
   getPost(id: String!): Post!
+  getTagsWithPostCount: [TagWithPostCount!]!
+  getPostTags: PostTags!
 }

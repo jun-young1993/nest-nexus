@@ -1,10 +1,14 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { PostService } from './post.service';
-import { Post, Posts } from './post.models';
+import {Post, Posts, PostTags} from './post.models';
+import {PostTagService} from "./post-tag.service";
 
 @Resolver()
 export class PostResolver {
-  constructor(private readonly postService: PostService) {}
+  constructor(
+      private readonly postService: PostService,
+      private readonly postTagService: PostTagService
+  ) {}
 
   @Query(() => Posts)
   async getPosts(
@@ -21,4 +25,5 @@ export class PostResolver {
   async getPost(@Args('id', { type: () => String }) id) {
     return this.postService.findOne(id);
   }
+
 }

@@ -9,6 +9,9 @@ export class PostTag {
   @Column({ unique: true })
   name: string;
 
+  @Column({ default: '#FFFFFF'  })
+  color: string;
+
   @ManyToMany(() => Post, (post) => post.tags)
   posts: Post[];
 }

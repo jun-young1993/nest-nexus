@@ -7,6 +7,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PostResolver } from './post.resolver';
 import { PostService } from './post.service';
+import {PostTagService} from "./post-tag.service";
+import {PostTagResolver} from "./post-tag.resolver";
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { PostService } from './post.service';
       path: '/graphql/post',
     }),
   ],
-  providers: [PostService, PostResolver],
-  exports: [PostService, PostResolver],
+  providers: [PostService, PostTagService, PostResolver, PostTagResolver],
+  exports: [PostService, PostTagService, PostResolver, PostTagResolver],
 })
 export class PostModule {}

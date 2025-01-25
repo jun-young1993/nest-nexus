@@ -33,3 +33,28 @@ export class Posts {
   @Field(() => PaginationInfo)
   pagination: PaginationInfo;
 }
+
+@ObjectType()
+export class PostTags {
+  @Field()
+  id: string
+  @Field()
+  name: string
+  @Field()
+  color: string
+}
+
+@ObjectType()
+export class TagWithPostCount {
+  @Field()
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field()
+  color: string;
+
+  @Field()
+  postCount: number;
+}
