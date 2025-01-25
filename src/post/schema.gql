@@ -2,12 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type PostTag {
+  id: String!
+  name: String!
+  color: String!
+}
+
+type TagWithPostCount {
+  id: String!
+  name: String!
+  color: String!
+  postCount: Float!
+}
+
 type Post {
   id: String!
   title: String!
   content: String!
   createdAt: DateTime!
   updatedAt: DateTime!
+  tags: [PostTag!]!
 }
 
 """
@@ -27,22 +41,19 @@ type Posts {
   pagination: PaginationInfo!
 }
 
-type PostTags {
-  id: String!
-  name: String!
-  color: String!
-}
-
-type TagWithPostCount {
-  id: String!
-  name: String!
-  color: String!
-  postCount: Float!
-}
-
 type Query {
-  getPosts(limit: Float, page: Float): Posts!
+  getPosts(limit: Float, page: Float, tagId: String): Posts!
   getPost(id: String!): Post!
   getTagsWithPostCount: [TagWithPostCount!]!
-  getPostTags: PostTags!
+  getPostTags: [PostTag!]!
+}
+
+type Mutation {
+  createPost(input: CreatePostInputModel!): Post!
+}
+
+input CreatePostInputModel {
+  tagIds: [String!]!
+  title: String!
+  content: String!
 }

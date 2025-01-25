@@ -9,10 +9,11 @@ import { PostResolver } from './post.resolver';
 import { PostService } from './post.service';
 import {PostTagService} from "./post-tag.service";
 import {PostTagResolver} from "./post-tag.resolver";
+import {User} from "../user/entities/user.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, PostTag]),
+    TypeOrmModule.forFeature([Post, PostTag, User]),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/post/schema.gql'),

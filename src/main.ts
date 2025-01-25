@@ -26,6 +26,11 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useWebSocketAdapter(new IoAdapter(app));
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,POST',
+    allowedHeaders: 'Content-Type,Authorization',
+  });
 
   const options = new DocumentBuilder()
     .setTitle('API')

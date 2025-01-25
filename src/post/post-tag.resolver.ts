@@ -1,6 +1,6 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Query, Resolver } from '@nestjs/graphql';
 import { PostService } from './post.service';
-import {Post, Posts, PostTags, TagWithPostCount} from './post.models';
+import { PostTag, TagWithPostCount} from './models/post.models';
 import {PostTagService} from "./post-tag.service";
 
 @Resolver()
@@ -15,7 +15,7 @@ export class PostTagResolver {
     return this.postTagService.getTagsWithPostCount()
   }
 
-  @Query(() => PostTags)
+  @Query(() => [PostTag])
   async getPostTags(){
     return this.postTagService.findAll()
   }
