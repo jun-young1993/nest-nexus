@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as cookieParser from 'cookie-parser'
 // import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {
@@ -26,11 +27,16 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useWebSocketAdapter(new IoAdapter(app));
+  const allowedOrigins = [
+    'http://localhost:3001',
+  ];
   app.enableCors({
-    origin: '*',
+    origin: allowedOrigins,
+    credentials: true,
     methods: 'GET,POST',
     allowedHeaders: 'Content-Type,Authorization',
   });
+  app.use(cookieParser());
 
   const options = new DocumentBuilder()
     .setTitle('API')

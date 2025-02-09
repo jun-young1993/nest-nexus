@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {User} from "../user/entities/user.entity";
-
+import {AuthResolver} from "./auth.resolver";
 
 @Module({
   imports: [
@@ -16,7 +16,8 @@ import {User} from "../user/entities/user.entity";
       signOptions: { expiresIn: '1h' }, // 토큰 유효기간 설정
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, AuthResolver],
+  exports: [AuthResolver, AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}
