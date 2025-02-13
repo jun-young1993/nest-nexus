@@ -27,9 +27,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useWebSocketAdapter(new IoAdapter(app));
-  const allowedOrigins = [
-    'http://localhost:3001',
-  ];
+  const allowedOrigins = process.env.ALLOW_ORIGINS.split(',');
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
