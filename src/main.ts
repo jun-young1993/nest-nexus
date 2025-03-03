@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import * as cookieParser from 'cookie-parser'
+import * as cookieParser from 'cookie-parser';
 // import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {

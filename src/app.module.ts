@@ -24,6 +24,8 @@ import { FourPillarsModule } from './four-pillars/four-pillars.module';
 import { PostModule } from './post/post.module';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { ThreeObjectModule } from './three-object/three-object.module';
+import { ParkingLocationModule } from './parking-location/parking-location.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { UserModule } from './user/user.module';
     PostModule,
     AuthModule,
     UserModule,
+    ThreeObjectModule,
+    ParkingLocationModule,
   ],
   controllers: [],
   providers: [],
