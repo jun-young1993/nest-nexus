@@ -2,13 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CarNumberDto {
   @ApiProperty({ description: '차량 지역 코드 (예: 31)' })
-  regionCode: string;
+  region: string;
 
   @ApiProperty({ description: '차량 한글 코드 (예: 가)' })
-  koreanCode: string;
+  category: string;
 
   @ApiProperty({ description: '차량 일련번호 (예: 1234)' })
-  serialNumber: string;
+  number: string;
 }
 
 export class CreateParkingLocationDto {

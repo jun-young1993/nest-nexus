@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ThreeObject } from '../../three-object/entities/three-object.entity';
+import { CarNumber } from './car-number.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -14,10 +15,6 @@ export class ParkingLocation {
   @ApiProperty({ description: '주차 위치 고유 ID' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @ApiProperty({ description: '주소' })
-  @Column()
-  address: string;
 
   @ApiProperty({ description: '주차 구역 코드' })
   @Column()
@@ -47,22 +44,9 @@ export class ParkingLocation {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ApiProperty({ description: '차량 지역 코드' })
-  @Column({ nullable: true })
-  carRegionCode: string;
-
-  @ApiProperty({ description: '차량 한글 코드' })
-  @Column({ nullable: true })
-  carKoreanCode: string;
-
-  @ApiProperty({ description: '차량 일련번호' })
-  @Column({ nullable: true })
-  carSerialNumber: string;
-
-  @ApiProperty({ description: ' 차주 번호' })
-  @Column({ nullable: true })
-  phoneNumber: string;
-
   @OneToMany(() => ThreeObject, (threeObject) => threeObject.parkingLocation)
   threeObjects: ThreeObject[];
+
+  @OneToMany(() => CarNumber, (carNumber) => carNumber.parkingLocation)
+  carNumbers: CarNumber[];
 }

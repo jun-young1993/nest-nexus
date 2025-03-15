@@ -38,6 +38,26 @@ export class ParkingLocationController {
     return this.parkingLocationService.findOne(id);
   }
 
+  @Get('/zone/:zoneCode')
+  @ApiOperation({ summary: '특정 구역의 모든 주차 위치 조회' })
+  @ApiParam({
+    name: 'zoneCode',
+    description: '구역 코드 (예: "강남구")',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '해당 구역의 모든 주차 위치 정보를 반환',
+    type: ParkingLocation,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '해당 구역의 주차 위치를 찾을 수 없음',
+  })
+  findByZoneCode(@Param('zoneCode') zoneCode: string) {
+    return this.parkingLocationService.findByZoneCode(zoneCode);
+  }
+
   // @Patch(':id')
   // @ApiOperation({ summary: '주차 위치 정보 수정' })
   // @ApiParam({ name: 'id', description: '주차 위치 ID' })

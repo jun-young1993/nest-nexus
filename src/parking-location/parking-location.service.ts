@@ -3,27 +3,46 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateParkingLocationDto } from './dto/create-parking-location.dto';
 import { ParkingLocation } from './entities/parking-location.entity';
+import { CarNumber } from './entities/car-number.entity';
 
 @Injectable()
 export class ParkingLocationService {
   constructor(
     @InjectRepository(ParkingLocation)
     private parkingLocationRepository: Repository<ParkingLocation>,
+    @InjectRepository(CarNumber)
+    private carNumberRepository: Repository<CarNumber>,
   ) {}
 
   async create(
     createParkingLocationDto: CreateParkingLocationDto,
-  ): Promise<ParkingLocation> {
-    const parkingLocation = this.parkingLocationRepository.create(
-      createParkingLocationDto,
-    );
-    return await this.parkingLocationRepository.save(parkingLocation);
+  ): Promise<CarNumber> {
+    const { carNumber: carNumberDto, ...parkingLocationData } =
+      createParkingLocationDto;
+
+    // 주차 위치 생성
+    const parkingLocation =
+      (await this.findByZoneCode(parkingLocationData.zoneCode)) ||
+      (await this.parkingLocationRepository.save(
+        this.parkingLocationRepository.create(parkingLocationData),
+      ));
+
+    // 차량 번호가 있는 경우 생성
+    if (carNumberDto) {
+      const carNumber = await this.carNumberRepository.create({
+        ...carNumberDto,
+        parkingLocationId: parkingLocation.id,
+      });
+      return await this.carNumberRepository.save(carNumber);
+    }
+
+    throw new NotFoundException('Car number not found');
   }
 
   async findOne(id: string): Promise<ParkingLocation> {
     const parkingLocation = await this.parkingLocationRepository.findOne({
       where: { id },
-      relations: ['threeObjects'], // Three.js 객체 정보도 함께 조회
+      relations: ['carNumber', 'threeObjects'],
     });
 
     if (!parkingLocation) {
@@ -31,6 +50,17 @@ export class ParkingLocationService {
     }
 
     return parkingLocation;
+  }
+
+  async findByZoneCode(zoneCode: string): Promise<ParkingLocation> {
+    const parkingLocations = await this.parkingLocationRepository.findOne({
+      where: {
+        zoneCode: zoneCode, // zoneCode가 주소에 포함된 경우 검색
+      },
+      relations: ['carNumbers', 'threeObjects'],
+    });
+
+    return parkingLocations;
   }
 
   // update(id: number, updateParkingLocationDto: UpdateParkingLocationDto) {
