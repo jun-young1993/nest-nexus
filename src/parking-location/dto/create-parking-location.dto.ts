@@ -9,6 +9,9 @@ export class CarNumberDto {
 
   @ApiProperty({ description: '차량 일련번호 (예: 1234)' })
   number: string;
+
+  @ApiProperty({ description: '주차 여부', default: true })
+  isParked: boolean;
 }
 
 export class CreateParkingLocationDto {

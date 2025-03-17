@@ -26,6 +26,10 @@ export class CarNumber {
   @Column()
   number: string;
 
+  @ApiProperty({ description: '차량 주차 여부' })
+  @Column({ default: true })
+  isParked: boolean;
+
   @ApiProperty({ description: ' 차주 번호' })
   @Column({ nullable: true })
   phoneNumber: string;
