@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   ManyToOne,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ParkingLocation } from './parking-location.entity';
@@ -33,6 +34,10 @@ export class CarNumber {
   @ApiProperty({ description: ' 차주 번호' })
   @Column({ nullable: true })
   phoneNumber: string;
+
+  @ApiProperty({ description: '최종 업데이트 시간 (상태 변경 시간으로 활용)' })
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne(
     () => ParkingLocation,

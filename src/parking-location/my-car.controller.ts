@@ -21,6 +21,17 @@ export class MyCarController {
     return this.myCarService.findAll();
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: '차량 상세 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '차량 상세 조회 성공',
+    type: CarNumber,
+  })
+  findOne(@Param('id') id: string): Promise<CarNumber> {
+    return this.myCarService.findOne(id);
+  }
+
   @Put(':id')
   @ApiOperation({ summary: '차량 정보 수정' })
   @ApiResponse({

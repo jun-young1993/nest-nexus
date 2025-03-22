@@ -15,6 +15,14 @@ export class MyCarService {
     return this.carNumberRepository.find();
   }
 
+  async findOne(id: string): Promise<CarNumber> {
+    const carNumber = await this.carNumberRepository.findOne({ where: { id } });
+    if (!carNumber) {
+      throw new NotFoundException('Car number not found');
+    }
+    return carNumber;
+  }
+
   async update(
     id: string,
     updateCarNumberDto: UpdateCarNumberDto,
