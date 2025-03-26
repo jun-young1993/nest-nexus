@@ -34,7 +34,7 @@ export class SocketEventsGateway
     this.server.emit('ServerToClient', data);
   }
 
-  afterInit(server: Server) {
+  afterInit() {
     this.logger.info('웹소켓 서버 초기화 ✅');
   }
 
@@ -43,6 +43,6 @@ export class SocketEventsGateway
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    this.logger.info(`Client Connected : ${client.id}`);
+    this.logger.info(`Client Connected : ${client.id}`, args);
   }
 }

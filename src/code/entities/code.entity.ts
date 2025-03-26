@@ -1,11 +1,5 @@
 import { CodeItem } from 'src/code-item/entities/code-item.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('code')
 export class Code {

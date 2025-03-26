@@ -26,6 +26,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ThreeObjectModule } from './three-object/three-object.module';
 import { ParkingLocationModule } from './parking-location/parking-location.module';
+import { NoticeGroupModule } from './notice-group/notice-group.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { ParkingLocationModule } from './parking-location/parking-location.modul
     UserModule,
     ThreeObjectModule,
     ParkingLocationModule,
+    NoticeGroupModule,
   ],
   controllers: [],
   providers: [],
