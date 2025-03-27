@@ -18,5 +18,5 @@ export class CreateNoticeReplyDto {
   @ApiProperty({
     example: 'test notice reply',
   })
-  userId: string;
+  userName: string;
 }

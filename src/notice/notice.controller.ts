@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { NoticeService } from './notice.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateNoticeDto } from './dto/create-notice.dto';
@@ -36,5 +36,23 @@ export class NoticeController {
   })
   async findByNoticeGroupId(@Param('id') id: string) {
     return this.noticeService.findByNoticeGroupId(id);
+  }
+
+  @Get('notice-group/name/:name')
+  @ApiOperation({ summary: 'Get a notice by notice group name' })
+  @ApiResponse({
+    status: 200,
+  })
+  async findOneByName(
+    @Param('name') name: string,
+    @Query('take') take?: number,
+    @Query('created_at_order') createdAtOrder?: 'ASC' | 'DESC',
+  ) {
+    return this.noticeService.findOneByName(name, {
+      take: take || 10,
+      order: {
+        createdAt: createdAtOrder || 'DESC',
+      },
+    });
   }
 }

@@ -30,10 +30,6 @@ export class Notice {
   @JoinColumn({ name: 'noticeGroupId' })
   noticeGroup: NoticeGroup;
 
-  @Column({ type: 'uuid', nullable: false })
-  userId: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @Column()
+  userName: string;
 }

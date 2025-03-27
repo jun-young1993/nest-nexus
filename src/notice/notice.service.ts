@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Notice } from './entities/notice.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { NoticeGroupService } from '../notice-group/notice-group.service';
 
@@ -38,6 +38,14 @@ export class NoticeService {
   async findOne(id: string) {
     return await this.noticeRepository.findOne({
       where: { id },
+    });
+  }
+
+  async findOneByName(name: string, options?: FindManyOptions<Notice>) {
+    const noticeGroup = await this.noticeGroupService.findOneByName(name);
+    return await this.noticeRepository.find({
+      where: { noticeGroupId: noticeGroup.id },
+      ...options,
     });
   }
 }

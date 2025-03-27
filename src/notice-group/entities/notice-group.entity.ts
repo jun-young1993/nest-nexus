@@ -6,7 +6,7 @@ export class NoticeGroup {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @OneToMany(() => Notice, (notice) => notice.noticeGroup)

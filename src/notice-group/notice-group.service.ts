@@ -22,4 +22,11 @@ export class NoticeGroupService {
       where: { id },
     });
   }
+
+  async findOneByName(name: string) {
+    return await this.noticeGroupRepository.findOne({
+      where: { name },
+      relations: ['notices'],
+    });
+  }
 }

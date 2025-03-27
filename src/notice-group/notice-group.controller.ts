@@ -28,4 +28,14 @@ export class NoticeGroupController {
   async getNoticeGroup(@Param('id') id: string) {
     return this.noticeGroupService.findOne(id);
   }
+
+  @Get('name/:name')
+  @ApiOperation({ summary: 'Get a notice group by name' })
+  @ApiResponse({
+    status: 200,
+    description: 'The notice group has been successfully retrieved.',
+  })
+  async getNoticeGroupByName(@Param('name') name: string) {
+    return this.noticeGroupService.findOneByName(name);
+  }
 }
