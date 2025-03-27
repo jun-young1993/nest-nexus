@@ -1,13 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Notice } from 'src/notice/entities/notice.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+@Entity()
 export class NoticeGroup {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  @ApiProperty({
-    example: 'test notice group',
-  })
   name: string;
+
+  @OneToMany(() => Notice, (notice) => notice.noticeGroup)
+  notices: Notice[];
 }

@@ -16,4 +16,10 @@ export class NoticeGroupService {
       this.noticeGroupRepository.create(createNoticeGroupDto),
     );
   }
+
+  async findOne(id: string) {
+    return await this.noticeGroupRepository.findOne({
+      where: { id },
+    });
+  }
 }

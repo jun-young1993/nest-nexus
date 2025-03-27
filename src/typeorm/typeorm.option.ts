@@ -6,9 +6,9 @@ import { AllConfigType } from '../config/config.type';
 @Injectable()
 export class TypeormOption implements TypeOrmOptionsFactory {
   constructor(private readonly configService: ConfigService<AllConfigType>) {}
-  public createTypeOrmOptions(
-    connectionName?: string,
-  ): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions {
+  public createTypeOrmOptions():
+    | Promise<TypeOrmModuleOptions>
+    | TypeOrmModuleOptions {
     return {
       type: 'mysql',
       host: this.configService.get<string>('db.host', { infer: true }),

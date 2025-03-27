@@ -8,5 +8,6 @@ import { NoticeGroupService } from './notice-group.service';
   imports: [TypeOrmModule.forFeature([NoticeGroup])],
   controllers: [NoticeGroupController],
   providers: [NoticeGroupService],
+  exports: [NoticeGroupService],
 })
 export class NoticeGroupModule {}

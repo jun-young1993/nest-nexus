@@ -7,7 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Post } from '../../post/entities/post.entity';
-import {Field, ID, ObjectType} from "@nestjs/graphql";
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
