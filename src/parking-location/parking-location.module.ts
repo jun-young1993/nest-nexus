@@ -6,9 +6,15 @@ import { ParkingLocation } from './entities/parking-location.entity';
 import { CarNumber } from './entities/car-number.entity';
 import { MyCarController } from './my-car.controller';
 import { MyCarService } from './my-car.service';
+import { NoticeGroupModule } from 'src/notice-group/notice-group.module';
+import { LogGroupModule } from 'src/log-group/entities/log-group.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ParkingLocation, CarNumber])],
+  imports: [
+    NoticeGroupModule,
+    LogGroupModule,
+    TypeOrmModule.forFeature([ParkingLocation, CarNumber]),
+  ],
   controllers: [ParkingLocationController, MyCarController],
   providers: [ParkingLocationService, MyCarService],
 })

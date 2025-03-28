@@ -29,4 +29,8 @@ export class NoticeGroupService {
       relations: ['notices'],
     });
   }
+
+  async findOneByNameOrCreate(name: string) {
+    return (await this.findOneByName(name)) || (await this.create({ name }));
+  }
 }

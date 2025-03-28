@@ -1,5 +1,4 @@
 import { Notice } from 'src/notice/entities/notice.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
