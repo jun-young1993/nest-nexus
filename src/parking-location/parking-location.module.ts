@@ -8,11 +8,13 @@ import { MyCarController } from './my-car.controller';
 import { MyCarService } from './my-car.service';
 import { NoticeGroupModule } from 'src/notice-group/notice-group.module';
 import { LogGroupModule } from 'src/log-group/entities/log-group.module';
+import { LogModule } from 'src/log/log.module';
 
 @Module({
   imports: [
     NoticeGroupModule,
     LogGroupModule,
+    LogModule,
     TypeOrmModule.forFeature([ParkingLocation, CarNumber]),
   ],
   controllers: [ParkingLocationController, MyCarController],

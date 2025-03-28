@@ -17,6 +17,12 @@ export class MyCarService {
 
   async findOne(id: string): Promise<CarNumber> {
     const carNumber = await this.carNumberRepository.findOne({ where: { id } });
+
+    return carNumber;
+  }
+
+  async findOneOrFail(id: string): Promise<CarNumber> {
+    const carNumber = await this.findOne(id);
     if (!carNumber) {
       throw new NotFoundException('Car number not found');
     }
@@ -27,10 +33,8 @@ export class MyCarService {
     id: string,
     updateCarNumberDto: UpdateCarNumberDto,
   ): Promise<CarNumber> {
-    const carNumber = await this.carNumberRepository.findOne({ where: { id } });
-    if (!carNumber) {
-      throw new NotFoundException('Car number not found');
-    }
+    const carNumber = await this.findOneOrFail(id);
+
     return this.carNumberRepository.save({
       ...carNumber,
       ...updateCarNumberDto,
