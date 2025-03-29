@@ -1,4 +1,4 @@
-import { LogGroup } from 'src/log-group/entities/log-group.entity';
+import { LogGroup } from 'src/log/entities/log-group.entity';
 import {
   Column,
   CreateDateColumn,

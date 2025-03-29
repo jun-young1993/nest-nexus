@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { LogGroupService } from './log-group.service';
-import { CreateLogGroupDto } from '../dto/create-log-group.dto';
+
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { LogGroup } from './log-group.entity';
+import { LogGroup } from './entities/log-group.entity';
+import { CreateLogGroupDto } from './dto/create-log-group.dto';
 
 @ApiTags('Log Group')
 @Controller('log-group')

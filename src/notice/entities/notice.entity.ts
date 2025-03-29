@@ -1,4 +1,5 @@
-import { NoticeGroup } from 'src/notice-group/entities/notice-group.entity';
+import { NoticeReply } from 'src/notice/entities/notice-reply.entity';
+import { NoticeGroup } from 'src/notice/entities/notice-group.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
@@ -6,6 +7,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -32,4 +34,7 @@ export class Notice {
 
   @Column()
   userName: string;
+
+  @OneToMany(() => NoticeReply, (noticeReply) => noticeReply.notice)
+  noticeReplies: NoticeReply[];
 }

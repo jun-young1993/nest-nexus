@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { LogGroup } from './log-group.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateLogGroupDto } from '../dto/create-log-group.dto';
+import { LogGroup } from './entities/log-group.entity';
+import { CreateLogGroupDto } from './dto/create-log-group.dto';
 
 @Injectable()
 export class LogGroupService {
@@ -27,6 +28,14 @@ export class LogGroupService {
 
   async findOneByName(name: string) {
     return this.logGroupRepository.findOne({ where: { name } });
+  }
+
+  async findOneByNameOrFail(name: string) {
+    const logGroup = await this.findOneByName(name);
+    if (!logGroup) {
+      throw new NotFoundException('Log group not found');
+    }
+    return logGroup;
   }
 
   async findOneByNameOrCreate(name: string) {
