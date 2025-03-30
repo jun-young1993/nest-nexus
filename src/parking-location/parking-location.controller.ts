@@ -15,6 +15,9 @@ import { LogGroupService } from 'src/log/log-group.service';
 import { NoticeGroupService } from 'src/notice/notice-group.service';
 import { NoticeService } from 'src/notice/notice.service';
 
+import { Notice } from 'src/notice/entities/notice.entity';
+import { CreateParkingLocationNoticeDto } from './dto/create-parking-location-notice.dto';
+
 @ApiTags('Parking Locations')
 @Controller('parking-location')
 export class ParkingLocationController {
@@ -98,5 +101,33 @@ export class ParkingLocationController {
       parkingLocationGroupName(zoneCode),
     );
     return notice;
+  }
+
+  @Post('/notice/:zoneCode')
+  @ApiOperation({ summary: '특정 구역의 공지 생성' })
+  @ApiParam({
+    name: 'zoneCode',
+    description: '구역 코드 (예: "강남구")',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 201,
+    description: '공지가 성공적으로 생성됨',
+    type: Notice,
+  })
+  async createNotice(
+    @Param('zoneCode') zoneCode: string,
+    @Body() createNoticeDto: CreateParkingLocationNoticeDto,
+  ) {
+    const groupNotice = await this.noticeGroupService.findOneByName(
+      parkingLocationGroupName(zoneCode),
+    );
+    if (!groupNotice) {
+      throw new InternalServerErrorException('Notice group not found');
+    }
+    return this.noticeService.create({
+      ...createNoticeDto,
+      noticeGroupId: groupNotice.id,
+    });
   }
 }

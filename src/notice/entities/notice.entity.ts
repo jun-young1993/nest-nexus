@@ -1,6 +1,6 @@
 import { NoticeReply } from 'src/notice/entities/notice-reply.entity';
 import { NoticeGroup } from 'src/notice/entities/notice-group.entity';
-import { User } from 'src/user/entities/user.entity';
+
 import {
   Column,
   CreateDateColumn,
@@ -10,6 +10,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { NoticeType } from '../enum/notice.type';
 
 @Entity()
 export class Notice {
@@ -21,6 +22,13 @@ export class Notice {
 
   @Column()
   content: string;
+
+  @Column({
+    type: 'enum',
+    enum: NoticeType,
+    default: NoticeType.NORMAL,
+  })
+  type: NoticeType;
 
   @CreateDateColumn()
   createdAt: Date;
