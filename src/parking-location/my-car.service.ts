@@ -16,7 +16,10 @@ export class MyCarService {
   }
 
   async findOne(id: string): Promise<CarNumber> {
-    const carNumber = await this.carNumberRepository.findOne({ where: { id } });
+    const carNumber = await this.carNumberRepository.findOne({
+      where: { id },
+      relations: ['parkingLocation'],
+    });
 
     return carNumber;
   }

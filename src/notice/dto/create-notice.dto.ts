@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { NoticeType } from '../enum/notice.type';
 
 export class CreateNoticeDto {
   @IsString()
@@ -13,6 +14,13 @@ export class CreateNoticeDto {
     example: 'test notice content',
   })
   content: string;
+
+  @IsEnum(NoticeType)
+  @IsOptional()
+  @ApiProperty({
+    example: 'test notice type',
+  })
+  type?: NoticeType;
 
   @IsString()
   @ApiProperty({

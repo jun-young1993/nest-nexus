@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { NoticeReplyService } from './notice-reply.service';
-import { CreateNoticeReplyDto } from './dto/notice-reply.dto';
+import { CreateNoticeReplyDto } from '../notice/dto/create-notice-reply.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { NoticeReply } from './entities/notice-reply.entity';
+import { NoticeReply } from '../notice/entities/notice-reply.entity';
 
 @ApiTags('Notice Reply')
 @Controller('notice-reply')

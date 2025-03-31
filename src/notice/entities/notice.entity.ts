@@ -1,13 +1,16 @@
-import { NoticeGroup } from 'src/notice-group/entities/notice-group.entity';
-import { User } from 'src/user/entities/user.entity';
+import { NoticeReply } from 'src/notice/entities/notice-reply.entity';
+import { NoticeGroup } from 'src/notice/entities/notice-group.entity';
+
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { NoticeType } from '../enum/notice.type';
 
 @Entity()
 export class Notice {
@@ -19,6 +22,13 @@ export class Notice {
 
   @Column()
   content: string;
+
+  @Column({
+    type: 'enum',
+    enum: NoticeType,
+    default: NoticeType.NORMAL,
+  })
+  type: NoticeType;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -35,4 +45,7 @@ export class Notice {
 
   @Column({ default: 0 })
   viewCount: number;
+
+  @OneToMany(() => NoticeReply, (noticeReply) => noticeReply.notice)
+  noticeReplies: NoticeReply[];
 }

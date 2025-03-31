@@ -49,4 +49,12 @@ export class CarNumber {
 
   @Column()
   parkingLocationId: string;
+
+  /**
+   * 차량번호를 문자열로 변환 (예: "31가1234")
+   * @returns {string} 완성된 차량번호
+   */
+  toString(): string {
+    return `${this.region} ${this.category} ${this.number}`;
+  }
 }

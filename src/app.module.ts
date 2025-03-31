@@ -26,11 +26,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ThreeObjectModule } from './three-object/three-object.module';
 import { ParkingLocationModule } from './parking-location/parking-location.module';
-import { NoticeGroupModule } from './notice-group/notice-group.module';
 import { NoticeModule } from './notice/notice.module';
-import { NoticeReplyModule } from './notice-reply/notice-reply.module';
 import { LogModule } from './log/log.module';
-import { LogGroupModule } from './log-group/entities/log-group.module';
 
 @Module({
   imports: [
@@ -65,11 +62,8 @@ import { LogGroupModule } from './log-group/entities/log-group.module';
     UserModule,
     ThreeObjectModule,
     ParkingLocationModule,
-    NoticeGroupModule,
     NoticeModule,
-    NoticeReplyModule,
     LogModule,
-    LogGroupModule,
   ],
   controllers: [],
   providers: [],
