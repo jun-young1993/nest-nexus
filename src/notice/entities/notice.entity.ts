@@ -32,4 +32,7 @@ export class Notice {
 
   @Column()
   userName: string;
+
+  @Column({ default: 0 })
+  viewCount: number;
 }
