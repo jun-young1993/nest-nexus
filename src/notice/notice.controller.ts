@@ -26,7 +26,9 @@ export class NoticeController {
     status: 200,
   })
   async findOne(@Param('id') id: string) {
-    return this.noticeService.findOne(id);
+    const notice = await this.noticeService.findOne(id);
+    await this.noticeService.incrementViewCount(id);
+    return notice;
   }
 
   @Get('notice-group/:id')

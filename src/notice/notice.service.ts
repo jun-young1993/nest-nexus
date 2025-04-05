@@ -53,4 +53,24 @@ export class NoticeService {
       ...options,
     });
   }
+
+  async findByName(name: string) {
+    const noticeGroup = await this.noticeGroupService.findOneByName(name);
+    return await this.noticeRepository.find({
+      where: { noticeGroupId: noticeGroup.id },
+      relations: ['noticeReplies'],
+      order: {
+        createdAt: 'DESC',
+        noticeReplies: {
+          createdAt: 'DESC',
+        },
+      },
+    });
+  }
+
+  async incrementViewCount(id: string) {
+    const notice = await this.findOne(id);
+    notice.viewCount++;
+    return await this.noticeRepository.save(notice);
+  }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { Log } from './entities/log.entity';
 import { CreateLogDto } from './dto/create-log.dto';
 import { LogGroupService } from 'src/log/log-group.service';
@@ -19,8 +19,12 @@ export class LogService {
     return this.parkingLogRepository.save(log);
   }
 
-  async findAllByGroupId(groupId: string) {
-    return this.parkingLogRepository.find({ where: { logGroupId: groupId } });
+  async findAllByGroupId(groupId: string, options?: FindManyOptions<Log>) {
+    return this.parkingLogRepository.find({
+      where: { logGroupId: groupId },
+      order: { createdAt: 'DESC' },
+      ...options,
+    });
   }
 
   async createByGroupName(groupName: string, description: string) {
@@ -29,5 +33,10 @@ export class LogService {
       description,
       logGroupId: group.id,
     });
+  }
+
+  async findByName(name: string, options?: FindManyOptions<Log>) {
+    const group = await this.logGroupService.findOneByNameOrFail(name);
+    return this.findAllByGroupId(group.id, options);
   }
 }

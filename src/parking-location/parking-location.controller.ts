@@ -5,6 +5,8 @@ import {
   Body,
   Param,
   InternalServerErrorException,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ParkingLocationService } from './parking-location.service';
@@ -17,6 +19,7 @@ import { NoticeService } from 'src/notice/notice.service';
 
 import { Notice } from 'src/notice/entities/notice.entity';
 import { CreateParkingLocationNoticeDto } from './dto/create-parking-location-notice.dto';
+import { LogService } from 'src/log/log.service';
 
 @ApiTags('Parking Locations')
 @Controller('parking-location')
@@ -26,6 +29,7 @@ export class ParkingLocationController {
     private readonly noticeGroupService: NoticeGroupService,
     private readonly noticeService: NoticeService,
     private readonly logGroupService: LogGroupService,
+    private readonly logService: LogService,
   ) {}
 
   @Post()
@@ -97,10 +101,30 @@ export class ParkingLocationController {
     type: 'string',
   })
   findZoneNotice(@Param('zoneCode') zoneCode: string) {
-    const notice = this.noticeService.findOneByName(
+    const notice = this.noticeService.findByName(
       parkingLocationGroupName(zoneCode),
     );
     return notice;
+  }
+
+  @Get('/log/:zoneCode')
+  @ApiOperation({ summary: '특정 구역의 로그 조회' })
+  @ApiParam({
+    name: 'zoneCode',
+    description: '구역 코드 (예: "강남구")',
+    type: 'string',
+  })
+  findZoneLog(
+    @Param('zoneCode') zoneCode: string,
+    @Query('take') take: number,
+  ) {
+    if (!take) {
+      throw new BadRequestException('take is required');
+    }
+    const log = this.logService.findByName(parkingLocationGroupName(zoneCode), {
+      take: take,
+    });
+    return log;
   }
 
   @Post('/notice/:zoneCode')
