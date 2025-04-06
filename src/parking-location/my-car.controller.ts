@@ -37,7 +37,7 @@ export class MyCarController {
     return this.myCarService.findOne(id);
   }
 
-  @Put(':id')
+  @Put('parking/:id')
   @ApiOperation({ summary: '차량 정보 수정' })
   @ApiResponse({
     status: 200,
@@ -62,5 +62,19 @@ export class MyCarController {
       );
     }
     return carNumber;
+  }
+
+  @Put('message/:id')
+  @ApiOperation({ summary: '차량 메세지 수정' })
+  @ApiResponse({
+    status: 200,
+    description: '차량 메세지 수정 성공',
+    type: CarNumber,
+  })
+  async updateMessage(
+    @Param('id') id: string,
+    @Body() updateCarNumberDto: UpdateCarNumberDto,
+  ): Promise<CarNumber> {
+    return this.myCarService.update(id, updateCarNumberDto);
   }
 }

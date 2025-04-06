@@ -37,7 +37,6 @@ export class MyCarService {
     updateCarNumberDto: UpdateCarNumberDto,
   ): Promise<CarNumber> {
     const carNumber = await this.findOneOrFail(id);
-
     return this.carNumberRepository.save({
       ...carNumber,
       ...updateCarNumberDto,
