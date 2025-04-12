@@ -7,6 +7,7 @@ import {
   InternalServerErrorException,
   Query,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ParkingLocationService } from './parking-location.service';
@@ -16,15 +17,17 @@ import { parkingLocationGroupName } from './constance/parking-location.constance
 import { LogGroupService } from 'src/log/log-group.service';
 import { NoticeGroupService } from 'src/notice/notice-group.service';
 import { NoticeService } from 'src/notice/notice.service';
-
+import { Logger } from 'winston';
 import { Notice } from 'src/notice/entities/notice.entity';
 import { CreateParkingLocationNoticeDto } from './dto/create-parking-location-notice.dto';
 import { LogService } from 'src/log/log.service';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 @ApiTags('Parking Locations')
 @Controller('parking-location')
 export class ParkingLocationController {
   constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly parkingLocationService: ParkingLocationService,
     private readonly noticeGroupService: NoticeGroupService,
     private readonly noticeService: NoticeService,
@@ -40,6 +43,8 @@ export class ParkingLocationController {
     type: ParkingLocation,
   })
   create(@Body() createParkingLocationDto: CreateParkingLocationDto) {
+    this.logger.info('[PARKING-LOCATION][CREATE][PARAMS]');
+    this.logger.info(CreateParkingLocationDto);
     const noticeGroup = this.noticeGroupService.findOneByNameOrCreate(
       parkingLocationGroupName(createParkingLocationDto.zoneCode),
     );

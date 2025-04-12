@@ -38,29 +38,6 @@ export class TasksService {
       );
       return false;
     }
-
-    this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION][START]');
-    this.getAlieHotProductPromotion(async (userContent) => {
-      const session = await this.openaiService.saveSession();
-      const completion = await this.openaiService.chatCompletions(
-        {
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant specialized in creating promotional blog posts in Markdown format.',
-            },
-            {
-              role: 'user',
-              content: userContent,
-            },
-          ],
-          model: 'gpt-4o',
-        },
-        session,
-      );
-      return completion.choices[0].message.content;
-    });
   }
 
   async getAlieHotProductPromotion(
@@ -280,12 +257,5 @@ export class TasksService {
       );
       return false;
     }
-    this.logger.info('[CREATE ALIE HOT PRODUCT PROMOTION GEMINI][START]');
-    this.getAlieHotProductPromotion((prompt) => {
-      return this.geminiService.sendMessage(
-        'You are a helpful assistant specialized in creating promotional blog posts in Markdown format. \r\n' +
-          prompt,
-      );
-    });
   }
 }
