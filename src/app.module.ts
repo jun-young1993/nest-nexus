@@ -28,6 +28,7 @@ import { ThreeObjectModule } from './three-object/three-object.module';
 import { ParkingLocationModule } from './parking-location/parking-location.module';
 import { NoticeModule } from './notice/notice.module';
 import { LogModule } from './log/log.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { LogModule } from './log/log.module';
     ParkingLocationModule,
     NoticeModule,
     LogModule,
+    FirebaseModule,
   ],
   controllers: [],
   providers: [],
