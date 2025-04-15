@@ -29,6 +29,7 @@ import { ParkingLocationModule } from './parking-location/parking-location.modul
 import { NoticeModule } from './notice/notice.module';
 import { LogModule } from './log/log.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import myHomeParkingFcmConfig from './config/my-home-parking-fcm.config';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { FirebaseModule } from './firebase/firebase.module';
         geminiConfig,
         logConfig,
         dbConfig,
+        myHomeParkingFcmConfig,
       ],
       envFilePath: ['.env'],
     }),

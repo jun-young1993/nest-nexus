@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { FcmService } from './fcm/fcm.service';
+import { MyHomeParkingFcmService } from './fcm/my-home-parking-fcm.service';
+import { MyHomeParkingFcmController } from './fcm/my-home-parking-fcm.controller';
 
 @Module({
-  providers: [FcmService],
-  exports: [FcmService],
+  providers: [MyHomeParkingFcmService],
+  exports: [MyHomeParkingFcmService],
+  controllers: [MyHomeParkingFcmController],
 })
 export class FirebaseModule {}

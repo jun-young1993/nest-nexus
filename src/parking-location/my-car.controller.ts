@@ -4,7 +4,12 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CarNumber } from './entities/car-number.entity';
 import { UpdateCarNumberDto } from './dto/update-car-number.dto';
 import { LogService } from 'src/log/log.service';
-import { parkingLocationGroupName } from './constance/parking-location.constance';
+import { MyHomeParkingFcmService } from 'src/firebase/fcm/my-home-parking-fcm.service';
+import {
+  CarStatusChangedEvent,
+  CarStatus,
+} from './events/car-status-changed.event';
+import { CarNotificationService } from './notifications/car-notification.service';
 
 @ApiTags('My-Car')
 @Controller('my-car')
@@ -12,6 +17,8 @@ export class MyCarController {
   constructor(
     private readonly myCarService: MyCarService,
     private readonly logService: LogService,
+    private readonly myHomeParkingFcmService: MyHomeParkingFcmService,
+    private readonly carNotificationService: CarNotificationService,
   ) {}
 
   @Get()
@@ -48,19 +55,22 @@ export class MyCarController {
     @Param('id') id: string,
     @Body() updateCarNumberDto: UpdateCarNumberDto,
   ): Promise<CarNumber> {
+    const originalCarNumber = await this.myCarService.findOne(id);
     const carNumber = await this.myCarService.update(id, updateCarNumberDto);
-    const carFullNumber = `${carNumber.region} ${carNumber.category} ${carNumber.number}`;
-    if (updateCarNumberDto.isParked === true) {
-      this.logService.createByGroupName(
-        parkingLocationGroupName(carNumber.parkingLocation.zoneCode),
-        `${carFullNumber} 차량이 주차 되었습니다.`,
+
+    // 상태 변경 이벤트 생성
+    if (originalCarNumber.isParked !== updateCarNumberDto.isParked) {
+      const event = new CarStatusChangedEvent(
+        carNumber,
+        originalCarNumber.isParked,
+        updateCarNumberDto.isParked,
+        updateCarNumberDto.isParked ? CarStatus.PARKED : CarStatus.UNPARKED,
       );
-    } else if (updateCarNumberDto.isParked === false) {
-      this.logService.createByGroupName(
-        parkingLocationGroupName(carNumber.parkingLocation.zoneCode),
-        `${carFullNumber} 차량이 출차 되었습니다.`,
-      );
+
+      // 알림 처리
+      await this.carNotificationService.handleStatusChange(event);
     }
+
     return carNumber;
   }
 

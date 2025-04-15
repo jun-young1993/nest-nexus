@@ -42,4 +42,20 @@ export class MyCarService {
       ...updateCarNumberDto,
     });
   }
+
+  async getFcmTokens(carNumber: CarNumber): Promise<string[]> {
+    const parkingLocationId = carNumber.parkingLocationId;
+    const carnumbers = await this.carNumberRepository.find({
+      where: { parkingLocationId },
+    });
+
+    // FCM 토큰이 있는 차량만 필터링하고 중복 제거
+    const uniqueTokens = new Set(
+      carnumbers
+        .filter((car) => car.fcmToken) // FCM 토큰이 있는 차량만
+        .map((car) => car.fcmToken),
+    );
+
+    return Array.from(uniqueTokens);
+  }
 }

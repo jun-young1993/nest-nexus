@@ -41,6 +41,19 @@ export type DbConfig = {
   database: string;
   synchronize: boolean;
 };
+export type MyHomeParkingFcmConfig = {
+  type: string;
+  projectId: string;
+  privateKeyId: string;
+  privateKey: string;
+  clientEmail: string;
+  clientId: string;
+  authUri: string;
+  tokenUri: string;
+  authProviderX509CertUrl: string;
+  clientX509CertUrl: string;
+  universeDomain: string;
+};
 
 export type AllConfigType = {
   app: AppConfig;
@@ -50,4 +63,5 @@ export type AllConfigType = {
   log: LogConfig;
   gemini: GeminiConfig;
   db: DbConfig;
+  myHomeParkingFcm: MyHomeParkingFcmConfig;
 };
