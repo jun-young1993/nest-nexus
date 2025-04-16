@@ -1,4 +1,4 @@
-import { CarNumber } from '../entities/car-number.entity';
+import { CarNumber } from '../../../entities/car-number.entity';
 
 export enum CarStatus {
   PARKED = 'PARKED',
@@ -12,4 +12,4 @@ export class CarStatusChangedEvent {
     public readonly currentStatus: boolean,
     public readonly status: CarStatus,
   ) {}
-} 
+}

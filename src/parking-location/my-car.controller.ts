@@ -3,21 +3,17 @@ import { MyCarService } from './my-car.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CarNumber } from './entities/car-number.entity';
 import { UpdateCarNumberDto } from './dto/update-car-number.dto';
-import { LogService } from 'src/log/log.service';
-import { MyHomeParkingFcmService } from 'src/firebase/fcm/my-home-parking-fcm.service';
 import {
   CarStatusChangedEvent,
   CarStatus,
-} from './events/car-status-changed.event';
-import { CarNotificationService } from './notifications/car-notification.service';
+} from './events/notification/event/car-status-changed.event';
+import { CarNotificationService } from './events/notification/service/car-notification.service';
 
 @ApiTags('My-Car')
 @Controller('my-car')
 export class MyCarController {
   constructor(
     private readonly myCarService: MyCarService,
-    private readonly logService: LogService,
-    private readonly myHomeParkingFcmService: MyHomeParkingFcmService,
     private readonly carNotificationService: CarNotificationService,
   ) {}
 

@@ -9,9 +9,11 @@ import { MyCarService } from './my-car.service';
 import { LogModule } from 'src/log/log.module';
 import { NoticeModule } from 'src/notice/notice.module';
 import { FirebaseModule } from 'src/firebase/firebase.module';
-import { CarNotificationService } from './notifications/car-notification.service';
-import { ParkingNotificationStrategy } from './notifications/parking-notification.strategy';
-import { UnparkingNotificationStrategy } from './notifications/unparking-notification.strategy';
+import { CarNotificationService } from './events/notification/service/car-notification.service';
+import { ParkingNotificationStrategy } from './events/notification/strategy/car-changed/parking-notification.strategy';
+import { UnparkingNotificationStrategy } from './events/notification/strategy/car-changed/unparking-notification.strategy';
+import { CreateNoticeService } from './events/notification/service/create-notice.service';
+import { CreateNoticeStrategy } from './events/notification/strategy/create-notice/create-notice.strategy';
 
 @Module({
   imports: [
@@ -27,6 +29,9 @@ import { UnparkingNotificationStrategy } from './notifications/unparking-notific
     CarNotificationService,
     ParkingNotificationStrategy,
     UnparkingNotificationStrategy,
+    CreateNoticeService,
+    CreateNoticeStrategy,
+    CreateNoticeService,
   ],
   exports: [MyCarService],
 })
@@ -35,13 +40,14 @@ export class ParkingLocationModule {
     private readonly carNotificationService: CarNotificationService,
     private readonly parkingNotificationStrategy: ParkingNotificationStrategy,
     private readonly unparkingNotificationStrategy: UnparkingNotificationStrategy,
+    private readonly createNoticeService: CreateNoticeService,
+    private readonly createNoticeStrategy: CreateNoticeStrategy,
   ) {
     // 알림 전략 등록
-    this.carNotificationService.registerStrategy(
+    this.carNotificationService.registerStrategy([
       this.parkingNotificationStrategy,
-    );
-    this.carNotificationService.registerStrategy(
       this.unparkingNotificationStrategy,
-    );
+    ]);
+    this.createNoticeService.registerStrategy([this.createNoticeStrategy]);
   }
 }

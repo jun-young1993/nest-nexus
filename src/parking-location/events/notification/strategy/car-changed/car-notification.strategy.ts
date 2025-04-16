@@ -1,4 +1,4 @@
-import { CarStatusChangedEvent } from '../events/car-status-changed.event';
+import { CarStatusChangedEvent } from '../../event/car-status-changed.event';
 
 export interface CarNotificationStrategy {
   shouldHandle(event: CarStatusChangedEvent): boolean;

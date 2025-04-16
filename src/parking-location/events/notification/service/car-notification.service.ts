@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CarNotificationStrategy } from './car-notification.strategy';
-import { CarStatusChangedEvent } from '../events/car-status-changed.event';
+import { CarNotificationStrategy } from '../strategy/car-changed/car-notification.strategy';
+import { CarStatusChangedEvent } from '../event/car-status-changed.event';
 
 @Injectable()
 export class CarNotificationService {
   private strategies: CarNotificationStrategy[] = [];
 
-  registerStrategy(strategy: CarNotificationStrategy): void {
-    this.strategies.push(strategy);
+  registerStrategy(strategy: CarNotificationStrategy[]): void {
+    this.strategies.push(...strategy);
   }
 
   async handleStatusChange(event: CarStatusChangedEvent): Promise<void> {

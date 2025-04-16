@@ -22,6 +22,8 @@ import { Notice } from 'src/notice/entities/notice.entity';
 import { CreateParkingLocationNoticeDto } from './dto/create-parking-location-notice.dto';
 import { LogService } from 'src/log/log.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { CreateNoticeEvent } from './events/notification/event/create-notice.event';
+import { CreateNoticeService } from './events/notification/service/create-notice.service';
 
 @ApiTags('Parking Locations')
 @Controller('parking-location')
@@ -33,6 +35,7 @@ export class ParkingLocationController {
     private readonly noticeService: NoticeService,
     private readonly logGroupService: LogGroupService,
     private readonly logService: LogService,
+    private readonly createNoticeService: CreateNoticeService,
   ) {}
 
   @Post()
@@ -154,9 +157,14 @@ export class ParkingLocationController {
     if (!groupNotice) {
       throw new InternalServerErrorException('Notice group not found');
     }
-    return this.noticeService.create({
+    const notice = await this.noticeService.create({
       ...createNoticeDto,
       noticeGroupId: groupNotice.id,
     });
+
+    const createNoticeEvent = new CreateNoticeEvent(notice, zoneCode);
+    await this.createNoticeService.handleCreateNotice(createNoticeEvent);
+
+    return notice;
   }
 }

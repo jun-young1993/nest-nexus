@@ -3,14 +3,14 @@ import { CarNotificationStrategy } from './car-notification.strategy';
 import {
   CarStatusChangedEvent,
   CarStatus,
-} from '../events/car-status-changed.event';
+} from '../../event/car-status-changed.event';
 import { MyHomeParkingFcmService } from 'src/firebase/fcm/my-home-parking-fcm.service';
-import { MyCarService } from '../my-car.service';
+import { MyCarService } from 'src/parking-location/my-car.service';
 import { LogService } from 'src/log/log.service';
-import { parkingLocationGroupName } from '../constance/parking-location.constance';
+import { parkingLocationGroupName } from 'src/parking-location/constance/parking-location.constance';
 
 @Injectable()
-export class UnparkingNotificationStrategy implements CarNotificationStrategy {
+export class ParkingNotificationStrategy implements CarNotificationStrategy {
   constructor(
     private readonly myHomeParkingFcmService: MyHomeParkingFcmService,
     private readonly myCarService: MyCarService,
@@ -18,14 +18,14 @@ export class UnparkingNotificationStrategy implements CarNotificationStrategy {
   ) {}
 
   shouldHandle(event: CarStatusChangedEvent): boolean {
-    return event.status === CarStatus.UNPARKED;
+    return event.status === CarStatus.PARKED;
   }
 
   async handle(event: CarStatusChangedEvent): Promise<void> {
     const { carNumber } = event;
     const fcmTokens = await this.myCarService.getFcmTokens(carNumber);
     const carFullNumber = `${carNumber.region} ${carNumber.category} ${carNumber.number}`;
-    const message = `${carFullNumber} 차량이 출차 되었습니다.`;
+    const message = `${carFullNumber} 차량이 주차 되었습니다.`;
 
     // 로그 기록
     await this.logService.createByGroupName(
@@ -37,7 +37,7 @@ export class UnparkingNotificationStrategy implements CarNotificationStrategy {
     await this.myHomeParkingFcmService.sendMessage({
       tokens: fcmTokens,
       notification: {
-        title: '차량 출차 알림',
+        title: '차량 주차 알림',
         body: message,
       },
     });
