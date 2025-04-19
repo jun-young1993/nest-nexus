@@ -30,6 +30,7 @@ import { NoticeModule } from './notice/notice.module';
 import { LogModule } from './log/log.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import myHomeParkingFcmConfig from './config/my-home-parking-fcm.config';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import myHomeParkingFcmConfig from './config/my-home-parking-fcm.config';
       ],
       envFilePath: ['.env'],
     }),
+    EventModule,
     TypeormModule,
     HttpModule,
     AlieModule,

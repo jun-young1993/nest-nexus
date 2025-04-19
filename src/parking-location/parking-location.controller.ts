@@ -22,8 +22,9 @@ import { Notice } from 'src/notice/entities/notice.entity';
 import { CreateParkingLocationNoticeDto } from './dto/create-parking-location-notice.dto';
 import { LogService } from 'src/log/log.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { CreateNoticeEvent } from './events/notification/event/create-notice.event';
-import { CreateNoticeService } from './events/notification/service/create-notice.service';
+import { EventName } from 'src/enums/event-name.enum';
+import { ParkingLocationNoticeCreatedEvent } from './events/parking-location-notice-created.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @ApiTags('Parking Locations')
 @Controller('parking-location')
@@ -35,7 +36,7 @@ export class ParkingLocationController {
     private readonly noticeService: NoticeService,
     private readonly logGroupService: LogGroupService,
     private readonly logService: LogService,
-    private readonly createNoticeService: CreateNoticeService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Post()
@@ -161,9 +162,12 @@ export class ParkingLocationController {
       ...createNoticeDto,
       noticeGroupId: groupNotice.id,
     });
-
-    const createNoticeEvent = new CreateNoticeEvent(notice, zoneCode);
-    await this.createNoticeService.handleCreateNotice(createNoticeEvent);
+    const parkingLocation =
+      await this.parkingLocationService.findByZoneCode(zoneCode);
+    this.eventEmitter.emit(
+      EventName.PARKING_LOCATION_NOTICE_CREATED,
+      new ParkingLocationNoticeCreatedEvent(parkingLocation, notice),
+    );
 
     return notice;
   }

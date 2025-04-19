@@ -3,12 +3,16 @@ import { CarNumber } from './entities/car-number.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateCarNumberDto } from './dto/update-car-number.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventName } from 'src/enums/event-name.enum';
+import { CarUpdatedEvent } from './events/car-updated.event';
 
 @Injectable()
 export class MyCarService {
   constructor(
     @InjectRepository(CarNumber)
     private carNumberRepository: Repository<CarNumber>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(): Promise<CarNumber[]> {
@@ -37,10 +41,16 @@ export class MyCarService {
     updateCarNumberDto: UpdateCarNumberDto,
   ): Promise<CarNumber> {
     const carNumber = await this.findOneOrFail(id);
-    return this.carNumberRepository.save({
+    const updatedCarNumber = await this.carNumberRepository.save({
       ...carNumber,
       ...updateCarNumberDto,
     });
+
+    this.eventEmitter.emit(
+      EventName.CAR_UPDATED,
+      new CarUpdatedEvent(carNumber, updatedCarNumber),
+    );
+    return updatedCarNumber;
   }
 
   async getFcmTokens(carNumber: CarNumber): Promise<string[]> {

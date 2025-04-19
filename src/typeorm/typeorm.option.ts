@@ -21,7 +21,7 @@ export class TypeormOption implements TypeOrmOptionsFactory {
         infer: true,
       }),
       autoLoadEntities: true,
-      logging: true,
+      logging: false,
       migrations: ['src/migration/**/*.ts'],
     };
   }

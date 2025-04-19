@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   UpdateDateColumn,
+  AfterLoad,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { ParkingLocation } from './parking-location.entity';
@@ -58,11 +59,24 @@ export class CarNumber {
   @Column()
   parkingLocationId: string;
 
-  /**
-   * 차량번호를 문자열로 변환 (예: "31가1234")
-   * @returns {string} 완성된 차량번호
-   */
-  toString(): string {
-    return `${this.region} ${this.category} ${this.number}`;
+  // 계산된 속성
+  fullNumber: string;
+  jsonData: Record<string, any>;
+
+  @AfterLoad()
+  afterLoad() {
+    this.fullNumber = `${this.region} ${this.category} ${this.number}`;
+    this.jsonData = {
+      id: this.id,
+      region: this.region,
+      category: this.category,
+      number: this.number,
+      isParked: this.isParked,
+      phoneNumber: this.phoneNumber,
+      message: this.message,
+      fcmToken: this.fcmToken,
+      parkingLocationId: this.parkingLocationId,
+      fullNumber: this.fullNumber,
+    };
   }
 }

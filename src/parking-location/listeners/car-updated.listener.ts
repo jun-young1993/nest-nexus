@@ -1,0 +1,48 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { CarUpdatedEvent } from '../events/car-updated.event';
+import { EventName } from 'src/enums/event-name.enum';
+import { OnEvent } from '@nestjs/event-emitter';
+import { MyHomeParkingFcmService } from 'src/firebase/fcm/my-home-parking-fcm.service';
+import { LogService } from 'src/log/log.service';
+import { MyCarService } from '../my-car.service';
+import { parkingLocationGroupName } from '../constance/parking-location.constance';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+@Injectable()
+export class CarUpdatedListener {
+  constructor(
+    private readonly myHomeParkingFcmService: MyHomeParkingFcmService,
+    private readonly logService: LogService,
+    private readonly myCarService: MyCarService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
+
+  @OnEvent(EventName.CAR_UPDATED)
+  async handleCarUpdated(event: CarUpdatedEvent) {
+    const { currentCarNumber, previousCarNumber } = event;
+    this.logger.info('[CAR UPDATED]', currentCarNumber.id);
+    const isUnparked =
+      currentCarNumber.isParked === false &&
+      previousCarNumber.isParked === true;
+    const isParked =
+      currentCarNumber.isParked === true &&
+      previousCarNumber.isParked === false;
+    const carFullNumber = currentCarNumber.fullNumber;
+    if (isParked || isUnparked) {
+      // 출차 알림
+      const fcmTokens = await this.myCarService.getFcmTokens(currentCarNumber);
+      const message = `${carFullNumber} 차량이 ${isParked ? '주차' : '출차'} 되었습니다.`;
+      await this.logService.createByGroupName(
+        parkingLocationGroupName(currentCarNumber.parkingLocation.zoneCode),
+        message,
+      );
+      await this.myHomeParkingFcmService.sendMessage({
+        tokens: fcmTokens,
+        notification: {
+          title: '차량 주차 알림',
+          body: message,
+        },
+      });
+    }
+  }
+}
