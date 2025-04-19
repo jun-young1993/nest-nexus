@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import {
   WinstonModule,
   utilities as nestWinstonModuleUtilities,
@@ -7,6 +7,7 @@ import * as winston from 'winston';
 import * as winstonDaily from 'winston-daily-rotate-file';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AllConfigType } from '../config/config.type';
+import { RequestLoggerMiddleware } from './middleware/request-logger.middleware';
 
 @Module({
   imports: [
@@ -67,4 +68,8 @@ import { AllConfigType } from '../config/config.type';
   ],
   exports: [WinstonModule],
 })
-export class LoggerModule {}
+export class LoggerModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}
