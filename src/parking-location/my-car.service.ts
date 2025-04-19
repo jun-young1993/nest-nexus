@@ -56,7 +56,7 @@ export class MyCarService {
   async getFcmTokens(carNumber: CarNumber): Promise<string[]> {
     const parkingLocationId = carNumber.parkingLocationId;
     const carnumbers = await this.carNumberRepository.find({
-      where: { parkingLocationId },
+      where: { parkingLocationId, allowFcmNotification: true },
     });
 
     // FCM 토큰이 있는 차량만 필터링하고 중복 제거

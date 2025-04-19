@@ -17,6 +17,9 @@ export class MyHomeParkingFcmService {
   }
 
   async sendMessage(message: MulticastMessage, dryRun?: boolean) {
+    if (message.tokens.length === 0) {
+      throw new Error('FCM 토큰이 없습니다.');
+    }
     return firebaseAdmin.messaging().sendEachForMulticast(message, dryRun);
   }
 }

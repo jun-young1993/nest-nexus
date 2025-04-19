@@ -44,6 +44,10 @@ export class CarNumber {
   @Column()
   fcmToken: string;
 
+  @ApiProperty({ description: 'FCM 메세지 허용 여부' })
+  @Column({ default: true })
+  allowFcmNotification: boolean;
+
   @ApiProperty({ description: '최종 업데이트 시간 (상태 변경 시간으로 활용)' })
   @UpdateDateColumn()
   updatedAt: Date;

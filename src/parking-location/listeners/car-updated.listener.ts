@@ -20,7 +20,7 @@ export class CarUpdatedListener {
   @OnEvent(EventName.CAR_UPDATED)
   async handleCarUpdated(event: CarUpdatedEvent) {
     const { currentCarNumber, previousCarNumber } = event;
-    this.logger.info('[CAR UPDATED]', currentCarNumber.id);
+    this.logger.info('[HANDLE CAR UPDATED]', currentCarNumber.id);
     const isUnparked =
       currentCarNumber.isParked === false &&
       previousCarNumber.isParked === true;
@@ -32,6 +32,7 @@ export class CarUpdatedListener {
       // 출차 알림
       const fcmTokens = await this.myCarService.getFcmTokens(currentCarNumber);
       const message = `${carFullNumber} 차량이 ${isParked ? '주차' : '출차'} 되었습니다.`;
+
       await this.logService.createByGroupName(
         parkingLocationGroupName(currentCarNumber.parkingLocation.zoneCode),
         message,
@@ -43,6 +44,7 @@ export class CarUpdatedListener {
           body: message,
         },
       });
+      this.logger.info('[HANDLE CAR UPDATED][SEND FCM]', message);
     }
   }
 }
