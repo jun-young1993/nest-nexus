@@ -63,6 +63,14 @@ export class CarNumber {
   @Column()
   parkingLocationId: string;
 
+  @ApiProperty({ description: '입차 예정 시간' })
+  @Column({ type: 'timestamp', nullable: true })
+  expectedInTime: Date;
+
+  @ApiProperty({ description: '출차 예정 시간' })
+  @Column({ type: 'timestamp', nullable: true })
+  expectedOutTime: Date;
+
   // 계산된 속성
   fullNumber: string;
   jsonData: Record<string, any>;
@@ -81,6 +89,8 @@ export class CarNumber {
       fcmToken: this.fcmToken,
       parkingLocationId: this.parkingLocationId,
       fullNumber: this.fullNumber,
+      expectedInTime: this.expectedInTime,
+      expectedOutTime: this.expectedOutTime,
     };
   }
 }
