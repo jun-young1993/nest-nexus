@@ -63,13 +63,9 @@ export class CarNumber {
   @Column()
   parkingLocationId: string;
 
-  @ApiProperty({ description: '입차 예정 시간' })
+  @ApiProperty({ description: '입차 출차 예정 시간' })
   @Column({ type: 'timestamp', nullable: true })
-  expectedInTime: Date;
-
-  @ApiProperty({ description: '출차 예정 시간' })
-  @Column({ type: 'timestamp', nullable: true })
-  expectedOutTime: Date;
+  expectedTime: Date;
 
   // 계산된 속성
   fullNumber: string;

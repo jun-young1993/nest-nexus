@@ -24,22 +24,13 @@ export class CarNumberDto {
   message?: string;
 
   @ApiProperty({
-    description: '입차 예정 시간',
+    description: '입차 출차 예정 시간',
     required: false,
     example: new Date().toISOString(),
   })
   @IsOptional()
   @IsDateString()
-  expectedInTime?: Date;
-
-  @ApiProperty({
-    description: '출차 예정 시간',
-    required: false,
-    example: new Date().toISOString(),
-  })
-  @IsOptional()
-  @IsDateString()
-  expectedOutTime?: Date;
+  expectedTime?: Date;
 }
 
 export class CreateParkingLocationDto {
