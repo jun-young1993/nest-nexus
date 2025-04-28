@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsOptional, IsString } from 'class-validator';
 
 export class CarNumberDto {
   @ApiProperty({ description: '차량 지역 코드 (예: 31)' })
@@ -14,10 +14,32 @@ export class CarNumberDto {
   @ApiProperty({ description: '주차 여부', default: true })
   isParked: boolean;
 
-  @ApiProperty({ description: '차량 메세지', required: false })
+  @ApiProperty({
+    description: '차량 메세지',
+    required: false,
+    example: '차량 메모',
+  })
   @IsOptional()
   @IsString()
   message?: string;
+
+  @ApiProperty({
+    description: '입차 예정 시간',
+    required: false,
+    example: new Date().toISOString(),
+  })
+  @IsOptional()
+  @IsDateString()
+  expectedInTime?: Date;
+
+  @ApiProperty({
+    description: '출차 예정 시간',
+    required: false,
+    example: new Date().toISOString(),
+  })
+  @IsOptional()
+  @IsDateString()
+  expectedOutTime?: Date;
 }
 
 export class CreateParkingLocationDto {
