@@ -27,10 +27,11 @@ export class CarNumberDto {
     description: '입차 출차 예정 시간',
     required: false,
     example: new Date().toISOString(),
+    nullable: true,
   })
   @IsOptional()
   @IsDateString()
-  expectedTime?: Date;
+  expectedTime?: Date | null;
 }
 
 export class CreateParkingLocationDto {
