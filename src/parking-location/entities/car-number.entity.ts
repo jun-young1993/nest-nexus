@@ -85,8 +85,7 @@ export class CarNumber {
       fcmToken: this.fcmToken,
       parkingLocationId: this.parkingLocationId,
       fullNumber: this.fullNumber,
-      expectedInTime: this.expectedInTime,
-      expectedOutTime: this.expectedOutTime,
+      expectedTime: this.expectedTime,
     };
   }
 }
