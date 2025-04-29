@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CarNumber } from './entities/car-number.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, LessThanOrEqual, Not, Repository, And } from 'typeorm';
 import { UpdateCarNumberDto } from './dto/update-car-number.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventName } from 'src/enums/event-name.enum';
@@ -67,5 +67,18 @@ export class MyCarService {
     );
 
     return Array.from(uniqueTokens);
+  }
+
+  async findCarNumbersWithExpiredTime(): Promise<CarNumber[]> {
+    const now = new Date();
+    const oneMinuteLater = new Date(now.getTime() + 60 * 1000);
+
+    const carNumbers = await this.carNumberRepository.find({
+      where: {
+        expectedTime: And(LessThanOrEqual(oneMinuteLater), Not(IsNull())),
+      },
+    });
+
+    return carNumbers;
   }
 }
