@@ -31,7 +31,20 @@ export class CarUpdatedListener {
     if (isParked || isUnparked) {
       // 출차 알림
       const fcmTokens = await this.myCarService.getFcmTokens(currentCarNumber);
-      const message = `${carFullNumber} 차량이 ${isParked ? '주차' : '출차'} 되었습니다.`;
+      const exceptedTime = previousCarNumber.expectedTime;
+      let exceptedDiffMinutes = 0;
+      if (exceptedTime) {
+        const currentTime = new Date().getTime();
+        const expectedTime = new Date(exceptedTime).getTime();
+        const diffMinutes =
+          Math.floor((currentTime - expectedTime) / (1000 * 60)) * -1;
+        exceptedDiffMinutes = diffMinutes;
+      }
+
+      const message =
+        exceptedDiffMinutes === 0
+          ? `${carFullNumber} 차량이 ${isParked ? '주차' : '출차'} 되었습니다.`
+          : `${carFullNumber} 차량의 예상 ${isParked ? '주차' : '출차'} 시간은 ${exceptedDiffMinutes}분 전입니다.`;
 
       await this.logService.createByGroupName(
         parkingLocationGroupName(currentCarNumber.parkingLocation.zoneCode),

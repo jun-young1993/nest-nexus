@@ -6,14 +6,15 @@ import { GithubModule } from '../github/github.module';
 import { OpenaiModule } from '../openai/openai.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GeminiModule } from 'src/gemini/gemini.module';
+import { ParkingLocationModule } from 'src/parking-location/parking-location.module';
 
 @Module({
   imports: [
     AlieModule,
     GithubModule,
     OpenaiModule,
-    ScheduleModule.forRoot(),
     GeminiModule,
+    ParkingLocationModule,
   ],
   controllers: [TasksController],
   providers: [TasksService, ScheduleModule],

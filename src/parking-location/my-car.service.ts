@@ -69,9 +69,13 @@ export class MyCarService {
     return Array.from(uniqueTokens);
   }
 
-  async findCarNumbersWithExpiredTime(): Promise<CarNumber[]> {
+  async findCarNumbersWithExpiredTime(
+    minutesBeforeExpiration: number = 5,
+  ): Promise<CarNumber[]> {
     const now = new Date();
-    const oneMinuteLater = new Date(now.getTime() + 60 * 1000);
+    const oneMinuteLater = new Date(
+      now.getTime() + minutesBeforeExpiration * 60 * 1000,
+    );
 
     const carNumbers = await this.carNumberRepository.find({
       where: {

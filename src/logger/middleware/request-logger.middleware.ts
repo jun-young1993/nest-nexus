@@ -12,20 +12,20 @@ export class RequestLoggerMiddleware implements NestMiddleware {
     const startTime = Date.now();
     const userAgent = req.get('user-agent') || '';
     // 요청 로깅
-    this.logger.info('[REQUEST MIDDLEWARE] START');
-    this.logger.info(`[Request] ${method} ${originalUrl}`);
-    this.logger.info('Query:', query);
-    this.logger.info('Params:', params);
-    this.logger.info('Body:', body);
-    this.logger.info('IP:', ip);
-    this.logger.info('User-Agent:', userAgent);
-    this.logger.info('[REQUEST MIDDLEWARE] END');
+    this.logger.http('[REQUEST MIDDLEWARE] START');
+    this.logger.http(`[Request] ${method} ${originalUrl}`);
+    this.logger.http('Query:', query);
+    this.logger.http('Params:', params);
+    this.logger.http('Body:', body);
+    this.logger.http('IP:', ip);
+    this.logger.http('User-Agent:', userAgent);
+    this.logger.http('[REQUEST MIDDLEWARE] END');
 
     // 응답 로깅을 위한 이벤트 리스너
     res.on('finish', () => {
       const duration = Date.now() - startTime;
       const { statusCode } = res;
-      this.logger.info(
+      this.logger.http(
         `[Response] ${method} ${originalUrl} ${statusCode} ${duration}ms`,
       );
     });

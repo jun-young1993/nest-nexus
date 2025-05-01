@@ -31,6 +31,7 @@ import { LogModule } from './log/log.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import myHomeParkingFcmConfig from './config/my-home-parking-fcm.config';
 import { EventModule } from './event/event.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { EventModule } from './event/event.module';
       ],
       envFilePath: ['.env'],
     }),
+    ScheduleModule.forRoot(),
     EventModule,
     TypeormModule,
     HttpModule,
