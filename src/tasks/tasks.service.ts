@@ -18,7 +18,7 @@ export class TasksService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron('0 */2 * * * *')
   async checkExpectedTimeCarNumbers() {
     this.logger.task('[CHECK EXPECTED TIME CAR NUMBERS][START]');
     const carNumbers = await this.myCarService.findCarNumbersWithExpiredTime(5);
