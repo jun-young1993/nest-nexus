@@ -42,7 +42,7 @@ export class ParkingLocationService {
   async findOne(id: string): Promise<ParkingLocation> {
     const parkingLocation = await this.parkingLocationRepository.findOne({
       where: { id },
-      relations: ['carNumber', 'threeObjects'],
+      relations: ['carNumbers', 'threeObjects'],
     });
 
     if (!parkingLocation) {
