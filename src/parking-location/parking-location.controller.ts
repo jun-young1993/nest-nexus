@@ -49,21 +49,7 @@ export class ParkingLocationController {
   create(@Body() createParkingLocationDto: CreateParkingLocationDto) {
     this.logger.info('[PARKING-LOCATION][CREATE][PARAMS]');
     this.logger.info(CreateParkingLocationDto);
-    const noticeGroup = this.noticeGroupService.findOneByNameOrCreate(
-      parkingLocationGroupName(createParkingLocationDto.zoneCode),
-    );
-    if (!noticeGroup) {
-      throw new InternalServerErrorException('Notice group not found');
-    }
-
-    const logGroup = this.logGroupService.findOneByNameOrCreate(
-      parkingLocationGroupName(createParkingLocationDto.zoneCode),
-    );
-    if (!logGroup) {
-      throw new InternalServerErrorException('Log group not found');
-    }
-
-    return this.parkingLocationService.create(createParkingLocationDto);
+    return this.parkingLocationService.createMany(createParkingLocationDto);
   }
 
   @Get(':id')

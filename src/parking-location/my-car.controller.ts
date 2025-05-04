@@ -7,6 +7,8 @@ import { SendFcmDto } from './dto/send-fcm.dto';
 import { MyHomeParkingFcmService } from 'src/firebase/fcm/my-home-parking-fcm.service';
 import { LogService } from 'src/log/log.service';
 import { parkingLocationGroupName } from './constance/parking-location.constance';
+import { UpdateCarNumberLocationDto } from './dto/update-car-number-location.dto';
+import { ParkingLocationService } from './parking-location.service';
 
 @ApiTags('My-Car')
 @Controller('my-car')
@@ -15,6 +17,7 @@ export class MyCarController {
     private readonly myHomeParkingFcmService: MyHomeParkingFcmService,
     private readonly myCarService: MyCarService,
     private readonly logService: LogService,
+    private readonly parkingLocationService: ParkingLocationService,
   ) {}
 
   @Get()
@@ -52,6 +55,25 @@ export class MyCarController {
     @Body() updateCarNumberDto: UpdateCarNumberDto,
   ): Promise<CarNumber> {
     return this.myCarService.update(id, updateCarNumberDto);
+  }
+
+  @Put('location/:id')
+  @ApiOperation({ summary: '차량 위치 수정' })
+  @ApiResponse({
+    status: 200,
+    description: '차량 위치 수정 성공',
+    type: CarNumber,
+  })
+  async updateLocation(
+    @Param('id') id: string,
+    @Body() updateCarNumberLocationDto: UpdateCarNumberLocationDto,
+  ) {
+    const parkingLocation = await this.parkingLocationService.create({
+      zoneCode: updateCarNumberLocationDto.zoneCode,
+    });
+    const carNumber = await this.myCarService.findOne(id);
+    carNumber.parkingLocationId = parkingLocation.id;
+    return this.myCarService.update(id, carNumber);
   }
 
   @Put('message/:id')

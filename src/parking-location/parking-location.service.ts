@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateParkingLocationDto } from './dto/create-parking-location.dto';
 import { ParkingLocation } from './entities/parking-location.entity';
 import { CarNumber } from './entities/car-number.entity';
+import { parkingLocationGroupName } from './constance/parking-location.constance';
+import { LogGroupService } from 'src/log/log-group.service';
+import { NoticeGroupService } from 'src/notice/notice-group.service';
 
 @Injectable()
 export class ParkingLocationService {
@@ -12,6 +19,8 @@ export class ParkingLocationService {
     private parkingLocationRepository: Repository<ParkingLocation>,
     @InjectRepository(CarNumber)
     private carNumberRepository: Repository<CarNumber>,
+    private readonly noticeGroupService: NoticeGroupService,
+    private readonly logGroupService: LogGroupService,
   ) {}
 
   async create(
@@ -63,6 +72,22 @@ export class ParkingLocationService {
     return parkingLocations;
   }
 
+  async createMany(createParkingLocationDto: CreateParkingLocationDto) {
+    const noticeGroup = this.noticeGroupService.findOneByNameOrCreate(
+      parkingLocationGroupName(createParkingLocationDto.zoneCode),
+    );
+    if (!noticeGroup) {
+      throw new InternalServerErrorException('Notice group not found');
+    }
+
+    const logGroup = this.logGroupService.findOneByNameOrCreate(
+      parkingLocationGroupName(createParkingLocationDto.zoneCode),
+    );
+    if (!logGroup) {
+      throw new InternalServerErrorException('Log group not found');
+    }
+    return this.create(createParkingLocationDto);
+  }
   // update(id: number, updateParkingLocationDto: UpdateParkingLocationDto) {
   //   return `This action updates a #${id} parkingLocation`;
   // }

@@ -20,6 +20,12 @@ export class TasksService {
 
   @Cron('0 */2 * * * *')
   async checkExpectedTimeCarNumbers() {
+    const isDev = this.configService.getOrThrow('app.is_dev', {
+      infer: true,
+    });
+    if (isDev) {
+      return;
+    }
     this.logger.task('[CHECK EXPECTED TIME CAR NUMBERS][START]');
     const carNumbers = await this.myCarService.findCarNumbersWithExpiredTime(5);
     this.logger.task(

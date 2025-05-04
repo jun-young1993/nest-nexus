@@ -35,9 +35,6 @@ export class CarNumberDto {
 }
 
 export class CreateParkingLocationDto {
-  @ApiProperty({ description: '주소' })
-  address: string;
-
   @ApiProperty({ description: '주차 구역 코드' })
   zoneCode: string;
 
@@ -46,7 +43,7 @@ export class CreateParkingLocationDto {
     enum: ['USER_HOME', 'PARKING_SPOT', 'PICKUP_POINT'],
     default: 'USER_HOME',
   })
-  type: 'USER_HOME';
+  type?: 'USER_HOME' | 'PARKING_SPOT' | 'PICKUP_POINT';
 
   @ApiProperty({ description: '설명', required: false })
   description?: string;
