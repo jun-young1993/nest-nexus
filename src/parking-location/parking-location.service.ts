@@ -28,6 +28,7 @@ export class ParkingLocationService {
   ): Promise<CarNumber> {
     const { carNumber: carNumberDto, ...parkingLocationData } =
       createParkingLocationDto;
+
     // 주차 위치 생성
     const parkingLocation =
       (await this.findByZoneCode(parkingLocationData.zoneCode)) ||
@@ -45,6 +46,18 @@ export class ParkingLocationService {
     }
 
     throw new NotFoundException('Car number not found');
+  }
+
+  async findOrCreateLocation(
+    createParkingLocationDto: CreateParkingLocationDto,
+  ): Promise<ParkingLocation> {
+    const parkingLocation =
+      (await this.findByZoneCode(createParkingLocationDto.zoneCode)) ||
+      (await this.parkingLocationRepository.save(
+        this.parkingLocationRepository.create(createParkingLocationDto),
+      ));
+
+    return parkingLocation;
   }
 
   async findOne(id: string): Promise<ParkingLocation> {
