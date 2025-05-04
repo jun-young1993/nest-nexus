@@ -28,7 +28,6 @@ export class ParkingLocationService {
   ): Promise<CarNumber> {
     const { carNumber: carNumberDto, ...parkingLocationData } =
       createParkingLocationDto;
-
     // 주차 위치 생성
     const parkingLocation =
       (await this.findByZoneCode(parkingLocationData.zoneCode)) ||
