@@ -72,11 +72,13 @@ export class MyCarController {
       await this.parkingLocationService.findOrCreateLocation({
         zoneCode: updateCarNumberLocationDto.zoneCode,
       });
-
-    const carNumber = await this.myCarService.findOne(id);
-    carNumber.parkingLocationId = parkingLocation.id;
-    console.log('carNumber', carNumber);
-    return this.myCarService.update(id, carNumber);
+    const carNumber = await this.myCarService.update(id, {
+      parkingLocationId: parkingLocation.id,
+    });
+    console.log(carNumber);
+    return this.myCarService.update(id, {
+      parkingLocationId: parkingLocation.id,
+    });
   }
 
   @Put('message/:id')

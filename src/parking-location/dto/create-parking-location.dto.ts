@@ -14,6 +14,9 @@ export class CarNumberDto {
   @ApiProperty({ description: '주차 여부', default: true })
   isParked: boolean;
 
+  @ApiProperty({ description: '주차 위치 ID', required: false })
+  parkingLocationId?: string;
+
   @ApiProperty({
     description: '차량 메세지',
     required: false,
