@@ -84,9 +84,15 @@ export class ParkingLocationService {
     return parkingLocations;
   }
 
+  async findOrCreateNoticeGroup(zoneCode: string) {
+    return this.noticeGroupService.findOneByNameOrCreate(
+      parkingLocationGroupName(zoneCode),
+    );
+  }
+
   async createMany(createParkingLocationDto: CreateParkingLocationDto) {
-    const noticeGroup = this.noticeGroupService.findOneByNameOrCreate(
-      parkingLocationGroupName(createParkingLocationDto.zoneCode),
+    const noticeGroup = await this.findOrCreateNoticeGroup(
+      createParkingLocationDto.zoneCode,
     );
     if (!noticeGroup) {
       throw new InternalServerErrorException('Notice group not found');

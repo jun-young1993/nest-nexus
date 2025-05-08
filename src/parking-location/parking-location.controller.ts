@@ -95,7 +95,8 @@ export class ParkingLocationController {
     description: '구역 코드 (예: "강남구")',
     type: 'string',
   })
-  findZoneNotice(@Param('zoneCode') zoneCode: string) {
+  async findZoneNotice(@Param('zoneCode') zoneCode: string) {
+    await this.parkingLocationService.findOrCreateNoticeGroup(zoneCode);
     const notice = this.noticeService.findByName(
       parkingLocationGroupName(zoneCode),
     );
