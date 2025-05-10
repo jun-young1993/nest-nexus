@@ -11,10 +11,10 @@ import { RequestLoggerMiddleware } from './middleware/request-logger.middleware'
 
 // 커스텀 로그 레벨 정의
 const levels = {
-  error: 0,
-  warn: 1,
-  info: 2,
-  http: 3,
+  http: 0,
+  error: 1,
+  warn: 2,
+  info: 3,
   task: 4,
   debug: 5,
   silly: 6,

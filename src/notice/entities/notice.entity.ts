@@ -50,6 +50,6 @@ export class Notice {
   @OneToMany(() => NoticeReply, (noticeReply) => noticeReply.notice)
   noticeReplies: NoticeReply[];
 
-  @OneToMany(() => NoticeReport, report => report.notice)
+  @OneToMany(() => NoticeReport, (report) => report.notice)
   reports: NoticeReport[];
 }
