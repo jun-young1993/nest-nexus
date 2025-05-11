@@ -1,11 +1,4 @@
-import {
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsPort,
-  IsSemVer,
-  IsString,
-} from 'class-validator';
+import { IsOptional, IsPort, IsString } from 'class-validator';
 import { DbConfig } from './config.type';
 import { registerAs } from '@nestjs/config';
 import validateConfig from '../utils/validate-config';

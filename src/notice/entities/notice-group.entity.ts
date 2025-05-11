@@ -1,5 +1,12 @@
+import { Goal } from 'src/goal/entities/goal.entity';
 import { Notice } from 'src/notice/entities/notice.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class NoticeGroup {
@@ -11,4 +18,7 @@ export class NoticeGroup {
 
   @OneToMany(() => Notice, (notice) => notice.noticeGroup)
   notices: Notice[];
+
+  @OneToOne(() => Goal, (goal) => goal.noticeGroup)
+  goal: Goal;
 }

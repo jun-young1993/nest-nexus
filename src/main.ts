@@ -7,6 +7,10 @@ import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as cookieParser from 'cookie-parser';
+import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
+import { HttpRequestInterceptor } from './core/interceptors/http-request.interceptor';
+import { HttpExceptionFilter } from './core/filters/http-exception.filter';
+import { CustomLogger } from './config/logger.config';
 // import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {
@@ -18,6 +22,7 @@ async function bootstrap() {
             cert: fs.readFileSync(process.env.APP_SSL_CRT),
           }
         : null,
+    logger: new CustomLogger(),
   });
 
   const configService = app.get(ConfigService<AllConfigType>);
@@ -25,7 +30,13 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
   app.useWebSocketAdapter(new IoAdapter(app));
   const allowedOrigins = process.env.ALLOW_ORIGINS.split(',');
   app.enableCors({
@@ -36,10 +47,20 @@ async function bootstrap() {
   });
   app.use(cookieParser());
 
+  // 전역 인터셉터 적용
+  app.useGlobalInterceptors(
+    new HttpRequestInterceptor(),
+    new LoggingInterceptor(),
+  );
+  
+  // 전역 예외 필터 적용
+  app.useGlobalFilters(new HttpExceptionFilter());
+
   const options = new DocumentBuilder()
     .setTitle('API')
     .setDescription('API docs')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);

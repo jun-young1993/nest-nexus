@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { NoticeGroup } from 'src/notice/entities/notice-group.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('goal')
 export class Goal {
@@ -6,8 +13,18 @@ export class Goal {
   id: string;
 
   @Column()
-  name: string;
+  title: string;
 
   @Column()
   description: string;
+
+  @Column()
+  startDate: Date;
+
+  @Column()
+  endDate: Date;
+
+  @OneToOne(() => NoticeGroup, (noticeGroup) => noticeGroup.goal)
+  @JoinColumn({ name: 'noticeGroupId' })
+  noticeGroup: NoticeGroup;
 }

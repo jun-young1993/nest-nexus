@@ -32,6 +32,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import myHomeParkingFcmConfig from './config/my-home-parking-fcm.config';
 import { EventModule } from './event/event.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { GoalModule } from './goal/goal.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     NoticeModule,
     LogModule,
     FirebaseModule,
+    GoalModule,
   ],
   controllers: [],
   providers: [],
