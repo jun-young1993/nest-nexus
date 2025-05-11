@@ -36,4 +36,12 @@ export class CreateGoalDto {
   @IsDate()
   @IsNotEmpty()
   endDate: Date;
+
+  @ApiProperty({
+    description: '사용자 ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 }

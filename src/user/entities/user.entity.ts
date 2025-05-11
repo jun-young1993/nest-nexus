@@ -9,6 +9,7 @@ import {
 import { Post } from '../../post/entities/post.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserType } from '../enum/user.type';
+import { GoalUser } from '../../goal/entities/goal-user.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -49,4 +50,7 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[]; // 작성한 게시글
+
+  @OneToMany(() => GoalUser, (goalUser) => goalUser.user)
+  goalUsers: GoalUser[];
 }

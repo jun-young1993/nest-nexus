@@ -3,9 +3,11 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { GoalUser } from './goal-user.entity';
 
 @Entity('goal')
 export class Goal {
@@ -27,4 +29,7 @@ export class Goal {
   @OneToOne(() => NoticeGroup, (noticeGroup) => noticeGroup.goal)
   @JoinColumn({ name: 'noticeGroupId' })
   noticeGroup: NoticeGroup;
+
+  @OneToMany(() => GoalUser, (goalUser) => goalUser.goal)
+  goalUsers: GoalUser[];
 }
