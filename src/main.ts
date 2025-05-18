@@ -52,7 +52,7 @@ async function bootstrap() {
     new HttpRequestInterceptor(),
     new LoggingInterceptor(),
   );
-  
+
   // 전역 예외 필터 적용
   app.useGlobalFilters(new HttpExceptionFilter());
 
