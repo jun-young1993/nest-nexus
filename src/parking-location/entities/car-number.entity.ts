@@ -34,7 +34,7 @@ export class CarNumber {
 
   @ApiProperty({ description: ' 차주 번호' })
   @Column({ nullable: true })
-  phoneNumber: string;
+  phoneNumber?: string;
 
   @ApiProperty({ description: '차량 메세지' })
   @Column({ nullable: true })

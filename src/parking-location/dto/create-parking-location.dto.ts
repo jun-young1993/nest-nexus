@@ -35,6 +35,10 @@ export class CarNumberDto {
   @IsOptional()
   @IsDateString()
   expectedTime?: Date | null;
+
+  @ApiProperty({ description: 'FCM TOKEN', required: false })
+  @IsOptional()
+  fcmToken?: string;
 }
 
 export class CreateParkingLocationDto {

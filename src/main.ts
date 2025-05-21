@@ -10,7 +10,7 @@ import * as cookieParser from 'cookie-parser';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { HttpRequestInterceptor } from './core/interceptors/http-request.interceptor';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
-import { CustomLogger } from './config/logger.config';
+// import { CustomLogger } from './config/logger.config';
 // import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {
@@ -22,7 +22,7 @@ async function bootstrap() {
             cert: fs.readFileSync(process.env.APP_SSL_CRT),
           }
         : null,
-    logger: new CustomLogger(),
+    // logger: new CustomLogger(),
   });
 
   const configService = app.get(ConfigService<AllConfigType>);
@@ -34,7 +34,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false,
     }),
   );
   app.useWebSocketAdapter(new IoAdapter(app));

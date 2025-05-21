@@ -28,7 +28,7 @@ export class ParkingLocationService {
   ): Promise<CarNumber> {
     const { carNumber: carNumberDto, ...parkingLocationData } =
       createParkingLocationDto;
-
+    console.log('create');
     // 주차 위치 생성
     const parkingLocation =
       (await this.findByZoneCode(parkingLocationData.zoneCode)) ||
@@ -40,6 +40,7 @@ export class ParkingLocationService {
     if (carNumberDto) {
       const carNumber = await this.carNumberRepository.create({
         ...carNumberDto,
+        parkingLocation: parkingLocation,
         parkingLocationId: parkingLocation.id,
       });
       return await this.carNumberRepository.save(carNumber);
