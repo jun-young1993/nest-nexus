@@ -30,13 +30,7 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: false,
-    }),
-  );
+  app.useGlobalPipes(new ValidationPipe());
   app.useWebSocketAdapter(new IoAdapter(app));
   const allowedOrigins = process.env.ALLOW_ORIGINS.split(',');
   app.enableCors({

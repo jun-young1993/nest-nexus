@@ -47,9 +47,6 @@ export class ParkingLocationController {
     type: ParkingLocation,
   })
   create(@Body() createParkingLocationDto: CreateParkingLocationDto) {
-    this.logger.info('[PARKING-LOCATION][CREATE][PARAMS]');
-    this.logger.info(createParkingLocationDto);
-    console.log(createParkingLocationDto);
     return this.parkingLocationService.createMany(createParkingLocationDto);
   }
 
