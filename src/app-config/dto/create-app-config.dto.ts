@@ -16,4 +16,14 @@ export class CreateAppConfigDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty({ description: '애플 아이디' })
+  @IsNotEmpty()
+  @IsString()
+  appleId: string;
+
+  @ApiProperty({ description: '패키지 이름' })
+  @IsNotEmpty()
+  @IsString()
+  packageName: string;
 }

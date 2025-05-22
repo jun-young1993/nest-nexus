@@ -20,6 +20,13 @@ export class AppConfig {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column()
+  appleId: string;
+
+  @Column()
+  packageName: string;
+
+  @Column()
   @CreateDateColumn()
   createdAt: Date;
 
