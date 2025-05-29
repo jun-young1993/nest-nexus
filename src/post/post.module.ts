@@ -7,15 +7,14 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PostResolver } from './post.resolver';
 import { PostService } from './post.service';
-import {PostTagService} from "./post-tag.service";
-import {PostTagResolver} from "./post-tag.resolver";
-import {User} from "../user/entities/user.entity";
-import {AuthResolver} from "../auth/auth.resolver";
-import {AuthModule} from "../auth/auth.module";
+import { PostTagService } from './post-tag.service';
+import { PostTagResolver } from './post-tag.resolver';
+import { User } from '../user/entities/user.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-      AuthModule,
+    AuthModule,
     TypeOrmModule.forFeature([Post, PostTag, User]),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

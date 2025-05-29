@@ -1,18 +1,16 @@
-import {Args, Mutation, Query, Resolver} from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { PostService } from './post.service';
-import {Post, Posts } from './models/post.models';
-import {CreatePostInputModel} from "./models/create-post.model";
-import {Post as PostEntity} from "./entities/post.entity"
+import { Post, Posts } from './models/post.models';
+import { CreatePostInputModel } from './models/create-post.model';
+import { Post as PostEntity } from './entities/post.entity';
 
 @Resolver()
 export class PostResolver {
-  constructor(
-      private readonly postService: PostService
-  ) {}
+  constructor(private readonly postService: PostService) {}
 
   @Mutation(() => Post)
   async createPost(
-      @Args('input') input: CreatePostInputModel,
+    @Args('input') input: CreatePostInputModel,
   ): Promise<PostEntity> {
     const { tagIds, title, content } = input;
 
@@ -28,7 +26,7 @@ export class PostResolver {
     return await this.postService.findAll({
       limit: limit,
       page: page,
-      tagId: tagId
+      tagId: tagId,
     });
   }
 
@@ -36,5 +34,4 @@ export class PostResolver {
   async getPost(@Args('id', { type: () => String }) id) {
     return this.postService.findOne(id);
   }
-
 }

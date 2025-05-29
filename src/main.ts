@@ -36,16 +36,16 @@ async function bootstrap() {
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
-    methods: 'GET,POST',
-    allowedHeaders: 'Content-Type,Authorization',
+    methods: 'GET,POST,PUT,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,Accept',
   });
   app.use(cookieParser());
 
   // 전역 인터셉터 적용
-  app.useGlobalInterceptors(
-    new HttpRequestInterceptor(),
-    new LoggingInterceptor(),
-  );
+  // app.useGlobalInterceptors(
+  //   new HttpRequestInterceptor(),
+  //   new LoggingInterceptor(),
+  // );
 
   // 전역 예외 필터 적용
   app.useGlobalFilters(new HttpExceptionFilter());
