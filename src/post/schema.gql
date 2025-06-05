@@ -55,11 +55,17 @@ type AuthResponse {
 }
 
 type Query {
-  getPosts(limit: Float, page: Float, tagId: String): Posts!
+  getPosts(limit: Float, page: Float, tagId: String, type: PostType): Posts!
   getPost(id: String!): Post!
   getTagsWithPostCount: [TagWithPostCount!]!
   getPostTags: [PostTag!]!
   me: User
+}
+
+"""게시글 타입"""
+enum PostType {
+  POST
+  PROJECT
 }
 
 type Mutation {

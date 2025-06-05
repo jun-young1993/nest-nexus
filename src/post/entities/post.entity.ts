@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { PostTag } from './post-tag.entity';
 import { User } from '../../user/entities/user.entity';
+import { PostType } from '../enums/post-type.enum';
 
 @Entity()
 export class Post {
@@ -19,6 +20,9 @@ export class Post {
 
   @Column({ type: 'text' })
   content: string;
+
+  @Column({ type: 'enum', enum: PostType, default: PostType.POST })
+  type: PostType;
 
   @Column({ type: 'timestamp' })
   createdAt: Date;

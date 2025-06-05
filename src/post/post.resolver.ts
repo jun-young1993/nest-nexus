@@ -3,6 +3,7 @@ import { PostService } from './post.service';
 import { Post, Posts } from './models/post.models';
 import { CreatePostInputModel } from './models/create-post.model';
 import { Post as PostEntity } from './entities/post.entity';
+import { PostType } from './enums/post-type.enum';
 
 @Resolver()
 export class PostResolver {
@@ -22,11 +23,13 @@ export class PostResolver {
     @Args('limit', { nullable: true, type: () => Number }) limit,
     @Args('page', { nullable: true, type: () => Number }) page,
     @Args('tagId', { nullable: true, type: () => String }) tagId,
+    @Args('type', { nullable: true, type: () => PostType }) type,
   ) {
     return await this.postService.findAll({
       limit: limit,
       page: page,
       tagId: tagId,
+      type: type,
     });
   }
 

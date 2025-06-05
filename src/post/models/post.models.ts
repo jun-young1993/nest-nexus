@@ -3,11 +3,11 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class PostTag {
   @Field()
-  id: string
+  id: string;
   @Field()
-  name: string
+  name: string;
   @Field()
-  color: string
+  color: string;
 }
 
 @ObjectType()
@@ -30,7 +30,7 @@ export class Post {
   updatedAt: Date;
 
   @Field(() => [PostTag])
-  tags: PostTag[]
+  tags: PostTag[];
 }
 
 @ObjectType()
@@ -52,5 +52,3 @@ export class Posts {
   @Field(() => PaginationInfo)
   pagination: PaginationInfo;
 }
-
-
