@@ -4,9 +4,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
 } from 'typeorm';
 import { Goal } from './goal.entity';
 import { User } from 'src/user/entities/user.entity';
+import { GoalProgress } from './goal-progress.entity';
 
 @Entity('goal_user')
 export class GoalUser {
@@ -29,4 +31,7 @@ export class GoalUser {
   @ManyToOne(() => User, (user) => user.goalUsers)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => GoalProgress, (goalProgress) => goalProgress.goalUser)
+  goalProgresses: GoalProgress[];
 }

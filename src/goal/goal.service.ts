@@ -45,7 +45,16 @@ export class GoalService {
   async findAll(): Promise<Goal[]> {
     this.logger.log('Finding all goals');
     const goals = await this.goalRepository.find({
-      relations: ['noticeGroup', 'noticeGroup.notices'],
+      relations: [
+        'noticeGroup',
+        'noticeGroup.notices',
+        'goalUsers',
+        'goalUsers.user',
+        'goalUsers.goalProgresses',
+      ],
+      order: {
+        createdAt: 'DESC',
+      },
     });
     this.logger.log(`Found ${goals.length} goals`);
     return goals;

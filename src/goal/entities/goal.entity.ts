@@ -1,6 +1,7 @@
 import { NoticeGroup } from 'src/notice/entities/notice-group.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   OneToMany,
@@ -25,6 +26,9 @@ export class Goal {
 
   @Column()
   endDate: Date;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
   @OneToOne(() => NoticeGroup, (noticeGroup) => noticeGroup.goal)
   @JoinColumn({ name: 'noticeGroupId' })
