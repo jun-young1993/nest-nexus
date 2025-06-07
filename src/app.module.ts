@@ -34,6 +34,8 @@ import { EventModule } from './event/event.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GoalModule } from './goal/goal.module';
 import { AppConfigModule } from './app-config/app-config.module';
+import { MailerModule } from './mailer/mailer.module';
+import mailConfig from './config/mail.config';
 
 @Module({
   imports: [
@@ -48,6 +50,7 @@ import { AppConfigModule } from './app-config/app-config.module';
         logConfig,
         dbConfig,
         myHomeParkingFcmConfig,
+        mailConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -76,6 +79,7 @@ import { AppConfigModule } from './app-config/app-config.module';
     FirebaseModule,
     GoalModule,
     AppConfigModule,
+    MailerModule,
   ],
   controllers: [],
   providers: [],
