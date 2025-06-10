@@ -5,12 +5,16 @@ import { CreateGoalDto } from './dto/create-goal.dto';
 import { Goal } from './entities/goal.entity';
 import { NoticeGroupService } from 'src/notice/notice-group.service';
 import { goalGroupName } from 'src/notice/constance/notice-group.constance';
+import { GoalProgress } from './entities/goal-progress.entity';
+import { CreateGoalProgressDto } from './dto/create-goal-progress.dto';
+import { GoalProgressService } from './goal-progress.service';
 @ApiTags('Goals')
 @Controller('goals')
 export class GoalController {
   constructor(
     private readonly goalService: GoalService,
     private readonly noticeGroupService: NoticeGroupService,
+    private readonly goalProgressService: GoalProgressService,
   ) {}
 
   @Post()
@@ -61,5 +65,36 @@ export class GoalController {
     @Param('noticeGroupId') noticeGroupId: string,
   ): Promise<Goal> {
     return this.goalService.findByNoticeGroupId(noticeGroupId);
+  }
+
+  @Post(':goalId/users/:goalUserId/progress')
+  @ApiOperation({ summary: '목표 진행 생성' })
+  @ApiResponse({
+    status: 201,
+    description: '목표 진행이 성공적으로 생성됨',
+    type: GoalProgress,
+  })
+  async createGoalProgress(
+    @Param('goalId') goalId: string,
+    @Param('goalUserId') goalUserId: string,
+    @Body() createGoalProgressDto: CreateGoalProgressDto,
+  ): Promise<Goal> {
+    this.goalProgressService.create(goalId, goalUserId, createGoalProgressDto);
+
+    return this.goalService.findOne(goalId);
+  }
+
+  @Get(':goalId/users/:goalUserId/progress')
+  @ApiOperation({ summary: '목표 진행 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '목표 진행 조회 성공',
+    type: [GoalProgress],
+  })
+  async getGoalProgress(
+    @Param('goalId') goalId: string,
+    @Param('goalUserId') goalUserId: string,
+  ): Promise<GoalProgress[]> {
+    return this.goalProgressService.findAll(goalId, goalUserId);
   }
 }
