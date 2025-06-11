@@ -13,6 +13,10 @@ export class UserService {
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
+    if (createUserDto.username === null) {
+      const count = await this.count();
+      createUserDto.username = `user ${count + 1}`;
+    }
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const newUser = this.userRepository.create({
       ...createUserDto,
@@ -28,5 +32,9 @@ export class UserService {
 
   async findOne(id: string): Promise<User> {
     return this.userRepository.findOne({ where: { id } });
+  }
+
+  async count(): Promise<number> {
+    return this.userRepository.count();
   }
 }
