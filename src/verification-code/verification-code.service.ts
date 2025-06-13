@@ -42,18 +42,18 @@ export class VerificationCodeService {
     );
 
     // 새 인증번호 생성
-    const verificationCode = this.verificationCodeRepository.create({
-      email: dto.email,
-      code: this.generateCode(),
-      expiresAt: this.getExpirationDate(),
-    });
-
-    await this.verificationCodeRepository.save(verificationCode);
-
+    const verificationCode = await this.verificationCodeRepository.save(
+      this.verificationCodeRepository.create({
+        email: dto.email,
+        code: this.generateCode(),
+        expiresAt: this.getExpirationDate(),
+      }),
+    );
+    console.log(verificationCode);
     // 이메일 발송
     await this.mailerService.sendVerificationCode(
       dto.email,
-      verificationCode.code,
+      verificationCode,
       appConfig,
     );
   }

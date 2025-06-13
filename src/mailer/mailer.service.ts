@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MailerService as NestMailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from 'src/app-config/entities/app-config.entity';
+import { VerificationCode } from 'src/verification-code/entities/verification-code.entity';
 
 @Injectable()
 export class MailerService {
@@ -12,16 +13,18 @@ export class MailerService {
 
   async sendVerificationCode(
     to: string,
-    verificationCode: string,
+    verificationCode: VerificationCode,
     appConfig: AppConfig,
   ): Promise<void> {
     const { displayName } = appConfig;
+    const { code, expiresAt } = verificationCode;
     await this.mailerService.sendMail({
       to,
-      subject: `[${displayName}] 인증번호 안내`,
+      subject: `[${displayName}] 인증번호 안내 - ${code}`,
       template: 'verification-code.html',
       context: {
-        verificationCode,
+        verificationCode: code,
+        expiresAt,
         displayName,
       },
     });
