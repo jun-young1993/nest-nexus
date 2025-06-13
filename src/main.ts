@@ -7,6 +7,7 @@ import { AllConfigType } from './config/config.type';
 import * as fs from 'fs';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as cookieParser from 'cookie-parser';
+import * as expressBasicAuth from 'express-basic-auth';
 // import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 // import { HttpRequestInterceptor } from './core/interceptors/http-request.interceptor';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
@@ -40,6 +41,22 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type,Authorization,Accept',
   });
   app.use(cookieParser());
+
+  if (!(process.env.SWAGGER_USER && process.env.SWAGGER_PASSWORD)) {
+    throw new Error(
+      'SWAGGER_USER 또는 SWAGGER_PASSWORD가 설정되지 않았습니다.',
+    );
+  }
+  // Swagger Basic Auth 설정
+  app.use(
+    ['/docs', '/docs-json'],
+    expressBasicAuth({
+      challenge: true,
+      users: {
+        [process.env.SWAGGER_USER]: process.env.SWAGGER_PASSWORD,
+      },
+    }),
+  );
 
   // 전역 인터셉터 적용
   // app.useGlobalInterceptors(

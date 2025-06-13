@@ -36,6 +36,7 @@ import { GoalModule } from './goal/goal.module';
 import { AppConfigModule } from './app-config/app-config.module';
 import { MailerModule } from './mailer/mailer.module';
 import mailConfig from './config/mail.config';
+import { VerificationCodeModule } from './verification-code/verification-code.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import mailConfig from './config/mail.config';
     GoalModule,
     AppConfigModule,
     MailerModule,
+    VerificationCodeModule,
   ],
   controllers: [],
   providers: [],
