@@ -5,6 +5,7 @@ import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from './mailer.service';
 import { MailerController } from './mailer.controller';
+import { AppConfigModule } from 'src/app-config/app-config.module';
 
 @Module({
   imports: [
@@ -23,7 +24,9 @@ import { MailerController } from './mailer.controller';
           from: `"${configService.get<string>('mail.fromName', { infer: true })}" <${configService.get<string>('mail.from', { infer: true })}>`,
         },
         template: {
-          dir: join(process.cwd(), 'dist/mailer/templates'),
+          dir: configService.get<boolean>('app.is_dev', { infer: true })
+            ? join(process.cwd(), 'src/mailer/templates')
+            : join(process.cwd(), 'dist/mailer/templates'),
           adapter: new HandlebarsAdapter(undefined, {
             inlineCssEnabled: true,
           }),
@@ -34,6 +37,7 @@ import { MailerController } from './mailer.controller';
       }),
       inject: [ConfigService],
     }),
+    AppConfigModule,
   ],
   controllers: [MailerController],
   providers: [MailerService],

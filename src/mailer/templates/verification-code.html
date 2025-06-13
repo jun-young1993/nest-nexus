@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>인증번호 안내</title>
+  <title>{{displayName}} 인증번호 안내</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
     
@@ -71,6 +71,12 @@
       display: inline-block;
       min-width: 200px;
       text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      -webkit-user-select: all;
+      user-select: all;
+      cursor: pointer;
+    }
+    .verification-code:active {
+      background-color: #EDF2F7;
     }
     .instruction {
       color: #4A5568;
@@ -126,19 +132,24 @@
       background: linear-gradient(to right, transparent, #E2E8F0, transparent);
       margin: 30px 0;
     }
+    .copy-hint {
+      font-size: 14px;
+      color: #718096;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <!-- <div class="logo">Nest-Nexus</div> -->
-      <h1>인증번호 안내</h1>
+      <h1>{{displayName}} 인증번호 안내</h1>
       <div class="timer">유효시간 5분</div>
     </div>
     <div class="content">
-      <p class="instruction">해당 인증번호를 앱으로 돌아가서 입력해주세요.</p>
+      <p class="instruction">해당 인증번호를 <b>{{displayName}}</b> 앱으로 돌아가서 입력해주세요.</p>
       <div class="verification-box">
         <div class="verification-code">{{verificationCode}}</div>
+        <!-- <p class="copy-hint">인증번호를 터치하면 전체가 선택됩니다</p> -->
       </div>
       <div class="divider"></div>
       <div class="note">

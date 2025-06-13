@@ -21,7 +21,7 @@ export class AppConfigService {
     return await this.appConfigRepository.find();
   }
 
-  async findOne(key: string): Promise<AppConfig> {
+  async findOneByKey(key: string): Promise<AppConfig> {
     const appConfig = await this.appConfigRepository.findOne({
       where: { key },
     });
@@ -45,15 +45,18 @@ export class AppConfigService {
     return appConfigs;
   }
 
-  async update(key: string, updateAppConfigDto: UpdateAppConfigDto): Promise<AppConfig> {
-    const appConfig = await this.findOne(key);
-    
+  async update(
+    key: string,
+    updateAppConfigDto: UpdateAppConfigDto,
+  ): Promise<AppConfig> {
+    const appConfig = await this.findOneByKey(key);
+
     Object.assign(appConfig, updateAppConfigDto);
     return await this.appConfigRepository.save(appConfig);
   }
 
   async remove(key: string): Promise<void> {
-    const appConfig = await this.findOne(key);
+    const appConfig = await this.findOneByKey(key);
     await this.appConfigRepository.remove(appConfig);
   }
-} 
+}

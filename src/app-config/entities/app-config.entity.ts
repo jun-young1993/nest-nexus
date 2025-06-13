@@ -20,6 +20,9 @@ export class AppConfig {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  displayName: string;
+
   @Column()
   appleId: string;
 

@@ -38,7 +38,7 @@ export class AppConfigController {
   @ApiOperation({ summary: '특정 키의 앱 설정 조회' })
   @ApiResponse({ status: 200, description: '특정 키의 앱 설정을 반환합니다.' })
   findOne(@Param('key') key: string) {
-    return this.appConfigService.findOne(key);
+    return this.appConfigService.findOneByKey(key);
   }
 
   @Get('version/:version')

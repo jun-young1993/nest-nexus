@@ -17,4 +17,12 @@ export class VerificationCodeDto {
   })
   @IsNotEmpty()
   to: string;
+
+  @IsString()
+  @ApiProperty({
+    example: 'caught-smoking',
+    description: '앱 Key',
+  })
+  @IsNotEmpty()
+  appKey: string;
 }

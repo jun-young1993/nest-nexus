@@ -10,4 +10,4 @@ import { AppConfig } from './entities/app-config.entity';
   providers: [AppConfigService],
   exports: [AppConfigService],
 })
-export class AppConfigModule {} 
+export class AppConfigModule {}
