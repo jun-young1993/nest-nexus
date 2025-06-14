@@ -34,7 +34,7 @@ export class VerificationCodeService {
   async createVerificationCode(
     dto: CreateVerificationCodeDto,
     appConfig: AppConfig,
-  ): Promise<void> {
+  ): Promise<VerificationCode> {
     // 기존 인증번호 비활성화
     await this.verificationCodeRepository.update(
       { email: dto.email, isVerified: false },
@@ -49,13 +49,15 @@ export class VerificationCodeService {
         expiresAt: this.getExpirationDate(),
       }),
     );
-    console.log(verificationCode);
+
     // 이메일 발송
     await this.mailerService.sendVerificationCode(
       dto.email,
       verificationCode,
       appConfig,
     );
+
+    return verificationCode;
   }
 
   async verifyCode(dto: VerifyCodeDto): Promise<boolean> {

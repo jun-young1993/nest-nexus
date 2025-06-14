@@ -14,6 +14,14 @@ export class CreateVerificationCodeDto {
 }
 
 export class VerifyCodeDto {
+  @IsString()
+  @ApiProperty({
+    example: '123456',
+    description: 'User ID',
+  })
+  @IsNotEmpty()
+  userId: string;
+
   @ApiProperty({ example: 'user@example.com', description: '이메일 주소' })
   @IsEmail()
   email: string;
