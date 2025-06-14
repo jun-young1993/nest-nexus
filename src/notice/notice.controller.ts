@@ -45,16 +45,14 @@ export class NoticeController {
   @ApiResponse({
     status: 200,
   })
-  async findOneByName(
+  async findByName(
     @Param('name') name: string,
     @Query('take') take?: number,
-    @Query('created_at_order') createdAtOrder?: 'ASC' | 'DESC',
+    @Query('skip') skip?: number,
   ) {
-    return this.noticeService.findOneByName(name, {
+    return this.noticeService.findByName(name, {
+      skip: skip || 0,
       take: take || 10,
-      order: {
-        createdAt: createdAtOrder || 'DESC',
-      },
     });
   }
 }

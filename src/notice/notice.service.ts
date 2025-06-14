@@ -48,16 +48,24 @@ export class NoticeService {
 
   async findOneByName(name: string, options?: FindManyOptions<Notice>) {
     const noticeGroup = await this.noticeGroupService.findOneByName(name);
+    if (!noticeGroup) {
+      throw new NotFoundException(`Notice group with name ${name} not found`);
+    }
     return await this.findOneBase({
       where: { noticeGroupId: noticeGroup.id },
       ...options,
     });
   }
 
-  async findByName(name: string) {
+  async findByName(name: string, options?: FindManyOptions<Notice>) {
     const noticeGroup = await this.noticeGroupService.findOneByName(name);
+    if (!noticeGroup) {
+      throw new NotFoundException(`Notice group with name ${name} not found`);
+    }
     return await this.noticeRepository.find({
       where: { noticeGroupId: noticeGroup.id },
+      skip: options?.skip || 0,
+      take: options?.take || 10,
       relations: ['noticeReplies'],
       order: {
         createdAt: 'DESC',
