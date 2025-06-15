@@ -9,7 +9,7 @@ import { NoticeReply } from '../notice/entities/notice-reply.entity';
 export class NoticeReplyController {
   constructor(private readonly noticeReplyService: NoticeReplyService) {}
 
-  @Post()
+  @Post('notice/:id')
   @ApiOperation({ summary: 'Create a new notice reply' })
   @ApiResponse({
     status: 201,
@@ -20,7 +20,7 @@ export class NoticeReplyController {
     return this.noticeReplyService.create(createNoticeReplyDto);
   }
 
-  @Get(':id')
+  @Get('notice/:id')
   @ApiOperation({ summary: 'Get all notice replies by notice id' })
   @ApiResponse({
     status: 200,

@@ -1,4 +1,5 @@
 import { Notice } from 'src/notice/entities/notice.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -23,8 +24,15 @@ export class NoticeReply {
   @JoinColumn({ name: 'noticeId' })
   notice: Notice;
 
-  @Column()
+  @Column({ nullable: true })
   userName: string;
+
+  @Column({ nullable: true })
+  userId: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @CreateDateColumn()
   createdAt: Date;

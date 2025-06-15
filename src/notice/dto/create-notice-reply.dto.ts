@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateNoticeReplyDto {
   @IsString()
@@ -14,9 +14,17 @@ export class CreateNoticeReplyDto {
   })
   noticeId: string;
 
+  @IsOptional()
   @IsString()
   @ApiProperty({
     example: 'test notice reply',
   })
   userName: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    example: 'test notice reply',
+  })
+  userId: string;
 }
