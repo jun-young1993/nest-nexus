@@ -28,6 +28,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService<AllConfigType>);
 
+  app.setGlobalPrefix('/api', { exclude: ['sse', 'messages', 'mcp'] });
+
   app.enableVersioning({
     type: VersioningType.URI,
   });
