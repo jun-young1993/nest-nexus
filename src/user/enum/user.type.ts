@@ -4,4 +4,5 @@ export enum UserType {
   JAKSIM = 'jaksim-one-month',
   MY_HOME_PARKING = 'my-home-parking',
   CAUGHT_SMOKING = 'caught-smoking',
+  MCP_CLIENT = 'mcp-client',
 }
