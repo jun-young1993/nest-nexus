@@ -5,7 +5,7 @@ import { GreetingTool } from './tools/greeting.tool';
 @Module({
   imports: [
     McpModule.forRoot({
-      name: 'rekog-server',
+      name: 'nest-nexus-mcp-server',
       version: '1.0.0',
     }),
   ],
