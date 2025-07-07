@@ -12,7 +12,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Server, Socket } from 'socket.io';
 import { Logger } from 'winston';
 
-@WebSocketGateway(8080, {
+@WebSocketGateway(8090, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST'],
