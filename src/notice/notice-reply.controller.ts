@@ -9,15 +9,18 @@ import { NoticeReply } from '../notice/entities/notice-reply.entity';
 export class NoticeReplyController {
   constructor(private readonly noticeReplyService: NoticeReplyService) {}
 
-  @Post('notice/:id')
+  @Post('notice/:noticeId')
   @ApiOperation({ summary: 'Create a new notice reply' })
   @ApiResponse({
     status: 201,
     description: 'The notice reply has been successfully created.',
     type: CreateNoticeReplyDto,
   })
-  create(@Body() createNoticeReplyDto: CreateNoticeReplyDto) {
-    return this.noticeReplyService.create(createNoticeReplyDto);
+  create(
+    @Param('noticeId') noticeId,
+    @Body() createNoticeReplyDto: CreateNoticeReplyDto,
+  ) {
+    return this.noticeReplyService.create(noticeId, createNoticeReplyDto);
   }
 
   @Get('notice/:id')

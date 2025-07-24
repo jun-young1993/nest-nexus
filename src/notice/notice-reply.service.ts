@@ -11,9 +11,12 @@ export class NoticeReplyService {
     private noticeReplyRepository: Repository<NoticeReply>,
   ) {}
 
-  async create(createNoticeReplyDto: CreateNoticeReplyDto) {
+  async create(noticeId: string, createNoticeReplyDto: CreateNoticeReplyDto) {
     return await this.noticeReplyRepository.save(
-      this.noticeReplyRepository.create(createNoticeReplyDto),
+      this.noticeReplyRepository.create({
+        noticeId,
+        ...createNoticeReplyDto,
+      }),
     );
   }
 
