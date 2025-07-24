@@ -12,9 +12,11 @@ import { NoticeReplyController } from './notice-reply.controller';
 import { NoticeReport } from './entities/notice-report.entity';
 import { NoticeReportService } from './notice-report.service';
 import { NoticeReportController } from './notice-report.controller';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
+    UserModule,
     TypeOrmModule.forFeature([Notice, NoticeGroup, NoticeReply, NoticeReport]),
   ],
   controllers: [
