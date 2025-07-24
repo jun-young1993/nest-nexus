@@ -8,6 +8,12 @@ export class CreateNoticeReplyDto {
   })
   content: string;
 
+  @IsString()
+  @ApiProperty({
+    example: 'test notice Id',
+  })
+  noticeId: string;
+
   @IsOptional()
   @IsString()
   @ApiProperty({
