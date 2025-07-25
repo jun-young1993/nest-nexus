@@ -16,7 +16,7 @@ export class AdmobController {
   @ApiOperation({ summary: 'Reward callback' })
   @ApiParam({ name: 'type', description: 'Reward type' })
   @ApiResponse({ status: 200, description: 'Reward callback' })
-  rewardCallback(@Param('type') type: string, @Req() request: Request) {
+  rewardCallback(@Param('app') app: string, @Param('type') type: string, @Req() request: Request) {
     const logData = {
       timestamp: new Date().toISOString(),
       type,
