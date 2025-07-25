@@ -12,11 +12,15 @@ export class AdmobController {
     this.admobLogger = new AdmobLogger();
   }
 
-  @Get('reward-callback/:app/:type')
+  @Get('reward-callback/:appId/:type')
   @ApiOperation({ summary: 'Reward callback' })
   @ApiParam({ name: 'type', description: 'Reward type' })
   @ApiResponse({ status: 200, description: 'Reward callback' })
-  rewardCallback(@Param('app') app: string, @Param('type') type: string, @Req() request: Request) {
+  rewardCallback(
+    @Param('appId') appId: string,
+    @Param('type') type: string,
+    @Req() request: Request,
+  ) {
     const logData = {
       timestamp: new Date().toISOString(),
       type,
@@ -27,7 +31,9 @@ export class AdmobController {
       url: request.url,
       method: request.method,
     };
-
+    console.log('appId', appId);
+    //  85b4abd3-8d81-4e8f-92f0-4f419caae155
+    console.log('type', type);
     this.admobLogger.log('AdMob reward callback received', logData);
 
     return true;
