@@ -12,7 +12,7 @@ export class AdmobController {
     this.admobLogger = new AdmobLogger();
   }
 
-  @Get('reward-callback/:type')
+  @Get('reward-callback/:app/:type')
   @ApiOperation({ summary: 'Reward callback' })
   @ApiParam({ name: 'type', description: 'Reward type' })
   @ApiResponse({ status: 200, description: 'Reward callback' })
