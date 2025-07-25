@@ -8,11 +8,7 @@ import * as fs from 'fs';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as cookieParser from 'cookie-parser';
 import * as expressBasicAuth from 'express-basic-auth';
-// import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
-// import { HttpRequestInterceptor } from './core/interceptors/http-request.interceptor';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
-// import { CustomLogger } from './config/logger.config';
-// import { AdminPageModule } from 'nest-admin-page';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

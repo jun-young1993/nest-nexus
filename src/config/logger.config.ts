@@ -125,6 +125,19 @@ const httpLogger = winston.createLogger({
   ],
 });
 
+// AdMob reward callback 로그 설정
+const admobLogger = winston.createLogger({
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
+  transports: [
+    new winston.transports.DailyRotateFile({
+      filename: 'storage/logs/admob-reward-callback-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '14d',
+    }),
+  ],
+});
+
 // 개발 환경일 경우 콘솔 출력 추가
 if (process.env.NODE_ENV !== 'production') {
   generalLogger.add(
@@ -135,6 +148,11 @@ if (process.env.NODE_ENV !== 'production') {
   httpLogger.add(
     new winston.transports.Console({
       format: combine(colorize(), httpLogFormat),
+    }),
+  );
+  admobLogger.add(
+    new winston.transports.Console({
+      format: combine(colorize(), logFormat),
     }),
   );
 }
@@ -216,5 +234,21 @@ export class HttpLogger {
   error(message: string, metadata?: any) {
     const error = metadata?.error || { message };
     httpLogger.error(message, { ...metadata, error });
+  }
+}
+
+// AdMob 로거
+export class AdmobLogger {
+  log(message: string, metadata?: any) {
+    admobLogger.info(message, metadata);
+  }
+
+  error(message: string, metadata?: any) {
+    const error = metadata?.error || { message };
+    admobLogger.error(message, { ...metadata, error });
+  }
+
+  warn(message: string, metadata?: any) {
+    admobLogger.warn(message, metadata);
   }
 }
