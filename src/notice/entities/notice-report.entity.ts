@@ -20,8 +20,8 @@ export class NoticeReport {
   })
   type: NoticeReportType;
 
-  @Column('text')
-  content: string;
+  @Column({ type: 'text', nullable: true })
+  content?: string;
 
   @Column()
   reporterId: string;
