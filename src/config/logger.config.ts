@@ -1,8 +1,19 @@
 import { LoggerService } from '@nestjs/common';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
+import { Request } from 'express';
 
 const { combine, timestamp, printf, colorize } = winston.format;
+
+export const baseLogData = (request: Request) => {
+  return {
+    timestamp: new Date().toISOString(),
+    userAgent: request.headers['user-agent'],
+    ip: request.ip || request.connection.remoteAddress,
+    headers: request.headers,
+    query: request.query,
+  };
+};
 
 interface ErrorObject {
   message: string;

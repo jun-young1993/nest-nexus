@@ -39,6 +39,7 @@ import mailConfig from './config/mail.config';
 import { VerificationCodeModule } from './verification-code/verification-code.module';
 import { McpServerModule } from './mcp/mcp-server.module';
 import { AdmobModule } from './admob/admob.module';
+import { AppRewardModule } from './app-reward/app-reward.module';
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { AdmobModule } from './admob/admob.module';
     VerificationCodeModule,
     McpServerModule,
     AdmobModule,
+    AppRewardModule,
   ],
   controllers: [],
   providers: [],

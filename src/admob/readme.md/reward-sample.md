@@ -1,5 +1,5 @@
 ```log
-2025-07-25 18:35:29 [info] : AdMob reward callback received
+2025-07-26 14:46:53 [info] : AdMob reward callback received
 {
   "type": "main",
   "userAgent": "Google-AdMob-Reward-Verification",
@@ -14,14 +14,16 @@
   "query": {
     "ad_network": "5450213213286189855",
     "ad_unit": "1234567890",
+    "custom_data": "10",
     "reward_amount": "1",
     "reward_item": "money",
-    "timestamp": "1753436128696",
+    "timestamp": "1753508812181",
     "transaction_id": "123456789",
-    "signature": "MEUCIQD8AjQoTzGLVOQRc9mt5pN4e5rhLi6_QOUZXmpKqXP5gwIgXm1AxRe6caWp88z1Mg1_AAxVgICeDdqHkILDDlTom7U",
+    "user_id": "8531591b-fde8-4207-b38f-a52f470bb4e4",
+    "signature": "MEUCIE76ZL_CmF2aY9EppkbexVqVXX8PXoAAoXT-0tQHLyUdAiEAl4wiQjloIzN8kMyVknNx9Osdni8rPywPIJOdCeZFS-Y",
     "key_id": "3335741209"
   },
-  "url": "/admob/reward-callback/85b4abd3-8d81-4e8f-92f0-4f419caae155/main?ad_network=5450213213286189855&ad_unit=1234567890&reward_amount=1&reward_item=money&timestamp=1753436128696&transaction_id=123456789&signature=MEUCIQD8AjQoTzGLVOQRc9mt5pN4e5rhLi6_QOUZXmpKqXP5gwIgXm1AxRe6caWp88z1Mg1_AAxVgICeDdqHkILDDlTom7U&key_id=3335741209",
+  "url": "/admob/reward-callback/money_tree/main?ad_network=5450213213286189855&ad_unit=1234567890&custom_data=10&reward_amount=1&reward_item=money&timestamp=1753508812181&transaction_id=123456789&user_id=8531591b-fde8-4207-b38f-a52f470bb4e4&signature=MEUCIE76ZL_CmF2aY9EppkbexVqVXX8PXoAAoXT-0tQHLyUdAiEAl4wiQjloIzN8kMyVknNx9Osdni8rPywPIJOdCeZFS-Y&key_id=3335741209",
   "method": "GET"
 }
 ```
