@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import {
   ApiOperation,
   ApiResponse,
@@ -16,7 +8,6 @@ import {
 } from '@nestjs/swagger';
 import { AppRewardService } from './app-reward.service';
 import { ProcessRewardDto } from './dto/process-reward.dto';
-import { GetUserPointsDto } from './dto/get-user-points.dto';
 import { UserPointBalance } from './entities/user-point-balance.entity';
 import { PointTransaction } from './entities/point-transaction.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';

@@ -20,4 +20,4 @@ import { UserRewardUsage } from './entities/user-reward-usage.entity';
   providers: [AppRewardService],
   exports: [AppRewardService],
 })
-export class AppRewardModule {} 
+export class AppRewardModule {}

@@ -41,7 +41,7 @@ export class UserRewardUsage {
   usageCount: number; // 사용 횟수
 
   @Field()
-  @Column({ type: 'bigint', default: 0 })
+  @Column({ type: 'int', default: 0 })
   totalPointsEarned: number; // 해당 날짜에 획득한 총 포인트
 
   @Field()

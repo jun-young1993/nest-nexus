@@ -1,8 +1,17 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { UserPointBalance } from './entities/user-point-balance.entity';
-import { PointTransaction, TransactionType, TransactionSource } from './entities/point-transaction.entity';
+import {
+  PointTransaction,
+  TransactionType,
+  TransactionSource,
+} from './entities/point-transaction.entity';
 import { RewardConfig, RewardType } from './entities/reward-config.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
 import { CreatePointTransactionDto } from './dto/create-point-transaction.dto';
@@ -50,7 +59,9 @@ export class AppRewardService {
   /**
    * 포인트 거래 처리 (트랜잭션)
    */
-  async processPointTransaction(createDto: CreatePointTransactionDto): Promise<PointTransaction> {
+  async processPointTransaction(
+    createDto: CreatePointTransactionDto,
+  ): Promise<PointTransaction> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -89,11 +100,11 @@ export class AppRewardService {
       await this.pointTransactionRepository.save(transaction);
 
       // 잔액 업데이트
+      balance.currentPoints = balanceAfter;
+
       if (createDto.amount > 0) {
-        balance.currentPoints = balanceAfter;
         balance.totalEarnedPoints += createDto.amount;
       } else {
-        balance.currentPoints = balanceAfter;
         if (createDto.transactionType === TransactionType.WITHDRAW) {
           balance.totalWithdrawnPoints += Math.abs(createDto.amount);
         } else {
@@ -120,9 +131,10 @@ export class AppRewardService {
   async processReward(processDto: ProcessRewardDto): Promise<PointTransaction> {
     // 리워드 설정 조회
     const rewardConfig = await this.rewardConfigRepository.findOne({
-      where: { 
+      where: {
+        name: processDto.rewardName,
         rewardType: this.mapSourceToRewardType(processDto.source),
-        isActive: true 
+        isActive: true,
       },
     });
 
@@ -159,7 +171,10 @@ export class AppRewardService {
       });
 
       if (lastTransaction) {
-        const cooldownTime = new Date(lastTransaction.createdAt.getTime() + rewardConfig.cooldownMinutes * 60000);
+        const cooldownTime = new Date(
+          lastTransaction.createdAt.getTime() +
+            rewardConfig.cooldownMinutes * 60000,
+        );
         if (new Date() < cooldownTime) {
           throw new BadRequestException('쿨다운 시간이 남아있습니다.');
         }
@@ -178,7 +193,11 @@ export class AppRewardService {
     });
 
     // 사용 내역 업데이트
-    await this.updateUserRewardUsage(processDto.userId, rewardConfig.rewardType, rewardConfig.pointsPerReward);
+    await this.updateUserRewardUsage(
+      processDto.userId,
+      rewardConfig.rewardType,
+      rewardConfig.pointsPerReward,
+    );
 
     return transaction;
   }
@@ -186,7 +205,11 @@ export class AppRewardService {
   /**
    * 사용자 리워드 사용 내역 업데이트
    */
-  private async updateUserRewardUsage(userId: string, rewardType: RewardType, pointsEarned: number): Promise<void> {
+  private async updateUserRewardUsage(
+    userId: string,
+    rewardType: RewardType,
+    pointsEarned: number,
+  ): Promise<void> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -232,7 +255,11 @@ export class AppRewardService {
   /**
    * 사용자의 거래 내역 조회
    */
-  async getUserTransactions(userId: string, limit = 50, offset = 0): Promise<PointTransaction[]> {
+  async getUserTransactions(
+    userId: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<PointTransaction[]> {
     return this.pointTransactionRepository.find({
       where: { userId },
       order: { createdAt: 'DESC' },
@@ -244,7 +271,10 @@ export class AppRewardService {
   /**
    * 사용자의 일일 리워드 사용 현황 조회
    */
-  async getUserDailyUsage(userId: string, date?: Date): Promise<UserRewardUsage[]> {
+  async getUserDailyUsage(
+    userId: string,
+    date?: Date,
+  ): Promise<UserRewardUsage[]> {
     const targetDate = date || new Date();
     targetDate.setHours(0, 0, 0, 0);
 
@@ -255,4 +285,4 @@ export class AppRewardService {
       },
     });
   }
-} 
+}

@@ -40,6 +40,8 @@ export class AdmobController {
         source: TransactionSource.ADMOB_REWARD,
         referenceId: `${appId}-${type}`,
         metadata: JSON.stringify({ appId, type }),
+        appId: appId,
+        rewardName: type,
       });
 
       this.admobLogger.log(

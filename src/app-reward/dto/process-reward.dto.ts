@@ -20,4 +20,12 @@ export class ProcessRewardDto {
   @IsOptional()
   @IsString()
   metadata?: string;
+
+  @ApiProperty({ description: '앱 ID' })
+  @IsString()
+  appId: string;
+
+  @ApiProperty({ description: '리워드 네임' })
+  @IsString()
+  rewardName: string;
 }

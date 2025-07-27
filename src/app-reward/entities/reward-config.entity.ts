@@ -64,4 +64,4 @@ export class RewardConfig {
   @Field()
   @UpdateDateColumn()
   updatedAt: Date;
-} 
+}
