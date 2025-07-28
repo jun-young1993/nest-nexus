@@ -12,6 +12,7 @@ import { UserPointBalance } from './entities/user-point-balance.entity';
 import { PointTransaction } from './entities/point-transaction.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
 import { TransactionSource } from './entities/point-transaction.entity';
+import { RewardType } from './entities/reward-config.entity';
 
 @ApiTags('app-reward')
 @Controller('app-reward')
@@ -97,6 +98,12 @@ export class AppRewardController {
   @ApiOperation({ summary: '사용자 일일 리워드 사용 현황 조회' })
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   @ApiQuery({
+    name: 'rewardType',
+    description: '리워드 타입',
+    required: false,
+    enum: RewardType,
+  })
+  @ApiQuery({
     name: 'date',
     description: '조회 날짜 (YYYY-MM-DD)',
     required: false,
@@ -109,9 +116,15 @@ export class AppRewardController {
   async getUserDailyUsage(
     @Param('userId') userId: string,
     @Query('date') date?: string,
+    @Query('rewardType') rewardType?: RewardType,
   ): Promise<UserRewardUsage[]> {
     const targetDate = date ? new Date(date) : new Date();
-    return this.appRewardService.getUserDailyUsage(userId, targetDate);
+    console.log('rewardType', rewardType);
+    return this.appRewardService.getUserDailyUsage(
+      userId,
+      targetDate,
+      rewardType,
+    );
   }
 
   @Get('health')

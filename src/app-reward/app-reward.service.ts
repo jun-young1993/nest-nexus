@@ -274,6 +274,7 @@ export class AppRewardService {
   async getUserDailyUsage(
     userId: string,
     date?: Date,
+    rewardType?: RewardType,
   ): Promise<UserRewardUsage[]> {
     const targetDate = date || new Date();
     targetDate.setHours(0, 0, 0, 0);
@@ -282,6 +283,7 @@ export class AppRewardService {
       where: {
         userId,
         date: targetDate,
+        ...(rewardType && { rewardType }),
       },
     });
   }
