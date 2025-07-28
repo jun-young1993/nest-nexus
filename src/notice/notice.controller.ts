@@ -25,9 +25,12 @@ export class NoticeController {
   @ApiResponse({
     status: 200,
   })
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @Query('user_id') userId?: string) {
     const notice = await this.noticeService.findOne(id);
-    await this.noticeService.incrementViewCount(id);
+    if (userId) {
+      await this.noticeService.incrementViewCount(id);
+    }
+
     return notice;
   }
 
