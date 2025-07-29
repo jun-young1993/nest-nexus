@@ -10,6 +10,7 @@ import { Post } from '../../post/entities/post.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserType } from '../enum/user.type';
 import { GoalUser } from '../../goal/entities/goal-user.entity';
+import { NoticeView } from '../../notice/entities/notice-view.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -53,4 +54,7 @@ export class User {
 
   @OneToMany(() => GoalUser, (goalUser) => goalUser.user)
   goalUsers: GoalUser[];
+
+  @OneToMany(() => NoticeView, (noticeView) => noticeView.user)
+  noticeViews: NoticeView[];
 }

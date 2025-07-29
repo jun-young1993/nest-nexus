@@ -1,6 +1,7 @@
 import { NoticeReply } from 'src/notice/entities/notice-reply.entity';
 import { NoticeGroup } from 'src/notice/entities/notice-group.entity';
 import { NoticeReport } from './notice-report.entity';
+import { NoticeView } from './notice-view.entity';
 
 import {
   Column,
@@ -52,4 +53,7 @@ export class Notice {
 
   @OneToMany(() => NoticeReport, (report) => report.notice)
   reports: NoticeReport[];
+
+  @OneToMany(() => NoticeView, (noticeView) => noticeView.notice)
+  noticeViews: NoticeView[];
 }

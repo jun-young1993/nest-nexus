@@ -13,11 +13,18 @@ import { NoticeReport } from './entities/notice-report.entity';
 import { NoticeReportService } from './notice-report.service';
 import { NoticeReportController } from './notice-report.controller';
 import { UserModule } from 'src/user/user.module';
+import { NoticeView } from './entities/notice-view.entity';
 
 @Module({
   imports: [
     UserModule,
-    TypeOrmModule.forFeature([Notice, NoticeGroup, NoticeReply, NoticeReport]),
+    TypeOrmModule.forFeature([
+      Notice,
+      NoticeGroup,
+      NoticeReply,
+      NoticeReport,
+      NoticeView,
+    ]),
   ],
   controllers: [
     NoticeController,

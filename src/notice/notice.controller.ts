@@ -27,9 +27,8 @@ export class NoticeController {
   })
   async findOne(@Param('id') id: string, @Query('user_id') userId?: string) {
     const notice = await this.noticeService.findOne(id);
-    if (userId) {
-      await this.noticeService.incrementViewCount(id);
-    }
+
+    await this.noticeService.incrementViewCount(id, userId);
 
     return notice;
   }

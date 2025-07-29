@@ -4,6 +4,7 @@ import { Notice } from './entities/notice.entity';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { NoticeGroupService } from './notice-group.service';
+import { NoticeView } from './entities/notice-view.entity';
 
 @Injectable()
 export class NoticeService {
@@ -11,6 +12,8 @@ export class NoticeService {
     @InjectRepository(Notice)
     private readonly noticeRepository: Repository<Notice>,
     private readonly noticeGroupService: NoticeGroupService,
+    @InjectRepository(NoticeView)
+    private readonly noticeViewRepository: Repository<NoticeView>,
   ) {}
 
   async create(createNoticeDto: CreateNoticeDto) {
@@ -76,9 +79,21 @@ export class NoticeService {
     });
   }
 
-  async incrementViewCount(id: string) {
+  async incrementViewCount(id: string, userId?: string) {
     const notice = await this.findOne(id);
-    notice.viewCount++;
-    return await this.noticeRepository.save(notice);
+    if (userId) {
+      const noticeView = await this.noticeViewRepository.findOne({
+        where: { noticeId: id, userId },
+      });
+      if (!noticeView) {
+        const newNoticeView = this.noticeViewRepository.create({
+          noticeId: id,
+          userId,
+        });
+        await this.noticeViewRepository.save(newNoticeView);
+      }
+    }
+
+    return notice;
   }
 }
