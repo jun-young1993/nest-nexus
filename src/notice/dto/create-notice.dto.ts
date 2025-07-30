@@ -33,4 +33,10 @@ export class CreateNoticeDto {
     example: 'test notice user id',
   })
   userName: string;
+
+  @IsString()
+  @ApiProperty({
+    example: 'notice user id',
+  })
+  userId: string;
 }

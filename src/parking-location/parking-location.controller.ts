@@ -143,6 +143,8 @@ export class ParkingLocationController {
     if (!groupNotice) {
       throw new InternalServerErrorException('Notice group not found');
     }
+
+    createNoticeDto.userId = '75f77373-f2db-4465-b40f-5f242b478728';
     const notice = await this.noticeService.create({
       ...createNoticeDto,
       noticeGroupId: groupNotice.id,

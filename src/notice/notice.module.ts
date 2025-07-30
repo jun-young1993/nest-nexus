@@ -14,6 +14,7 @@ import { NoticeReportService } from './notice-report.service';
 import { NoticeReportController } from './notice-report.controller';
 import { UserModule } from 'src/user/user.module';
 import { NoticeView } from './entities/notice-view.entity';
+import { NoticeViewService } from './notice-view.service';
 
 @Module({
   imports: [
@@ -37,12 +38,14 @@ import { NoticeView } from './entities/notice-view.entity';
     NoticeGroupService,
     NoticeReplyService,
     NoticeReportService,
+    NoticeViewService,
   ],
   exports: [
     NoticeService,
     NoticeGroupService,
     NoticeReplyService,
     NoticeReportService,
+    NoticeViewService,
   ],
 })
 export class NoticeModule {}

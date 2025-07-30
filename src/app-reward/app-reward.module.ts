@@ -6,9 +6,11 @@ import { UserPointBalance } from './entities/user-point-balance.entity';
 import { PointTransaction } from './entities/point-transaction.entity';
 import { RewardConfig } from './entities/reward-config.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
+import { NoticeModule } from 'src/notice/notice.module';
 
 @Module({
   imports: [
+    NoticeModule,
     TypeOrmModule.forFeature([
       UserPointBalance,
       PointTransaction,

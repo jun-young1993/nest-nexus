@@ -181,13 +181,25 @@ export class AppRewardService {
       }
     }
 
+    return await this.processPoint(
+      processDto,
+      rewardConfig,
+      TransactionType.EARN,
+    );
+  }
+
+  public async processPoint(
+    processDto: ProcessRewardDto,
+    rewardConfig: RewardConfig,
+    transactionType: TransactionType,
+  ) {
     // 포인트 거래 처리
     const transaction = await this.processPointTransaction({
       userId: processDto.userId,
-      transactionType: TransactionType.EARN,
+      transactionType: transactionType,
       source: processDto.source,
       amount: rewardConfig.pointsPerReward,
-      description: `${rewardConfig.name} 리워드`,
+      description: rewardConfig.description,
       referenceId: processDto.referenceId,
       metadata: processDto.metadata,
     });

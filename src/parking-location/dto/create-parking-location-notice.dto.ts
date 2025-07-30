@@ -21,6 +21,11 @@ export class CreateParkingLocationNoticeDto
   userName: string;
 
   @ApiProperty({
+    example: 'test notice user id',
+  })
+  userId: string;
+
+  @ApiProperty({
     example: 'NOTICE',
   })
   type?: NoticeType;

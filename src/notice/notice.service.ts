@@ -79,15 +79,16 @@ export class NoticeService {
     });
   }
 
-  async incrementViewCount(id: string, userId?: string) {
-    const notice = await this.findOne(id);
+  async incrementViewCount(noticeId: string, userId?: string) {
+    const notice = await this.findOne(noticeId);
     if (userId) {
       const noticeView = await this.noticeViewRepository.findOne({
-        where: { noticeId: id, userId },
+        where: { noticeId, userId },
       });
+
       if (!noticeView) {
         const newNoticeView = this.noticeViewRepository.create({
-          noticeId: id,
+          noticeId,
           userId,
         });
         await this.noticeViewRepository.save(newNoticeView);

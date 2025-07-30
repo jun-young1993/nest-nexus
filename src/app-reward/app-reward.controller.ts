@@ -13,11 +13,17 @@ import { PointTransaction } from './entities/point-transaction.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
 import { TransactionSource } from './entities/point-transaction.entity';
 import { RewardType } from './entities/reward-config.entity';
+import { NoticeViewService } from 'src/notice/notice-view.service';
+import { NoticeService } from 'src/notice/notice.service';
 
 @ApiTags('app-reward')
 @Controller('app-reward')
 export class AppRewardController {
-  constructor(private readonly appRewardService: AppRewardService) {}
+  constructor(
+    private readonly appRewardService: AppRewardService,
+    private readonly noticeViewService: NoticeViewService,
+    private readonly noticeService: NoticeService,
+  ) {}
 
   @Get('points/:userId')
   @ApiOperation({ summary: '사용자 포인트 잔액 조회' })
@@ -135,5 +141,30 @@ export class AppRewardController {
       status: 'ok',
       timestamp: new Date().toISOString(),
     };
+  }
+
+  @Get('notice-view')
+  @ApiOperation({ summary: '노티스 뷰 조회' })
+  @ApiResponse({ status: 200, description: '노티스 뷰 조회 성공' })
+  async getNoticeView(): Promise<any[]> {
+    const noticeViews = await this.noticeViewService.findInactiveNoticeViews();
+    for (const noticeView of noticeViews) {
+      const notice = await this.noticeService.findOneBase({
+        where: {
+          id: noticeView.noticeId,
+        },
+      });
+      if (notice) {
+        await this.noticeViewService.updateActiveNoticeViewsByNoticeId(
+          noticeView.noticeId,
+        );
+        // await this.appRewardService.processPoint(
+        //   new ProcessRewardDto(
+
+        //   )
+        // );
+      }
+    }
+    return noticeViews;
   }
 }

@@ -13,6 +13,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { NoticeType } from '../enum/notice.type';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 export class Notice {
@@ -47,6 +48,13 @@ export class Notice {
 
   @Column({ default: 0 })
   viewCount: number;
+
+  @Column({ type: 'uuid', nullable: false })
+  userId: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @OneToMany(() => NoticeReply, (noticeReply) => noticeReply.notice)
   noticeReplies: NoticeReply[];
