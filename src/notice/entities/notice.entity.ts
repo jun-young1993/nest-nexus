@@ -22,7 +22,7 @@ export class Notice {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'text' })
   content: string;
 
   @Column({

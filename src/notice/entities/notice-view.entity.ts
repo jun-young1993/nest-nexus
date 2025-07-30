@@ -29,6 +29,10 @@ export class NoticeView {
   userId: string;
 
   @Field()
+  @Column({ default: false })
+  isActive: boolean;
+
+  @Field()
   @CreateDateColumn()
   createdAt: Date;
 
