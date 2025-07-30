@@ -10,7 +10,10 @@ import { MyCarService } from 'src/parking-location/my-car.service';
 import { NoticeViewService } from 'src/notice/notice-view.service';
 import { NoticeService } from 'src/notice/notice.service';
 import { AppRewardService } from 'src/app-reward/app-reward.service';
-import { TransactionSource, TransactionType } from 'src/app-reward/entities/point-transaction.entity';
+import {
+  TransactionSource,
+  TransactionType,
+} from 'src/app-reward/entities/point-transaction.entity';
 import { RewardName } from 'src/app-reward/entities/reward-config.entity';
 import { ProcessRewardDto } from 'src/app-reward/dto/process-reward.dto';
 
