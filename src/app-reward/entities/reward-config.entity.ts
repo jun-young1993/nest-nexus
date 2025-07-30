@@ -7,6 +7,11 @@ import {
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
+export enum RewardName {
+  TREE_MAIN = 'main',
+  NOTICE_BONUS = 'notice_bonus',
+}
+
 export enum RewardType {
   ADMOB_REWARD = 'admob_reward',
   OFFERWALL = 'offerwall',
@@ -30,7 +35,10 @@ export class RewardConfig {
   rewardType: RewardType;
 
   @Field()
-  @Column()
+  @Column({
+    type: 'enum',
+    enum: RewardName,
+  })
   name: string; // 리워드 이름
 
   @Field()

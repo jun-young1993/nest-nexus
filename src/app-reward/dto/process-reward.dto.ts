@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TransactionSource } from '../entities/point-transaction.entity';
-
+import { RewardName } from '../entities/reward-config.entity';
 export class ProcessRewardDto {
   @ApiProperty({ description: '사용자 ID' })
   @IsUUID()
@@ -27,5 +27,23 @@ export class ProcessRewardDto {
 
   @ApiProperty({ description: '리워드 네임' })
   @IsString()
-  rewardName: string;
+  rewardName: RewardName;
+
+  static fromJson(json: {
+    userId: string;
+    source: TransactionSource;
+    referenceId?: string;
+    metadata?: string;
+    appId: string;
+    rewardName: RewardName;
+  }) {
+    const dto = new ProcessRewardDto();
+    dto.userId = json.userId;
+    dto.source = json.source;
+    dto.referenceId = json.referenceId;
+    dto.metadata = json.metadata;
+    dto.appId = json.appId;
+    dto.rewardName = json.rewardName;
+    return dto;
+  }
 }

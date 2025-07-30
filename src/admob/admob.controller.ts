@@ -4,6 +4,7 @@ import { Request } from 'express';
 import { AdmobLogger, baseLogData } from '../config/logger.config';
 import { AppRewardService } from '../app-reward/app-reward.service';
 import { TransactionSource } from '../app-reward/entities/point-transaction.entity';
+import { RewardName } from 'src/app-reward/entities/reward-config.entity';
 
 @ApiTags('admob')
 @Controller('admob')
@@ -20,12 +21,10 @@ export class AdmobController {
   @ApiResponse({ status: 200, description: 'Reward callback' })
   async rewardCallback(
     @Param('appId') appId: string,
-    @Param('type') type: string,
+    @Param('type') type: RewardName,
     @Query('user_id') userId: string,
     @Req() request: Request,
   ) {
-    console.log('appId', appId);
-    console.log('type', type);
     this.admobLogger.log(
       `AdMob reward callback received \r\n userId: ${userId} appId: ${appId} type: ${type}`,
       baseLogData(request),

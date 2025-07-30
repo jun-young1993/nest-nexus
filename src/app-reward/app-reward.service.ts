@@ -12,7 +12,11 @@ import {
   TransactionType,
   TransactionSource,
 } from './entities/point-transaction.entity';
-import { RewardConfig, RewardType } from './entities/reward-config.entity';
+import {
+  RewardConfig,
+  RewardName,
+  RewardType,
+} from './entities/reward-config.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
 import { CreatePointTransactionDto } from './dto/create-point-transaction.dto';
 import { ProcessRewardDto } from './dto/process-reward.dto';
@@ -125,18 +129,34 @@ export class AppRewardService {
     }
   }
 
+  async getRewardConfig(
+    TransactionSource: TransactionSource,
+    RewardName: RewardName,
+  ) {
+    const rewardConfig = await this.rewardConfigRepository.findOne({
+      where: {
+        name: RewardName,
+        rewardType: this.mapSourceToRewardType(TransactionSource),
+        isActive: true,
+      },
+    });
+
+    if (!rewardConfig) {
+      throw new NotFoundException('리워드 설정을 찾을 수 없습니다.');
+    }
+
+    return rewardConfig;
+  }
+
   /**
    * 리워드 처리 (광고 시청 등)
    */
   async processReward(processDto: ProcessRewardDto): Promise<PointTransaction> {
     // 리워드 설정 조회
-    const rewardConfig = await this.rewardConfigRepository.findOne({
-      where: {
-        name: processDto.rewardName,
-        rewardType: this.mapSourceToRewardType(processDto.source),
-        isActive: true,
-      },
-    });
+    const rewardConfig = await this.getRewardConfig(
+      processDto.source,
+      processDto.rewardName,
+    );
 
     if (!rewardConfig) {
       throw new NotFoundException('리워드 설정을 찾을 수 없습니다.');

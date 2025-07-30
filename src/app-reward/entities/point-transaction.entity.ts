@@ -20,12 +20,19 @@ export enum TransactionType {
 }
 
 export enum TransactionSource {
+  /** 애드몹 리워드 광고 적립 */
   ADMOB_REWARD = 'admob_reward',
+  /** 오퍼월(설문, 미션 등) 적립 */
   OFFERWALL = 'offerwall',
+  /** 일일 보너스 적립 */
   DAILY_BONUS = 'daily_bonus',
+  /** 추천인/초대 보상 */
   REFERRAL = 'referral',
+  /** 유료 결제(포인트 구매 등) */
   PURCHASE = 'purchase',
+  /** 출금(포인트 인출) */
   WITHDRAWAL = 'withdrawal',
+  /** 환불(포인트 반환) */
   REFUND = 'refund',
 }
 

@@ -7,6 +7,8 @@ import { OpenaiModule } from '../openai/openai.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GeminiModule } from 'src/gemini/gemini.module';
 import { ParkingLocationModule } from 'src/parking-location/parking-location.module';
+import { AppRewardModule } from 'src/app-reward/app-reward.module';
+import { NoticeModule } from 'src/notice/notice.module';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { ParkingLocationModule } from 'src/parking-location/parking-location.mod
     OpenaiModule,
     GeminiModule,
     ParkingLocationModule,
+    AppRewardModule,
+    NoticeModule,
   ],
   controllers: [TasksController],
   providers: [TasksService, ScheduleModule],

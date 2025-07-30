@@ -9,12 +9,16 @@ import {
 import { AppRewardService } from './app-reward.service';
 import { ProcessRewardDto } from './dto/process-reward.dto';
 import { UserPointBalance } from './entities/user-point-balance.entity';
-import { PointTransaction } from './entities/point-transaction.entity';
+import {
+  PointTransaction,
+  TransactionType,
+} from './entities/point-transaction.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
 import { TransactionSource } from './entities/point-transaction.entity';
-import { RewardType } from './entities/reward-config.entity';
+import { RewardName, RewardType } from './entities/reward-config.entity';
 import { NoticeViewService } from 'src/notice/notice-view.service';
 import { NoticeService } from 'src/notice/notice.service';
+import { Cron } from '@nestjs/schedule';
 
 @ApiTags('app-reward')
 @Controller('app-reward')
@@ -144,9 +148,9 @@ export class AppRewardController {
   }
 
   @Get('notice-view')
-  @ApiOperation({ summary: '노티스 뷰 조회' })
-  @ApiResponse({ status: 200, description: '노티스 뷰 조회 성공' })
-  async getNoticeView(): Promise<any[]> {
+  @ApiOperation({ summary: '노티스 보너스 리워드 처리' })
+  @ApiResponse({ status: 200, description: '노티스 보너스 리워드 처리 성공' })
+  async getNoticeBonus(): Promise<any[]> {
     const noticeViews = await this.noticeViewService.findInactiveNoticeViews();
     for (const noticeView of noticeViews) {
       const notice = await this.noticeService.findOneBase({
@@ -154,15 +158,32 @@ export class AppRewardController {
           id: noticeView.noticeId,
         },
       });
-      if (notice) {
+      if (notice && noticeView.count > 0) {
         await this.noticeViewService.updateActiveNoticeViewsByNoticeId(
           noticeView.noticeId,
         );
-        // await this.appRewardService.processPoint(
-        //   new ProcessRewardDto(
 
-        //   )
-        // );
+        const rewardConfig = await this.appRewardService.getRewardConfig(
+          TransactionSource.DAILY_BONUS,
+          RewardName.NOTICE_BONUS,
+        );
+
+        rewardConfig.pointsPerReward = noticeView.count;
+        rewardConfig.description = `게시글[${notice.title}] 조회수 리워드 정산: ${noticeView.count}P`;
+
+        const processRewardDto = ProcessRewardDto.fromJson({
+          userId: notice.userId,
+          source: TransactionSource.DAILY_BONUS,
+          referenceId: notice.id,
+          rewardName: RewardName.NOTICE_BONUS,
+          appId: 'notice-bonus',
+        });
+
+        await this.appRewardService.processPoint(
+          processRewardDto,
+          rewardConfig,
+          TransactionType.EARN,
+        );
       }
     }
     return noticeViews;
