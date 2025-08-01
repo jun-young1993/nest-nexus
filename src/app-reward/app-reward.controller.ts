@@ -20,6 +20,7 @@ import { NoticeViewService } from 'src/notice/notice-view.service';
 import { NoticeService } from 'src/notice/notice.service';
 import { Cron } from '@nestjs/schedule';
 import { PointWithdrawal, WithdrawalStatus } from './entities/point-withdrawal.entity';
+import { CreatePointWithdrawalDto } from './dto/create-point-withdrawal.dto';
 
 @ApiTags('app-reward')
 @Controller('app-reward')
@@ -138,18 +139,17 @@ export class AppRewardController {
     );
   }
 
-  @Put('withdrawal/:withdrawalId/complete')
-  @ApiOperation({ summary: '포인트 출금 완료 처리' })
-  @ApiParam({ name: 'withdrawalId', description: '출금 요청 ID' })
+  @Post('withdrawal')
+  @ApiOperation({ summary: '포인트 출금 요청 처리' })
   @ApiResponse({
     status: 200,
-    description: '출금 완료 처리 성공',
+    description: '출금 요청 처리 성공',
     type: PointWithdrawal,
   })
   async completeWithdrawal(
-    @Param('withdrawalId') withdrawalId: string,
+    @Body() createPointWithdrawalDto: CreatePointWithdrawalDto,
   ): Promise<PointWithdrawal> {
-    return this.appRewardService.completeWithdrawal(withdrawalId);
+    return this.appRewardService.createPointWithdrawal(createPointWithdrawalDto);
   }
 
   @Get('health')

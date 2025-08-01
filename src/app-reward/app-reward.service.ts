@@ -21,6 +21,7 @@ import { UserRewardUsage } from './entities/user-reward-usage.entity';
 import { PointWithdrawal, WithdrawalStatus } from './entities/point-withdrawal.entity';
 import { CreatePointTransactionDto } from './dto/create-point-transaction.dto';
 import { ProcessRewardDto } from './dto/process-reward.dto';
+import { CreatePointWithdrawalDto } from './dto/create-point-withdrawal.dto';
 
 @Injectable()
 export class AppRewardService {
@@ -329,16 +330,19 @@ export class AppRewardService {
    * 2. 사용자 포인트 잔액에서 출금액 차감
    * 3. 포인트 거래 내역 생성
    */
-  async completeWithdrawal(withdrawalId: string): Promise<PointWithdrawal> {
+  async createPointWithdrawal(createPointWithdrawalDto: CreatePointWithdrawalDto): Promise<PointWithdrawal> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      const withdrawal = this.pointWithdrawalRepository.create(createPointWithdrawalDto);
+      await this.pointWithdrawalRepository.save(withdrawal);
+      const withdrawalId = withdrawal.id;
       // 출금 요청 조회
-      const withdrawal = await this.pointWithdrawalRepository.findOne({
-        where: { id: withdrawalId },
-      });
+      // const withdrawal = await this.pointWithdrawalRepository.findOne({
+      //   where: { id: withdrawalId },
+      // });
 
       if (!withdrawal) {
         throw new NotFoundException('출금 요청을 찾을 수 없습니다.');
@@ -396,7 +400,7 @@ export class AppRewardService {
       return withdrawal;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`포인트 출금 완료 실패: ${withdrawalId}`, error.stack);
+      this.logger.error(`포인트 출금 완료 실패: ${error.message}`, error.stack);
       throw error;
     } finally {
       await queryRunner.release();
