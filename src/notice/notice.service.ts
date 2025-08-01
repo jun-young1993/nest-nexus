@@ -66,7 +66,7 @@ export class NoticeService {
       throw new NotFoundException(`Notice group with name ${name} not found`);
     }
     return await this.noticeRepository.find({
-      where: { noticeGroupId: noticeGroup.id },
+      where: { noticeGroupId: noticeGroup.id, ...options?.where },
       skip: options?.skip || 0,
       take: options?.take || 10,
       relations: ['noticeReplies'],
