@@ -92,6 +92,9 @@ export class NoticeService {
           userId,
         });
         await this.noticeViewRepository.save(newNoticeView);
+
+        notice.viewCount++;
+        await this.noticeRepository.save(notice);
       }
     }
 
