@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put } from '@nestjs/common';
 import {
   ApiOperation,
   ApiResponse,
@@ -19,6 +19,7 @@ import { RewardName, RewardType } from './entities/reward-config.entity';
 import { NoticeViewService } from 'src/notice/notice-view.service';
 import { NoticeService } from 'src/notice/notice.service';
 import { Cron } from '@nestjs/schedule';
+import { PointWithdrawal, WithdrawalStatus } from './entities/point-withdrawal.entity';
 
 @ApiTags('app-reward')
 @Controller('app-reward')
@@ -135,6 +136,20 @@ export class AppRewardController {
       targetDate,
       rewardType,
     );
+  }
+
+  @Put('withdrawal/:withdrawalId/complete')
+  @ApiOperation({ summary: '포인트 출금 완료 처리' })
+  @ApiParam({ name: 'withdrawalId', description: '출금 요청 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '출금 완료 처리 성공',
+    type: PointWithdrawal,
+  })
+  async completeWithdrawal(
+    @Param('withdrawalId') withdrawalId: string,
+  ): Promise<PointWithdrawal> {
+    return this.appRewardService.completeWithdrawal(withdrawalId);
   }
 
   @Get('health')

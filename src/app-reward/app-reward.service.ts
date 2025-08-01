@@ -18,6 +18,7 @@ import {
   RewardType,
 } from './entities/reward-config.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
+import { PointWithdrawal, WithdrawalStatus } from './entities/point-withdrawal.entity';
 import { CreatePointTransactionDto } from './dto/create-point-transaction.dto';
 import { ProcessRewardDto } from './dto/process-reward.dto';
 
@@ -34,6 +35,8 @@ export class AppRewardService {
     private readonly rewardConfigRepository: Repository<RewardConfig>,
     @InjectRepository(UserRewardUsage)
     private readonly userRewardUsageRepository: Repository<UserRewardUsage>,
+    @InjectRepository(PointWithdrawal)
+    private readonly pointWithdrawalRepository: Repository<PointWithdrawal>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -318,5 +321,85 @@ export class AppRewardService {
         ...(rewardType && { rewardType }),
       },
     });
+  }
+
+  /**
+   * 포인트 출금 완료 처리
+   * 1. 출금 요청 상태를 완료로 변경
+   * 2. 사용자 포인트 잔액에서 출금액 차감
+   * 3. 포인트 거래 내역 생성
+   */
+  async completeWithdrawal(withdrawalId: string): Promise<PointWithdrawal> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 출금 요청 조회
+      const withdrawal = await this.pointWithdrawalRepository.findOne({
+        where: { id: withdrawalId },
+      });
+
+      if (!withdrawal) {
+        throw new NotFoundException('출금 요청을 찾을 수 없습니다.');
+      }
+
+      if (withdrawal.status !== WithdrawalStatus.PENDING) {
+        throw new BadRequestException('이미 처리된 출금 요청입니다.');
+      }
+
+      // 사용자 포인트 잔액 조회
+      const balance = await this.userPointBalanceRepository.findOne({
+        where: { userId: withdrawal.userId },
+      });
+
+      if (!balance) {
+        throw new NotFoundException('사용자 포인트 잔액을 찾을 수 없습니다.');
+      }
+
+      if (balance.currentPoints < withdrawal.withdrawalAmount) {
+        throw new BadRequestException('포인트 잔액이 부족합니다.');
+      }
+
+      // 1. 출금 요청 상태를 완료로 변경
+      // withdrawal.status = WithdrawalStatus.COMPLETED;
+      withdrawal.completedAmount = withdrawal.withdrawalAmount;
+      await this.pointWithdrawalRepository.save(withdrawal);
+
+      // 2. 사용자 포인트 잔액에서 출금액 차감
+      balance.currentPoints -= withdrawal.withdrawalAmount;
+      balance.totalWithdrawnPoints += withdrawal.withdrawalAmount;
+      await this.userPointBalanceRepository.save(balance);
+
+      // 3. 포인트 거래 내역 생성 (출금)
+      const transaction = this.pointTransactionRepository.create({
+        userId: withdrawal.userId,
+        transactionType: TransactionType.WITHDRAW,
+        source: TransactionSource.WITHDRAWAL,
+        amount: -withdrawal.withdrawalAmount, // 음수로 출금 표시
+        description: `포인트 출금 요청 대기: ${withdrawal.bankName} ${withdrawal.accountNumber}`,
+        referenceId: withdrawal.id,
+        balanceBefore: balance.currentPoints + withdrawal.withdrawalAmount,
+        balanceAfter: balance.currentPoints,
+        metadata: JSON.stringify({
+          withdrawalId: withdrawal.id,
+          bankName: withdrawal.bankName,
+          accountNumber: withdrawal.accountNumber,
+          accountHolder: withdrawal.accountHolder,
+        }),
+      });
+      await this.pointTransactionRepository.save(transaction);
+
+      await queryRunner.commitTransaction();
+      this.logger.log(`포인트 출금 완료: ${withdrawalId}, 금액: ${withdrawal.withdrawalAmount}`);
+
+      return withdrawal;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`포인트 출금 완료 실패: ${withdrawalId}`, error.stack);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
