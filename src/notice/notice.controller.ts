@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { NoticeService } from './notice.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateNoticeDto } from './dto/create-notice.dto';
+import { Like } from 'typeorm';
 
 @ApiTags('Notice')
 @Controller('notice')
@@ -51,10 +52,14 @@ export class NoticeController {
     @Param('name') name: string,
     @Query('take') take?: number,
     @Query('skip') skip?: number,
+    @Query('title') title?: string,
   ) {
     return this.noticeService.findByName(name, {
       skip: skip || 0,
       take: take || 10,
+      where: {
+        title: title ? Like(`%${title}%`) : undefined,
+      },
     });
   }
 }
