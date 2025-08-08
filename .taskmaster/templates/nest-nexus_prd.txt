@@ -1,0 +1,58 @@
+📄 Task Master AI — nest-nexus.prd
+
+1. 프로젝트 개요
+- 프로젝트명: nest-nexus
+- 목표: 모든 클라이언트 프로젝트(웹, 앱, 내부 시스템 등)에서 공용으로 사용할 수 있는 NestJS 기반 API 허브 제공.
+- 특징:
+  - 모듈화 설계: 각 기능은 독립적인 NestJS 모듈로 분리.
+  - 안정성 보장: 기존 기능을 변경할 때는 하위 호환성 유지 필수.
+  - 확장성 확보: 신규 모듈과 기능이 쉽게 추가 가능.
+  - 다양한 클라이언트 지원: 주차장 앱, MCP Client API, 기타 내부/외부 앱.
+
+2. 개발 원칙
+1) NestJS 모듈 단위 개발
+   - 각 기능은 독립된 폴더 구조(src/modules/{module-name}).
+   - 모듈 간 의존성 최소화.
+   - @Module, @Injectable, @Controller 등 NestJS 데코레이터 사용을 표준화.
+   - 서비스/컨트롤러/리포지토리 계층 구조 명확화.
+
+2) 하위 호환성 유지
+   - 기존 엔드포인트 삭제 금지.
+   - 변경 시에는 새 버전(v2)을 병행 운영.
+   - Deprecation Notice를 사전에 공지하고 마이그레이션 가이드 제공.
+
+3) DTO & Validation 필수
+   - 모든 요청/응답에 DTO 적용.
+   - class-validator & class-transformer 사용.
+   - Swagger(OpenAPI) 문서와 DTO 자동 연동.
+
+4) 테스트 코드 작성
+   - unit test + e2e test 필수.
+   - 기존 기능 수정 시, 테스트 100% 통과 필수.
+   - 테스트 데이터는 mock/factory 패턴을 활용.
+
+5) 에러 처리 통일
+   - HttpException 기반 에러 응답 형식 통일.
+   - 글로벌 예외 필터(Global Exception Filter) 적용.
+   - 에러 로그는 로깅 모듈을 통해 중앙집중식 관리.
+
+6) 성능 고려
+   - DB 쿼리 최적화 (Index, Join 최소화).
+   - Redis 캐싱 적극 활용.
+   - 비동기 처리(async/await)와 Promise.all 등을 통한 처리 속도 개선.
+   - Long-running Task는 Queue(Bull 또는 BullMQ) 사용.
+
+7) 보안 표준 준수
+   - 모든 API 엔드포인트에 인증/인가 적용.
+   - 환경 변수는 ConfigModule로 관리하며 .env 파일은 Git에 포함 금지.
+   - 민감 데이터 암호화 및 HTTPS 통신 강제.
+
+8) 코드 스타일 & 리뷰
+   - ESLint + Prettier를 통한 코드 스타일 통일.
+   - PR 시 최소 2인 이상 코드 리뷰 필수.
+   - Git Commit 메시지는 Angular Commit 규칙 준수.
+
+9) 문서화
+   - Swagger로 API 문서 자동 생성 및 최신화.
+   - 모듈별 README 작성.
+   - 변경 이력(CHANGELOG) 관리.

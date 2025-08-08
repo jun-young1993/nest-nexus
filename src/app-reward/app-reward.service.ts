@@ -18,7 +18,10 @@ import {
   RewardType,
 } from './entities/reward-config.entity';
 import { UserRewardUsage } from './entities/user-reward-usage.entity';
-import { PointWithdrawal, WithdrawalStatus } from './entities/point-withdrawal.entity';
+import {
+  PointWithdrawal,
+  WithdrawalStatus,
+} from './entities/point-withdrawal.entity';
 import { CreatePointTransactionDto } from './dto/create-point-transaction.dto';
 import { ProcessRewardDto } from './dto/process-reward.dto';
 import { CreatePointWithdrawalDto } from './dto/create-point-withdrawal.dto';
@@ -330,13 +333,17 @@ export class AppRewardService {
    * 2. 사용자 포인트 잔액에서 출금액 차감
    * 3. 포인트 거래 내역 생성
    */
-  async createPointWithdrawal(createPointWithdrawalDto: CreatePointWithdrawalDto): Promise<PointWithdrawal> {
+  async createPointWithdrawal(
+    createPointWithdrawalDto: CreatePointWithdrawalDto,
+  ): Promise<PointWithdrawal> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const withdrawal = this.pointWithdrawalRepository.create(createPointWithdrawalDto);
+      const withdrawal = this.pointWithdrawalRepository.create(
+        createPointWithdrawalDto,
+      );
       await this.pointWithdrawalRepository.save(withdrawal);
       const withdrawalId = withdrawal.id;
       // 출금 요청 조회
@@ -395,7 +402,9 @@ export class AppRewardService {
       await this.pointTransactionRepository.save(transaction);
 
       await queryRunner.commitTransaction();
-      this.logger.log(`포인트 출금 완료: ${withdrawalId}, 금액: ${withdrawal.withdrawalAmount}`);
+      this.logger.log(
+        `포인트 출금 완료: ${withdrawalId}, 금액: ${withdrawal.withdrawalAmount}`,
+      );
 
       return withdrawal;
     } catch (error) {
