@@ -219,11 +219,81 @@
         ],
         "priority": "medium",
         "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Implement User Group Functionality in NestJS Application",
+        "description": "Develop user group management features including CRUD operations, user-group relationships, and REST endpoints.",
+        "details": "1. Create a UserGroup entity in the NestJS application, ensuring it can be mapped to the existing User entity. Define the necessary relationships between User and UserGroup entities using TypeORM decorators.\n2. Implement a UserGroup service that provides CRUD operations for managing user groups. This includes methods to add and remove users from groups, create and delete groups, and list users in a group or groups for a user.\n3. Develop DTOs (Data Transfer Objects) for all group operations to ensure data consistency and validation.\n4. Create a UserGroup controller with REST endpoints to expose the group management functionalities. Use NestJS decorators to define routes and handle requests.\n5. Implement validation and error handling in both the service and controller layers. Use class-validator for input validation and NestJS exception filters for error handling.\n6. Ensure that the UserGroup functionality integrates with existing authentication and authorization mechanisms, leveraging guards and interceptors as necessary.",
+        "testStrategy": "1. Write unit tests for the UserGroup service to verify CRUD operations, including edge cases for adding/removing users and handling non-existent groups.\n2. Develop integration tests for the UserGroup controller to ensure REST endpoints function correctly and return expected responses.\n3. Use mock data to simulate user-group interactions and validate that relationships are correctly established and maintained.\n4. Verify that validation rules are enforced and appropriate error messages are returned for invalid inputs.\n5. Conduct end-to-end testing to ensure that user group functionalities integrate seamlessly with authentication and authorization mechanisms.",
+        "status": "pending",
+        "dependencies": [
+          1,
+          4,
+          3
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Database Schema for UserGroup Entity",
+            "description": "Create the UserGroup entity and define its schema using TypeORM decorators.",
+            "dependencies": [],
+            "details": "Design the UserGroup entity with necessary fields and map it to the existing User entity. Define relationships using TypeORM decorators.\n<info added on 2025-08-14T05:57:53.364Z>\nDatabase schema design completed!\n\nImplemented features:\n1. Created UserGroup entity - schema defined with TypeORM decorators\n2. Added ManyToMany relationship to User entity\n3. Configured join table 'user_group_members'\n4. Supported GraphQL schema (@Field, @ObjectType)\n\nKey features:\n- Unique constraint on group name\n- Protection for system groups (isSystem field)\n- Management of active/inactive status\n- Automatic management of creation/modification dates\n</info added on 2025-08-14T05:57:53.364Z>",
+            "status": "pending",
+            "testStrategy": "Verify the schema creation and relationships through database migration tests."
+          },
+          {
+            "id": 2,
+            "title": "Implement UserGroup Service Layer",
+            "description": "Develop the service layer to handle business logic for user group management.",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "Implement CRUD operations and methods to manage user-group relationships in the UserGroup service.\n<info added on 2025-08-14T05:58:16.159Z>\nUserGroup service layer implementation completed with the following features:\n\n1. CRUD operations (Create, Read, Update, Delete)\n2. Methods for managing user-group relationships\n3. Business logic and validation\n4. Error handling and exception management\n\nKey functionalities include:\n\n- Duplicate name check during group creation\n- Protection of system groups (cannot be modified or deleted)\n- Prevention of deletion for groups with members\n- Validation during user addition/removal\n- Retrieval of group member count and relationship details\n</info added on 2025-08-14T05:58:16.159Z>",
+            "status": "pending",
+            "testStrategy": "Write unit tests for each service method to ensure correct functionality and edge case handling."
+          },
+          {
+            "id": 3,
+            "title": "Develop UserGroup Controller Endpoints",
+            "description": "Create REST endpoints in the UserGroup controller to expose group management functionalities.",
+            "dependencies": [
+              "17.2"
+            ],
+            "details": "Use NestJS decorators to define routes and handle requests for user group operations.\n<info added on 2025-08-14T05:58:36.392Z>\nUserGroup controller endpoints have been successfully developed with the following implementations:\n\n1. REST API endpoints for group management.\n2. Exposure of group management functionalities.\n3. Endpoints for managing user-group relationships.\n4. Handling of HTTP status codes and responses.\n\nKey endpoints include:\n\n- Group CRUD operations: POST, GET, PATCH, DELETE /user-groups\n- User management within groups: POST /user-groups/:id/add-users, POST /user-groups/:id/remove-users\n- Retrieval functions: GET /user-groups/:id/users, GET /user-groups/user/:userId\n- Member count: GET /user-groups/:id/member-count\n</info added on 2025-08-14T05:58:36.392Z>",
+            "status": "pending",
+            "testStrategy": "Develop integration tests to verify endpoint responses and error handling."
+          },
+          {
+            "id": 4,
+            "title": "Create DTOs and Implement Validation",
+            "description": "Develop Data Transfer Objects for user group operations and implement validation.",
+            "dependencies": [
+              "17.1"
+            ],
+            "details": "Ensure data consistency and validation using class-validator for all DTOs related to user group operations.\n<info added on 2025-08-14T05:59:44.857Z>\nDTO and validation implementation completed!\n\nImplemented features:\n1. Creation of data transfer objects\n2. Input validation using class-validator\n3. Support for GraphQL schema\n\nCreated DTOs:\n- CreateUserGroupDto: For creating groups\n- UpdateUserGroupDto: For updating groups (inherits PartialType)\n- AddUserToGroupDto: For adding users\n- RemoveUserFromGroupDto: For removing users\n\nValidation:\n- Group name length limit (1-100 characters)\n- Description length limit (0-500 characters)\n- UUID validation\n- Required field checks\n</info added on 2025-08-14T05:59:44.857Z>",
+            "status": "pending",
+            "testStrategy": "Test DTO validation logic with various input scenarios to ensure data integrity."
+          },
+          {
+            "id": 5,
+            "title": "Integrate UserGroup Functionality with Authentication",
+            "description": "Ensure UserGroup features integrate with existing authentication and authorization mechanisms.",
+            "dependencies": [
+              "17.3",
+              "17.4"
+            ],
+            "details": "Leverage NestJS guards and interceptors to secure user group operations.",
+            "status": "pending",
+            "testStrategy": "Conduct security tests to verify that only authorized users can perform group operations."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-08-08T01:28:30.770Z",
-      "updated": "2025-08-08T01:36:13.460Z",
+      "updated": "2025-08-14T05:47:09.527Z",
       "description": "Tasks for master context"
     }
   }

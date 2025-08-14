@@ -5,12 +5,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Post } from '../../post/entities/post.entity';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { UserType } from '../enum/user.type';
 import { GoalUser } from '../../goal/entities/goal-user.entity';
 import { NoticeView } from '../../notice/entities/notice-view.entity';
+import { UserGroup } from './user-group.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -57,4 +59,8 @@ export class User {
 
   @OneToMany(() => NoticeView, (noticeView) => noticeView.user)
   noticeViews: NoticeView[];
+
+  // Many-to-Many 관계: User와 UserGroup
+  @ManyToMany(() => UserGroup, (userGroup) => userGroup.users)
+  userGroups: UserGroup[]; // 사용자가 속한 그룹들
 }
