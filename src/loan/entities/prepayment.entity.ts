@@ -14,15 +14,15 @@ import { Loan } from './loan.entity';
 import { PrepaymentSchedule } from './prepayment-schedule.entity';
 
 export enum PrepaymentType {
-  PARTIAL = 'PARTIAL',         // 부분상환
-  FULL = 'FULL'                // 전액상환
+  PARTIAL = 'PARTIAL', // 부분상환
+  FULL = 'FULL', // 전액상환
 }
 
 export enum PrepaymentStatus {
-  PENDING = 'PENDING',         // 대기
-  APPLIED = 'APPLIED',         // 적용됨
-  CANCELLED = 'CANCELLED',     // 취소됨
-  REJECTED = 'REJECTED'        // 거부됨
+  PENDING = 'PENDING', // 대기
+  APPLIED = 'APPLIED', // 적용됨
+  CANCELLED = 'CANCELLED', // 취소됨
+  REJECTED = 'REJECTED', // 거부됨
 }
 
 @ObjectType()
@@ -48,7 +48,11 @@ export class Prepayment {
   prepaymentDate: Date;
 
   @Field()
-  @Column({ type: 'enum', enum: PrepaymentStatus, default: PrepaymentStatus.PENDING })
+  @Column({
+    type: 'enum',
+    enum: PrepaymentStatus,
+    default: PrepaymentStatus.PENDING,
+  })
   status: PrepaymentStatus;
 
   @Field({ nullable: true })
@@ -82,11 +86,11 @@ export class Prepayment {
 
   // 관계
   @Field(() => Loan)
-  @ManyToOne(() => Loan, loan => loan.prepayments)
+  @ManyToOne(() => Loan, (loan) => loan.prepayments)
   @JoinColumn({ name: 'loanId' })
   loan: Loan;
 
   @Field(() => [PrepaymentSchedule])
-  @OneToMany(() => PrepaymentSchedule, schedule => schedule.prepayment)
+  @OneToMany(() => PrepaymentSchedule, (schedule) => schedule.prepayment)
   schedules: PrepaymentSchedule[];
 }

@@ -76,7 +76,7 @@ export class LoanService {
   async findAllByUserId(userId: string): Promise<Loan[]> {
     return this.loanRepository.find({
       where: { userId, isActive: true },
-      relations: ['paymentSchedules', 'prepayments'],
+      // relations: ['paymentSchedules', 'prepayments'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -328,8 +328,8 @@ export class LoanService {
    */
   private async generatePaymentSchedules(loan: Loan): Promise<void> {
     const schedules: Partial<PaymentSchedule>[] = [];
-    const monthlyRate = loan.interestRate / 100 / 12;
-    const totalMonths = loan.term * 12;
+    const monthlyRate = loan.interestRate / 100;
+    const totalMonths = loan.term;
     let remainingBalance = loan.amount;
 
     for (let month = 1; month <= totalMonths; month++) {
