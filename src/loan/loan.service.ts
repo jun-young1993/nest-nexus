@@ -43,6 +43,7 @@ export class LoanService {
     await queryRunner.startTransaction();
 
     try {
+      this.logger.log(`대출 생성 시작: ${userId}`);
       // 대출 생성
       const loan = this.loanRepository.create({
         ...createLoanDto,
@@ -55,11 +56,9 @@ export class LoanService {
 
       const savedLoan = await this.loanRepository.save(loan);
 
-      // 상환 스케줄 생성
-      await this.generatePaymentSchedules(savedLoan);
+      // await this.generatePaymentSchedules(savedLoan);
 
       await queryRunner.commitTransaction();
-      this.logger.log(`대출 생성 완료: ${savedLoan.id}`);
 
       return savedLoan;
     } catch (error) {
