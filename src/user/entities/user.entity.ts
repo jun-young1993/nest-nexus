@@ -13,6 +13,7 @@ import { UserType } from '../enum/user.type';
 import { GoalUser } from '../../goal/entities/goal-user.entity';
 import { NoticeView } from '../../notice/entities/notice-view.entity';
 import { UserGroup } from './user-group.entity';
+import { Loan } from '../../loan/entities/loan.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -63,4 +64,8 @@ export class User {
   // Many-to-Many 관계: User와 UserGroup
   @ManyToMany(() => UserGroup, (userGroup) => userGroup.users)
   userGroups: UserGroup[]; // 사용자가 속한 그룹들
+
+  // One-to-Many 관계: User와 Loan
+  @OneToMany(() => Loan, (loan) => loan.user)
+  loans: Loan[]; // 사용자의 대출 목록
 }

@@ -2,298 +2,224 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
-        "title": "Setup Project Repository",
-        "description": "Initialize the project repository with NestJS and configure ESLint and Prettier.",
-        "details": "Create a new NestJS project using the Nest CLI. Initialize a Git repository and set up ESLint and Prettier for code style enforcement. Ensure the .env file is included in .gitignore. Follow Angular Commit guidelines for commit messages.",
-        "testStrategy": "Verify that the NestJS project runs successfully and linting rules are applied correctly.",
+        "id": 18,
+        "title": "Setup NestJS Project",
+        "description": "Initialize a new NestJS project for the Loan D-Day & Repayment Tracking App.",
+        "details": "Use the NestJS CLI to create a new project. Ensure TypeORM is included for database interactions. Set up initial project structure with necessary modules.",
+        "testStrategy": "Verify project setup by running the NestJS server and checking for any initialization errors.",
         "priority": "high",
         "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 2,
-        "title": "Design Modular Architecture",
-        "description": "Define the modular architecture for the NestJS project, ensuring minimal inter-module dependencies.",
-        "details": "Create a folder structure under src/modules for each module. Use NestJS decorators like @Module, @Injectable, and @Controller to define modules, services, and controllers. Ensure clear separation of concerns between service, controller, and repository layers.",
-        "testStrategy": "Review the folder structure and module definitions to ensure compliance with the modular architecture design.",
+        "id": 19,
+        "title": "Design Database Schema",
+        "description": "Design and implement the database schema based on the provided entity definitions.",
+        "details": "Use TypeORM decorators to define entities for Users, Loans, PaymentSchedules, Prepayments, PrepaymentSchedules, Notifications, UserSettings, SyncLogs, LoanAnalytics, and AuditLogs. Ensure all relationships and constraints are correctly implemented.",
+        "testStrategy": "Run TypeORM migrations to create the database schema and verify the tables and relationships are correctly set up.",
         "priority": "high",
         "dependencies": [
-          1
+          18
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 3,
-        "title": "Implement Global Exception Filter",
-        "description": "Develop a global exception filter to standardize error responses across the API.",
-        "details": "Create a GlobalExceptionFilter class extending HttpException. Implement logic to catch and format exceptions consistently. Apply the filter globally using app.useGlobalFilters().",
-        "testStrategy": "Write unit tests to simulate various exceptions and verify the standardized error response format.",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 4,
-        "title": "Setup Authentication and Authorization",
-        "description": "Implement authentication and authorization for all API endpoints.",
-        "details": "Use NestJS Passport module for authentication. Implement JWT strategy for token-based authentication. Ensure all endpoints are protected with appropriate guards.",
-        "testStrategy": "Write integration tests to verify that unauthorized access is blocked and authorized access is permitted.",
+        "id": 20,
+        "title": "Implement User Entity and Authentication",
+        "description": "Implement the User entity and set up authentication mechanisms.",
+        "details": "Define the User entity with all fields and relationships. Implement authentication using JWT and bcrypt for password hashing. Set up routes for user registration and login.",
+        "testStrategy": "Test user registration and login endpoints with valid and invalid data to ensure proper authentication and error handling.",
         "priority": "high",
         "dependencies": [
-          2
+          19
         ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 5,
-        "title": "Configure DTOs and Validation",
-        "description": "Set up Data Transfer Objects (DTOs) and validation for all request and response bodies.",
-        "details": "Use class-validator and class-transformer to define DTOs. Ensure all endpoints use DTOs for input validation and transformation. Integrate DTOs with Swagger for automatic API documentation.",
-        "testStrategy": "Write unit tests to validate DTOs and ensure correct transformation and validation logic.",
-        "priority": "medium",
+        "id": 21,
+        "title": "Develop Loan Management API",
+        "description": "Implement the API endpoints for managing loans.",
+        "status": "done",
         "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 6,
-        "title": "Implement Caching with Redis",
-        "description": "Integrate Redis caching to optimize performance for frequently accessed data.",
-        "details": "Set up a Redis server and use the cache-manager module with Redis store. Implement caching in service methods where applicable, using decorators like @Cacheable.",
-        "testStrategy": "Write tests to verify that data is cached and retrieved correctly, and cache invalidation works as expected.",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 7,
-        "title": "Optimize Database Queries",
-        "description": "Optimize database queries to improve performance and reduce load.",
-        "details": "Analyze current database queries and identify optimization opportunities. Use indexes and minimize joins where possible. Implement query optimizations in the repository layer.",
-        "testStrategy": "Perform load testing to measure query performance before and after optimization.",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 8,
-        "title": "Implement Asynchronous Processing",
-        "description": "Use async/await and Promise.all to improve processing speed for asynchronous tasks.",
-        "details": "Identify long-running tasks and refactor them to use async/await. Use Promise.all for concurrent processing where applicable.",
-        "testStrategy": "Write tests to ensure that asynchronous tasks are executed correctly and performance is improved.",
-        "priority": "medium",
-        "dependencies": [
-          2
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 9,
-        "title": "Setup BullMQ for Task Queuing",
-        "description": "Implement task queuing for long-running processes using BullMQ.",
-        "details": "Set up BullMQ and create queues for long-running tasks. Implement workers to process queued tasks asynchronously.",
-        "testStrategy": "Write tests to verify that tasks are queued and processed correctly, and handle failures gracefully.",
-        "priority": "medium",
-        "dependencies": [
-          8
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 10,
-        "title": "Implement Logging Module",
-        "description": "Develop a centralized logging module to manage error logs and application events.",
-        "details": "Use a logging library like Winston or Pino. Configure the logger to capture error logs and other application events. Ensure logs are stored centrally for easy access and analysis.",
-        "testStrategy": "Write tests to verify that logs are captured correctly and can be retrieved for analysis.",
-        "priority": "medium",
-        "dependencies": [
-          3
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 11,
-        "title": "Setup Swagger for API Documentation",
-        "description": "Integrate Swagger to automatically generate and update API documentation.",
-        "details": "Use the @nestjs/swagger module to generate API documentation. Ensure all endpoints and DTOs are documented. Set up Swagger UI for easy access to API docs.",
-        "testStrategy": "Verify that the Swagger UI is accessible and all endpoints are documented correctly.",
-        "priority": "medium",
-        "dependencies": [
-          5
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 12,
-        "title": "Implement Security Best Practices",
-        "description": "Ensure all API endpoints adhere to security standards, including HTTPS and data encryption.",
-        "details": "Enforce HTTPS for all communications. Use environment variables for sensitive configurations. Implement data encryption for sensitive information.",
-        "testStrategy": "Conduct security audits to verify compliance with security standards.",
-        "priority": "high",
-        "dependencies": [
-          4
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 13,
-        "title": "Develop Unit and E2E Tests",
-        "description": "Write comprehensive unit and end-to-end tests for all modules and features.",
-        "details": "Use Jest for unit testing and Supertest for end-to-end testing. Ensure 100% test coverage for all modules. Use mock/factory patterns for test data.",
-        "testStrategy": "Run all tests and ensure 100% pass rate before deployment.",
-        "priority": "high",
-        "dependencies": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 14,
-        "title": "Conduct Code Reviews",
-        "description": "Establish a code review process to ensure code quality and adherence to standards.",
-        "details": "Set up a process for code reviews with at least two reviewers per pull request. Use tools like GitHub or GitLab for managing reviews. Ensure compliance with ESLint and Prettier rules.",
-        "testStrategy": "Monitor pull requests to ensure all code is reviewed and approved before merging.",
-        "priority": "medium",
-        "dependencies": [
-          1
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 15,
-        "title": "Document Project and Maintain Changelog",
-        "description": "Create comprehensive documentation for the project and maintain a changelog for all updates.",
-        "details": "Write README files for each module. Use Swagger for API documentation. Maintain a CHANGELOG.md file to document all changes and updates.",
-        "testStrategy": "Review documentation for completeness and accuracy. Ensure the changelog is updated with each release.",
-        "priority": "medium",
-        "dependencies": [
-          11
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 16,
-        "title": "Integrate OpenAI API for Text Generation and Summarization",
-        "description": "Create a NestJS controller and service to interact with the OpenAI API for text generation and summarization tasks.",
-        "details": "Implement a new NestJS service that handles communication with the OpenAI API. This service should include methods for sending requests to the API for text generation and summarization. Create a corresponding controller that exposes endpoints for these functionalities. Ensure that the service handles API keys securely, using environment variables to store sensitive information. Use the NestJS HttpModule to facilitate HTTP requests to the OpenAI API. Implement error handling to manage API response errors gracefully. Consider rate limiting and caching strategies to optimize API usage.",
-        "testStrategy": "Write unit tests for the service to ensure it correctly formats requests and handles responses from the OpenAI API. Use mock responses to test different scenarios, including successful text generation and error handling. Verify that the controller endpoints return the expected results and handle errors appropriately. Conduct integration tests to ensure the service and controller work together seamlessly. Test with actual API calls in a development environment to validate end-to-end functionality.",
-        "status": "pending",
-        "dependencies": [
-          1,
-          4,
-          12
-        ],
-        "priority": "medium",
-        "subtasks": []
-      },
-      {
-        "id": 17,
-        "title": "Implement User Group Functionality in NestJS Application",
-        "description": "Develop user group management features including CRUD operations, user-group relationships, and REST endpoints.",
-        "details": "1. Create a UserGroup entity in the NestJS application, ensuring it can be mapped to the existing User entity. Define the necessary relationships between User and UserGroup entities using TypeORM decorators.\n2. Implement a UserGroup service that provides CRUD operations for managing user groups. This includes methods to add and remove users from groups, create and delete groups, and list users in a group or groups for a user.\n3. Develop DTOs (Data Transfer Objects) for all group operations to ensure data consistency and validation.\n4. Create a UserGroup controller with REST endpoints to expose the group management functionalities. Use NestJS decorators to define routes and handle requests.\n5. Implement validation and error handling in both the service and controller layers. Use class-validator for input validation and NestJS exception filters for error handling.\n6. Ensure that the UserGroup functionality integrates with existing authentication and authorization mechanisms, leveraging guards and interceptors as necessary.",
-        "testStrategy": "1. Write unit tests for the UserGroup service to verify CRUD operations, including edge cases for adding/removing users and handling non-existent groups.\n2. Develop integration tests for the UserGroup controller to ensure REST endpoints function correctly and return expected responses.\n3. Use mock data to simulate user-group interactions and validate that relationships are correctly established and maintained.\n4. Verify that validation rules are enforced and appropriate error messages are returned for invalid inputs.\n5. Conduct end-to-end testing to ensure that user group functionalities integrate seamlessly with authentication and authorization mechanisms.",
-        "status": "pending",
-        "dependencies": [
-          1,
-          4,
-          3
+          19,
+          20
         ],
         "priority": "high",
+        "details": "The Loan Management API has been completed with the following features: CRUD operations for loans, payment schedules, and prepayments using NestJS. The API supports different repayment methods, transaction handling for data consistency, and financial calculations for monthly payments and interest. JWT authentication is implemented for security, and Swagger is used for API documentation. The API is integrated with TypeORM for database operations and is part of the LoanModule in the main application.",
+        "testStrategy": "Unit and integration tests have been written for each endpoint to ensure correct functionality and data integrity. Tests cover CRUD operations, payment schedule management, prepayment processing, and security features.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Design Database Schema for UserGroup Entity",
-            "description": "Create the UserGroup entity and define its schema using TypeORM decorators.",
+            "title": "Implement Loan CRUD Endpoints",
+            "description": "",
+            "status": "done",
             "dependencies": [],
-            "details": "Design the UserGroup entity with necessary fields and map it to the existing User entity. Define relationships using TypeORM decorators.\n<info added on 2025-08-14T05:57:53.364Z>\nDatabase schema design completed!\n\nImplemented features:\n1. Created UserGroup entity - schema defined with TypeORM decorators\n2. Added ManyToMany relationship to User entity\n3. Configured join table 'user_group_members'\n4. Supported GraphQL schema (@Field, @ObjectType)\n\nKey features:\n- Unique constraint on group name\n- Protection for system groups (isSystem field)\n- Management of active/inactive status\n- Automatic management of creation/modification dates\n</info added on 2025-08-14T05:57:53.364Z>",
-            "status": "pending",
-            "testStrategy": "Verify the schema creation and relationships through database migration tests."
+            "details": "",
+            "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Implement UserGroup Service Layer",
-            "description": "Develop the service layer to handle business logic for user group management.",
-            "dependencies": [
-              "17.1"
-            ],
-            "details": "Implement CRUD operations and methods to manage user-group relationships in the UserGroup service.\n<info added on 2025-08-14T05:58:16.159Z>\nUserGroup service layer implementation completed with the following features:\n\n1. CRUD operations (Create, Read, Update, Delete)\n2. Methods for managing user-group relationships\n3. Business logic and validation\n4. Error handling and exception management\n\nKey functionalities include:\n\n- Duplicate name check during group creation\n- Protection of system groups (cannot be modified or deleted)\n- Prevention of deletion for groups with members\n- Validation during user addition/removal\n- Retrieval of group member count and relationship details\n</info added on 2025-08-14T05:58:16.159Z>",
-            "status": "pending",
-            "testStrategy": "Write unit tests for each service method to ensure correct functionality and edge case handling."
+            "title": "Develop Payment Schedule Management",
+            "description": "",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Develop UserGroup Controller Endpoints",
-            "description": "Create REST endpoints in the UserGroup controller to expose group management functionalities.",
-            "dependencies": [
-              "17.2"
-            ],
-            "details": "Use NestJS decorators to define routes and handle requests for user group operations.\n<info added on 2025-08-14T05:58:36.392Z>\nUserGroup controller endpoints have been successfully developed with the following implementations:\n\n1. REST API endpoints for group management.\n2. Exposure of group management functionalities.\n3. Endpoints for managing user-group relationships.\n4. Handling of HTTP status codes and responses.\n\nKey endpoints include:\n\n- Group CRUD operations: POST, GET, PATCH, DELETE /user-groups\n- User management within groups: POST /user-groups/:id/add-users, POST /user-groups/:id/remove-users\n- Retrieval functions: GET /user-groups/:id/users, GET /user-groups/user/:userId\n- Member count: GET /user-groups/:id/member-count\n</info added on 2025-08-14T05:58:36.392Z>",
-            "status": "pending",
-            "testStrategy": "Develop integration tests to verify endpoint responses and error handling."
+            "title": "Implement Prepayment Management",
+            "description": "",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
           },
           {
             "id": 4,
-            "title": "Create DTOs and Implement Validation",
-            "description": "Develop Data Transfer Objects for user group operations and implement validation.",
-            "dependencies": [
-              "17.1"
-            ],
-            "details": "Ensure data consistency and validation using class-validator for all DTOs related to user group operations.\n<info added on 2025-08-14T05:59:44.857Z>\nDTO and validation implementation completed!\n\nImplemented features:\n1. Creation of data transfer objects\n2. Input validation using class-validator\n3. Support for GraphQL schema\n\nCreated DTOs:\n- CreateUserGroupDto: For creating groups\n- UpdateUserGroupDto: For updating groups (inherits PartialType)\n- AddUserToGroupDto: For adding users\n- RemoveUserFromGroupDto: For removing users\n\nValidation:\n- Group name length limit (1-100 characters)\n- Description length limit (0-500 characters)\n- UUID validation\n- Required field checks\n</info added on 2025-08-14T05:59:44.857Z>",
-            "status": "pending",
-            "testStrategy": "Test DTO validation logic with various input scenarios to ensure data integrity."
+            "title": "Integrate JWT Authentication",
+            "description": "",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
           },
           {
             "id": 5,
-            "title": "Integrate UserGroup Functionality with Authentication",
-            "description": "Ensure UserGroup features integrate with existing authentication and authorization mechanisms.",
-            "dependencies": [
-              "17.3",
-              "17.4"
-            ],
-            "details": "Leverage NestJS guards and interceptors to secure user group operations.",
-            "status": "pending",
-            "testStrategy": "Conduct security tests to verify that only authorized users can perform group operations."
+            "title": "Document API with Swagger",
+            "description": "",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Ensure Transaction Handling for Data Consistency",
+            "description": "",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
           }
         ]
+      },
+      {
+        "id": 22,
+        "title": "Create Payment Schedule Management",
+        "description": "Develop the API for managing payment schedules associated with loans.",
+        "details": "Implement endpoints for creating, retrieving, updating, and deleting payment schedules. Ensure schedules are linked to the correct loans and handle any business logic related to payment calculations.",
+        "testStrategy": "Test payment schedule endpoints with various scenarios to ensure correct schedule management and calculations.",
+        "priority": "medium",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Implement Prepayment Management",
+        "description": "Develop the API for managing prepayments and related schedules.",
+        "details": "Create endpoints for managing prepayments, including creation, retrieval, update, and cancellation. Implement logic to apply prepayments and adjust loan schedules accordingly.",
+        "testStrategy": "Validate prepayment functionality by testing endpoints with different prepayment scenarios and checking for correct schedule adjustments.",
+        "priority": "medium",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Set Up Notification System",
+        "description": "Implement the notification system for user alerts and reminders.",
+        "details": "Develop the notification entity and implement endpoints for sending, reading, and deleting notifications. Set up scheduled tasks for sending reminders based on user settings.",
+        "testStrategy": "Test notification sending and receiving with various types and priorities to ensure correct delivery and user interaction.",
+        "priority": "medium",
+        "dependencies": [
+          20,
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Implement Sync and Conflict Resolution",
+        "description": "Develop the API for data synchronization and conflict resolution.",
+        "details": "Create endpoints for uploading, downloading, merging, and resolving conflicts in data synchronization. Implement logic to handle data conflicts and maintain data integrity.",
+        "testStrategy": "Simulate sync operations with conflicting data to test conflict resolution and data consistency.",
+        "priority": "medium",
+        "dependencies": [
+          20,
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 26,
+        "title": "Develop Analytics and Reporting API",
+        "description": "Implement the analytics and reporting features for loan data.",
+        "details": "Create endpoints for generating analytics reports and forecasts. Implement logic for calculating interest savings, repayment progress, and loan comparisons.",
+        "testStrategy": "Test analytics endpoints with various loan data to ensure accurate calculations and report generation.",
+        "priority": "medium",
+        "dependencies": [
+          21,
+          23
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 27,
+        "title": "Implement User Settings Management",
+        "description": "Develop the API for managing user settings and preferences.",
+        "details": "Create endpoints for retrieving and updating user settings and preferences. Ensure settings are correctly applied and stored in the database.",
+        "testStrategy": "Test user settings endpoints to verify correct retrieval and application of settings changes.",
+        "priority": "medium",
+        "dependencies": [
+          20
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 28,
+        "title": "Set Up Audit Logging",
+        "description": "Implement audit logging for tracking user actions and changes.",
+        "details": "Develop the AuditLog entity and implement logging for key actions such as user login, data modifications, and sync operations. Ensure logs are stored securely and can be retrieved for auditing purposes.",
+        "testStrategy": "Verify audit logs are correctly generated and stored by performing actions and checking log entries.",
+        "priority": "low",
+        "dependencies": [
+          20,
+          21,
+          24
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 29,
+        "title": "Optimize Database with Indexes",
+        "description": "Create indexes on key database fields to improve query performance.",
+        "details": "Implement SQL indexes as specified in the PRD on fields such as email, status, created_at, and foreign keys. Use TypeORM's query runner to apply these indexes.",
+        "testStrategy": "Run performance tests on database queries to ensure indexes are improving query speed without affecting data integrity.",
+        "priority": "low",
+        "dependencies": [
+          19
+        ],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-08-08T01:28:30.770Z",
-      "updated": "2025-08-14T05:47:09.527Z",
+      "updated": "2025-08-15T05:31:00.483Z",
       "description": "Tasks for master context"
     }
   }

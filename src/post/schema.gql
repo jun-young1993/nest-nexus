@@ -2,6 +2,129 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type PaymentSchedule {
+  id: ID!
+  paymentNumber: Int!
+  paymentDate: DateTime!
+  principalAmount: Float!
+  interestAmount: Float!
+  totalAmount: Float!
+  remainingBalance: Float!
+  status: String!
+  paidAt: DateTime
+  actualPaidAmount: Float!
+  lateFee: Float!
+  notes: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  loanId: String!
+  loan: Loan!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type PrepaymentSchedule {
+  id: ID!
+  originalScheduleNumber: Int!
+  originalPaymentDate: DateTime!
+  originalPrincipalAmount: Float!
+  originalInterestAmount: Float!
+  originalTotalAmount: Float!
+  adjustedPrincipalAmount: Float!
+  adjustedInterestAmount: Float!
+  adjustedTotalAmount: Float!
+  principalReduction: Float!
+  interestReduction: Float!
+  totalReduction: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  prepaymentId: String!
+  originalScheduleId: String!
+  prepayment: Prepayment!
+}
+
+type Prepayment {
+  id: ID!
+  amount: Float!
+  type: String!
+  prepaymentDate: DateTime!
+  status: String!
+  reason: String
+  interestSavings: Float
+  principalReduction: Float
+  notes: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  loanId: String!
+  loan: Loan!
+  schedules: [PrepaymentSchedule!]!
+}
+
+type PaymentHistoryItem {
+  date: String!
+  amount: Float!
+  type: String!
+}
+
+type InterestBreakdownItem {
+  month: Int!
+  principal: Float!
+  interest: Float!
+  balance: Float!
+}
+
+type LoanAnalytics {
+  id: ID!
+  analysisDate: DateTime!
+  totalInterestPaid: Float!
+  totalPrincipalPaid: Float!
+  remainingBalance: Float!
+  effectiveInterestRate: Float!
+  remainingPayments: Int!
+  monthlyPayment: Float!
+  paymentHistory: [PaymentHistoryItem!]!
+  interestBreakdown: [InterestBreakdownItem!]!
+  prepaymentSavings: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  loanId: String!
+  loan: Loan!
+}
+
+type Loan {
+  id: ID!
+  name: String!
+  description: String
+  amount: Float!
+  interestRate: Float!
+  term: Int!
+  repaymentType: String!
+  startDate: DateTime!
+  endDate: DateTime!
+  paymentDay: Float
+  initialPayment: Float
+  preferentialRate: Float
+  preferentialReason: String
+  isActive: Boolean!
+  status: String!
+  totalPaidAmount: Float!
+  totalPaidInterest: Float!
+  completedPayments: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  userId: String!
+  user: User!
+  paymentSchedules: [PaymentSchedule!]!
+  prepayments: [Prepayment!]!
+  analytics: [LoanAnalytics!]!
+  remainingBalance: Float!
+  remainingPayments: Int!
+}
+
 type User {
   id: ID!
   username: String!
@@ -10,11 +133,6 @@ type User {
   createdAt: DateTime!
   updatedAt: DateTime!
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type PostTag {
   id: String!

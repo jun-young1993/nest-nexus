@@ -6,4 +6,5 @@ export enum UserType {
   CAUGHT_SMOKING = 'caught-smoking',
   MCP_CLIENT = 'mcp-client',
   MONEY_TREE = 'money-tree',
+  LOAN_COUNTDOWN = 'loan-countdown',
 }

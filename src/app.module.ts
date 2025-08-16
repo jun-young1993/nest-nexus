@@ -40,6 +40,7 @@ import { VerificationCodeModule } from './verification-code/verification-code.mo
 import { McpServerModule } from './mcp/mcp-server.module';
 import { AdmobModule } from './admob/admob.module';
 import { AppRewardModule } from './app-reward/app-reward.module';
+import { LoanModule } from './loan/loan.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { AppRewardModule } from './app-reward/app-reward.module';
     McpServerModule,
     AdmobModule,
     AppRewardModule,
+    LoanModule,
   ],
   controllers: [],
   providers: [],

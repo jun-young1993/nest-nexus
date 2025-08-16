@@ -1,0 +1,791 @@
+# 대출 D-Day & 상환 추적 앱 - NestJS 백엔드 상세 PRD
+
+## 프로젝트 개요
+기존 Flutter 앱의 로컬 데이터를 클라우드와 동기화하고, 고급 분석 기능을 제공하는 NestJS 백엔드 API를 구축합니다. 완전히 새로운 프로젝트로 시작하여 기존 Flutter 모델과 완벽하게 호환되는 데이터베이스 설계와 API를 제공합니다.
+통합 api 이므로 기존의 기능을 변경하면 안됩니다 
+기존의 기능이 변경되야 할 경우 
+user 의 경우 따른 관계 테이블을 만들어서 처리해야됩니다.
+
+
+
+## 데이터베이스 엔티티 상세 설계
+
+### 1. Users (사용자) 엔티티
+```typescript
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ unique: true, length: 100 })
+  email: string;
+
+  @Column({ length: 100 })
+  password: string;
+
+  @Column({ length: 50 })
+  firstName: string;
+
+  @Column({ length: 50 })
+  lastName: string;
+
+  @Column({ length: 20, nullable: true })
+  phoneNumber: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ default: false })
+  isPhoneVerified: boolean;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
+
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  status: UserStatus;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  lastLoginAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
+
+  // 관계
+  @OneToMany(() => Loan, loan => loan.user)
+  loans: Loan[];
+
+  @OneToMany(() => Notification, notification => notification.user)
+  notifications: Notification[];
+
+  @OneToMany(() => SyncLog, syncLog => syncLog.user)
+  syncLogs: SyncLog[];
+
+  @OneToOne(() => UserSettings, settings => settings.user)
+  settings: UserSettings;
+}
+
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+  MODERATOR = 'MODERATOR'
+}
+
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  DELETED = 'DELETED'
+}
+```
+
+### 2. Loans (대출) 엔티티
+```typescript
+@Entity('loans')
+export class Loan {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ length: 100 })
+  name: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  amount: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  interestRate: number;
+
+  @Column({ type: 'int' })
+  term: number;
+
+  @Column({ type: 'enum', enum: RepaymentType })
+  repaymentType: RepaymentType;
+
+  @Column({ type: 'date' })
+  startDate: Date;
+
+  @Column({ type: 'date' })
+  endDate: Date;
+
+  @Column({ type: 'int', nullable: true })
+  paymentDay: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
+  initialPayment: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  preferentialRate: number;
+
+  @Column({ type: 'text', nullable: true })
+  preferentialReason: string;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Column({ type: 'enum', enum: LoanStatus, default: LoanStatus.ACTIVE })
+  status: LoanStatus;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  totalPaidAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  totalPaidInterest: number;
+
+  @Column({ type: 'int', default: 0 })
+  completedPayments: number;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  // 관계
+  @ManyToOne(() => User, user => user.loans)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @OneToMany(() => PaymentSchedule, schedule => schedule.loan)
+  paymentSchedules: PaymentSchedule[];
+
+  @OneToMany(() => Prepayment, prepayment => prepayment.loan)
+  prepayments: Prepayment[];
+
+  @OneToMany(() => LoanAnalytics, analytics => analytics.loan)
+  analytics: LoanAnalytics[];
+
+  // 계산된 필드 (가상 컬럼)
+  @Column({ type: 'decimal', precision: 15, scale: 2, select: false })
+  get remainingBalance(): number {
+    return this.amount - this.totalPaidAmount;
+  }
+
+  @Column({ type: 'int', select: false })
+  get remainingPayments(): number {
+    return this.term * 12 - this.completedPayments;
+  }
+}
+
+export enum RepaymentType {
+  EQUAL_INSTALLMENT = 'EQUAL_INSTALLMENT',    // 원리금균등상환
+  EQUAL_PRINCIPAL = 'EQUAL_PRINCIPAL',        // 원금균등상환
+  BULLET_PAYMENT = 'BULLET_PAYMENT'           // 만기일시상환
+}
+
+export enum LoanStatus {
+  ACTIVE = 'ACTIVE',           // 활성
+  COMPLETED = 'COMPLETED',     // 완료
+  DEFAULTED = 'DEFAULTED',     // 연체
+  CANCELLED = 'CANCELLED'      // 취소
+}
+```
+
+### 3. PaymentSchedules (상환 스케줄) 엔티티
+```typescript
+@Entity('payment_schedules')
+export class PaymentSchedule {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'int' })
+  paymentNumber: number;
+
+  @Column({ type: 'date' })
+  paymentDate: Date;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  principalAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  interestAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  totalAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  remainingBalance: number;
+
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  status: PaymentStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  paidAt: Date;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  actualPaidAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  lateFee: number;
+
+  @Column({ type: 'text', nullable: true })
+  notes: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  loanId: string;
+
+  // 관계
+  @ManyToOne(() => Loan, loan => loan.paymentSchedules)
+  @JoinColumn({ name: 'loanId' })
+  loan: Loan;
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',         // 대기
+  PAID = 'PAID',               // 납부완료
+  PARTIAL = 'PARTIAL',         // 부분납부
+  OVERDUE = 'OVERDUE',         // 연체
+  CANCELLED = 'CANCELLED'      // 취소
+}
+```
+
+### 4. Prepayments (중도상환) 엔티티
+```typescript
+@Entity('prepayments')
+export class Prepayment {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  amount: number;
+
+  @Column({ type: 'date' })
+  prepaymentDate: Date;
+
+  @Column({ type: 'enum', enum: PrepaymentType })
+  type: PrepaymentType;
+
+  @Column({ type: 'enum', enum: PrepaymentStatus, default: PrepaymentStatus.PENDING })
+  status: PrepaymentStatus;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  interestSavings: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  termReduction: number;
+
+  @Column({ type: 'text', nullable: true })
+  reason: string;
+
+  @Column({ type: 'text', nullable: true })
+  notes: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  loanId: string;
+
+  // 관계
+  @ManyToOne(() => Loan, loan => loan.prepayments)
+  @JoinColumn({ name: 'loanId' })
+  loan: Loan;
+
+  @OneToMany(() => PrepaymentSchedule, schedule => schedule.prepayment)
+  newSchedules: PrepaymentSchedule[];
+}
+
+export enum PrepaymentType {
+  PRINCIPAL_REDUCTION = 'PRINCIPAL_REDUCTION',   // 원금감액
+  TERM_REDUCTION = 'TERM_REDUCTION',             // 기간단축
+  HYBRID = 'HYBRID'                              // 혼합형
+}
+
+export enum PrepaymentStatus {
+  PENDING = 'PENDING',         // 대기
+  APPLIED = 'APPLIED',         // 적용완료
+  CANCELLED = 'CANCELLED',     // 취소
+  REJECTED = 'REJECTED'        // 거부
+}
+```
+
+### 5. PrepaymentSchedules (중도상환 후 새 스케줄) 엔티티
+```typescript
+@Entity('prepayment_schedules')
+export class PrepaymentSchedule {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'int' })
+  paymentNumber: number;
+
+  @Column({ type: 'date' })
+  paymentDate: Date;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  principalAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  interestAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  totalAmount: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  remainingBalance: number;
+
+  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  status: PaymentStatus;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  prepaymentId: string;
+
+  // 관계
+  @ManyToOne(() => Prepayment, prepayment => prepayment.newSchedules)
+  @JoinColumn({ name: 'prepaymentId' })
+  prepayment: Prepayment;
+}
+```
+
+### 6. Notifications (알림) 엔티티
+```typescript
+@Entity('notifications')
+export class Notification {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ length: 100 })
+  title: string;
+
+  @Column({ type: 'text' })
+  message: string;
+
+  @Column({ type: 'enum', enum: NotificationType })
+  type: NotificationType;
+
+  @Column({ type: 'enum', enum: NotificationPriority, default: NotificationPriority.NORMAL })
+  priority: NotificationPriority;
+
+  @Column({ type: 'enum', enum: NotificationStatus, default: NotificationStatus.UNREAD })
+  status: NotificationStatus;
+
+  @Column({ type: 'json', nullable: true })
+  metadata: Record<string, any>;
+
+  @Column({ type: 'timestamp', nullable: true })
+  scheduledAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  sentAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  readAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  @Column({ type: 'uuid', nullable: true })
+  loanId: string;
+
+  // 관계
+  @ManyToOne(() => User, user => user.notifications)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ManyToOne(() => Loan, { nullable: true })
+  @JoinColumn({ name: 'loanId' })
+  loan: Loan;
+}
+
+export enum NotificationType {
+  PAYMENT_DUE = 'PAYMENT_DUE',           // 납부일 알림
+  DDAY_REMINDER = 'DDAY_REMINDER',       // D-Day 알림
+  PREPAYMENT_OPPORTUNITY = 'PREPAYMENT_OPPORTUNITY', // 중도상환 기회
+  LOAN_MATURITY = 'LOAN_MATURITY',       // 만기일 알림
+  SYSTEM_UPDATE = 'SYSTEM_UPDATE',       // 시스템 업데이트
+  SECURITY_ALERT = 'SECURITY_ALERT'      // 보안 알림
+}
+
+export enum NotificationPriority {
+  LOW = 'LOW',
+  NORMAL = 'NORMAL',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT'
+}
+
+export enum NotificationStatus {
+  UNREAD = 'UNREAD',
+  READ = 'READ',
+  ARCHIVED = 'ARCHIVED',
+  DELETED = 'DELETED'
+}
+```
+
+### 7. UserSettings (사용자 설정) 엔티티
+```typescript
+@Entity('user_settings')
+export class UserSettings {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'json' })
+  notificationPreferences: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+    paymentReminder: boolean;
+    ddayReminder: boolean;
+    prepaymentOpportunity: boolean;
+    loanMaturity: boolean;
+    systemUpdates: boolean;
+  };
+
+  @Column({ type: 'int', default: 3 })
+  daysBeforePaymentReminder: number;
+
+  @Column({ type: 'int', default: 7 })
+  daysBeforeDDayReminder: number;
+
+  @Column({ type: 'json' })
+  displayPreferences: {
+    currency: string;
+    dateFormat: string;
+    language: string;
+    theme: string;
+    timezone: string;
+  };
+
+  @Column({ type: 'json' })
+  privacySettings: {
+    dataSharing: boolean;
+    analytics: boolean;
+    marketing: boolean;
+  };
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid', unique: true })
+  userId: string;
+
+  // 관계
+  @OneToOne(() => User, user => user.settings)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+}
+```
+
+### 8. SyncLogs (동기화 로그) 엔티티
+```typescript
+@Entity('sync_logs')
+export class SyncLog {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'enum', enum: SyncType })
+  type: SyncType;
+
+  @Column({ type: 'enum', enum: SyncStatus })
+  status: SyncStatus;
+
+  @Column({ type: 'json', nullable: true })
+  details: {
+    uploadedRecords: number;
+    downloadedRecords: number;
+    conflicts: number;
+    resolvedConflicts: number;
+    errors: string[];
+  };
+
+  @Column({ type: 'timestamp', nullable: true })
+  startedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  completedAt: Date;
+
+  @Column({ type: 'text', nullable: true })
+  errorMessage: string;
+
+  @Column({ type: 'text', nullable: true })
+  deviceInfo: string;
+
+  @Column({ type: 'text', nullable: true })
+  appVersion: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  // 관계
+  @ManyToOne(() => User, user => user.syncLogs)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+}
+
+export enum SyncType {
+  UPLOAD = 'UPLOAD',           // 업로드
+  DOWNLOAD = 'DOWNLOAD',       // 다운로드
+  MERGE = 'MERGE',             // 병합
+  CONFLICT_RESOLUTION = 'CONFLICT_RESOLUTION' // 충돌 해결
+}
+
+export enum SyncStatus {
+  PENDING = 'PENDING',         // 대기
+  IN_PROGRESS = 'IN_PROGRESS', // 진행중
+  COMPLETED = 'COMPLETED',     // 완료
+  FAILED = 'FAILED',           // 실패
+  CANCELLED = 'CANCELLED'      // 취소
+}
+```
+
+### 9. LoanAnalytics (대출 분석) 엔티티
+```typescript
+@Entity('loan_analytics')
+export class LoanAnalytics {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'date' })
+  analysisDate: Date;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  totalInterestPaid: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  totalPrincipalPaid: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  remainingBalance: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2 })
+  effectiveInterestRate: number;
+
+  @Column({ type: 'int' })
+  remainingPayments: number;
+
+  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  monthlyPayment: number;
+
+  @Column({ type: 'json' })
+  paymentHistory: {
+    date: string;
+    amount: number;
+    type: string;
+  }[];
+
+  @Column({ type: 'json' })
+  interestBreakdown: {
+    month: number;
+    principal: number;
+    interest: number;
+    balance: number;
+  }[];
+
+  @Column({ type: 'decimal', precision: 15, scale: 2, default: 0 })
+  prepaymentSavings: number;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  loanId: string;
+
+  // 관계
+  @ManyToOne(() => Loan, loan => loan.analytics)
+  @JoinColumn({ name: 'loanId' })
+  loan: Loan;
+}
+```
+
+### 10. AuditLogs (감사 로그) 엔티티
+```typescript
+@Entity('audit_logs')
+export class AuditLog {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'enum', enum: AuditAction })
+  action: AuditAction;
+
+  @Column({ length: 100 })
+  entityType: string;
+
+  @Column({ type: 'uuid' })
+  entityId: string;
+
+  @Column({ type: 'json', nullable: true })
+  oldValues: Record<string, any>;
+
+  @Column({ type: 'json', nullable: true })
+  newValues: Record<string, any>;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @Column({ type: 'text', nullable: true })
+  ipAddress: string;
+
+  @Column({ type: 'text', nullable: true })
+  userAgent: string;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  // 외래 키
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  // 관계
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+}
+
+export enum AuditAction {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+  SYNC = 'SYNC',
+  EXPORT = 'EXPORT',
+  IMPORT = 'IMPORT'
+}
+```
+
+## 데이터베이스 인덱스 설계
+
+### 주요 인덱스
+```sql
+-- Users 테이블
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_users_created_at ON users(created_at);
+
+-- Loans 테이블
+CREATE INDEX idx_loans_user_id ON loans(user_id);
+CREATE INDEX idx_loans_status ON loans(status);
+CREATE INDEX idx_loans_start_date ON loans(start_date);
+CREATE INDEX idx_loans_end_date ON loans(end_date);
+CREATE INDEX idx_loans_created_at ON loans(created_at);
+
+-- PaymentSchedules 테이블
+CREATE INDEX idx_payment_schedules_loan_id ON payment_schedules(loan_id);
+CREATE INDEX idx_payment_schedules_payment_date ON payment_schedules(payment_date);
+CREATE INDEX idx_payment_schedules_status ON payment_schedules(status);
+
+-- Notifications 테이블
+CREATE INDEX idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX idx_notifications_status ON notifications(status);
+CREATE INDEX idx_notifications_scheduled_at ON notifications(scheduled_at);
+
+-- SyncLogs 테이블
+CREATE INDEX idx_sync_logs_user_id ON sync_logs(user_id);
+CREATE INDEX idx_sync_logs_status ON sync_logs(status);
+CREATE INDEX idx_sync_logs_created_at ON sync_logs(created_at);
+```
+
+## API 엔드포인트 상세 명세
+
+### 대출 관리 API
+
+GET /loans - 대출 목록 조회
+POST /loans - 새 대출 생성
+GET /loans/:id - 대출 상세 조회
+PUT /loans/:id - 대출 정보 수정
+DELETE /loans/:id - 대출 삭제
+GET /loans/:id/schedule - 상환 스케줄 조회
+POST /loans/:id/schedule - 상환 스케줄 생성
+PUT /loans/:id/schedule/:scheduleId - 상환 스케줄 수정
+DELETE /loans/:id/schedule/:scheduleId - 상환 스케줄 삭제
+
+### 중도상환 API
+
+POST /loans/:id/prepayments - 중도상환 적용
+GET /loans/:id/prepayments - 중도상환 목록 조회
+GET /loans/:id/prepayments/:id - 중도상환 상세 조회
+PUT /loans/:id/prepayments/:id - 중도상환 수정
+DELETE /loans/:id/prepayments/:id - 중도상환 취소
+POST /loans/:id/prepayments/:id/apply - 중도상환 적용 확인
+
+
+### 데이터 동기화 API
+
+GET /sync/status - 동기화 상태 확인
+POST /sync/upload - 로컬 데이터 업로드
+GET /sync/download - 서버 데이터 다운로드
+POST /sync/merge - 데이터 병합
+GET /sync/conflicts - 충돌 데이터 조회
+POST /sync/resolve - 충돌 해결
+GET /sync/history - 동기화 히스토리
+DELETE /sync/history/:id - 동기화 로그 삭제
+
+
+### 분석 및 리포팅 API
+
+GET /analytics/portfolio - 포트폴리오 요약
+GET /analytics/loans/:id - 대출별 분석
+GET /analytics/repayment-progress - 상환 진행률
+GET /analytics/interest-savings - 이자 절약 분석
+GET /analytics/loan-comparison - 대출 비교
+GET /analytics/forecast - 상환 예측
+POST /reports/generate - 맞춤형 리포트 생성
+GET /reports/:id - 리포트 조회
+GET /reports/history - 리포트 히스토리
+
+### 알림 API
+
+GET /notifications - 알림 목록 조회
+POST /notifications/send - 알림 발송
+PUT /notifications/:id/read - 알림 읽음 처리
+DELETE /notifications/:id - 알림 삭제
+GET /notifications/settings - 알림 설정 조회
+PUT /notifications/settings - 알림 설정 수정
+POST /notifications/bulk-read - 알림 일괄 읽음 처리
+DELETE /notifications/bulk-delete - 알림 일괄 삭제
+
+### 사용자 설정 API
+
+GET /users/settings - 사용자 설정 조회
+PUT /users/settings - 사용자 설정 수정
+POST /users/settings/reset - 설정 초기화
+GET /users/preferences - 사용자 선호도 조회
+PUT /users/preferences - 사용자 선호도 수정
