@@ -42,10 +42,10 @@ export class CreateLoanDto {
   interestRate: number;
 
   @Field(() => Int)
-  @ApiProperty({ description: '대출 기간 (년)', example: 20 })
+  @ApiProperty({ description: '대출 기간 (개월)', example: 360 })
   @IsNumber()
   @Min(1)
-  @Max(50)
+  @Max(360 * 10)
   term: number;
 
   @Field()
@@ -62,12 +62,6 @@ export class CreateLoanDto {
   @Type(() => Date)
   @IsDate()
   startDate: Date;
-
-  @Field()
-  @ApiProperty({ description: '대출 만기일', example: '2044-01-01' })
-  @Type(() => Date)
-  @IsDate()
-  endDate: Date;
 
   @Field({ nullable: true })
   @ApiPropertyOptional({ description: '납부일 (1-31)', example: 15 })

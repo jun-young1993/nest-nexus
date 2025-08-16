@@ -16,16 +16,16 @@ import { Prepayment } from './prepayment.entity';
 import { LoanAnalytics } from './loan-analytics.entity';
 
 export enum RepaymentType {
-  EQUAL_INSTALLMENT = 'EQUAL_INSTALLMENT',    // 원리금균등상환
-  EQUAL_PRINCIPAL = 'EQUAL_PRINCIPAL',        // 원금균등상환
-  BULLET_PAYMENT = 'BULLET_PAYMENT'           // 만기일시상환
+  EQUAL_INSTALLMENT = 'EQUAL_INSTALLMENT', // 원리금균등상환
+  EQUAL_PRINCIPAL = 'EQUAL_PRINCIPAL', // 원금균등상환
+  BULLET_PAYMENT = 'BULLET_PAYMENT', // 만기일시상환
 }
 
 export enum LoanStatus {
-  ACTIVE = 'ACTIVE',           // 활성
-  COMPLETED = 'COMPLETED',     // 완료
-  DEFAULTED = 'DEFAULTED',     // 연체
-  CANCELLED = 'CANCELLED'      // 취소
+  ACTIVE = 'ACTIVE', // 활성
+  COMPLETED = 'COMPLETED', // 완료
+  DEFAULTED = 'DEFAULTED', // 연체
+  CANCELLED = 'CANCELLED', // 취소
 }
 
 @ObjectType()
@@ -125,20 +125,20 @@ export class Loan {
 
   // 관계
   @Field(() => User)
-  @ManyToOne(() => User, user => user.loans)
+  @ManyToOne(() => User, (user) => user.loans)
   @JoinColumn({ name: 'userId' })
   user: User;
 
   @Field(() => [PaymentSchedule])
-  @OneToMany(() => PaymentSchedule, schedule => schedule.loan)
+  @OneToMany(() => PaymentSchedule, (schedule) => schedule.loan)
   paymentSchedules: PaymentSchedule[];
 
   @Field(() => [Prepayment])
-  @OneToMany(() => Prepayment, prepayment => prepayment.loan)
+  @OneToMany(() => Prepayment, (prepayment) => prepayment.loan)
   prepayments: Prepayment[];
 
   @Field(() => [LoanAnalytics])
-  @OneToMany(() => LoanAnalytics, analytics => analytics.loan)
+  @OneToMany(() => LoanAnalytics, (analytics) => analytics.loan)
   analytics: LoanAnalytics[];
 
   // 계산된 필드 (가상 컬럼)
