@@ -6,15 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
-  Request,
   Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
@@ -26,12 +23,9 @@ import { CreatePrepaymentDto } from './dto/create-prepayment.dto';
 import { Loan } from './entities/loan.entity';
 import { PaymentSchedule } from './entities/payment-schedule.entity';
 import { Prepayment } from './entities/prepayment.entity';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('loans')
 @Controller('loans')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class LoanController {
   private readonly logger = new Logger(LoanController.name);
 
@@ -47,16 +41,13 @@ export class LoanController {
   @ApiResponse({ status: 400, description: '잘못된 입력 데이터입니다.' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   @ApiBody({ type: CreateLoanDto })
-  async create(
-    @Body() createLoanDto: CreateLoanDto,
-    @Request() req,
-  ): Promise<Loan> {
-    const userId = req.user.sub;
+  async create(@Body() createLoanDto: CreateLoanDto): Promise<Loan> {
+    const userId = createLoanDto.userId;
     this.logger.log(`대출 생성 요청: 사용자 ${userId}`);
     return this.loanService.create(createLoanDto, userId);
   }
 
-  @Get()
+  @Get('user/:userId')
   @ApiOperation({ summary: '사용자의 대출 목록 조회' })
   @ApiResponse({
     status: 200,
@@ -64,8 +55,7 @@ export class LoanController {
     type: [Loan],
   })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async findAll(@Request() req): Promise<Loan[]> {
-    const userId = req.user.sub;
+  async findAll(@Param('userId') userId: string): Promise<Loan[]> {
     this.logger.log(`대출 목록 조회: 사용자 ${userId}`);
     return this.loanService.findAllByUserId(userId);
   }
@@ -80,8 +70,10 @@ export class LoanController {
   })
   @ApiResponse({ status: 404, description: '대출을 찾을 수 없습니다.' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async findOne(@Param('id') id: string, @Request() req): Promise<Loan> {
-    const userId = req.user.sub;
+  async findOne(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+  ): Promise<Loan> {
     this.logger.log(`대출 상세 조회: ${id}, 사용자 ${userId}`);
     return this.loanService.findOne(id, userId);
   }
@@ -101,9 +93,8 @@ export class LoanController {
   async update(
     @Param('id') id: string,
     @Body() updateLoanDto: UpdateLoanDto,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<Loan> {
-    const userId = req.user.sub;
     this.logger.log(`대출 수정: ${id}, 사용자 ${userId}`);
     return this.loanService.update(id, updateLoanDto, userId);
   }
@@ -117,8 +108,10 @@ export class LoanController {
   })
   @ApiResponse({ status: 404, description: '대출을 찾을 수 없습니다.' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async remove(@Param('id') id: string, @Request() req): Promise<void> {
-    const userId = req.user.sub;
+  async remove(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+  ): Promise<void> {
     this.logger.log(`대출 삭제: ${id}, 사용자 ${userId}`);
     return this.loanService.remove(id, userId);
   }
@@ -134,9 +127,8 @@ export class LoanController {
   })
   async getPaymentSchedules(
     @Param('id') id: string,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<PaymentSchedule[]> {
-    const userId = req.user.sub;
     return this.loanService.getPaymentSchedules(id, userId);
   }
 
@@ -152,9 +144,8 @@ export class LoanController {
   async createPaymentSchedule(
     @Param('id') id: string,
     @Body() createScheduleDto: CreatePaymentScheduleDto,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<PaymentSchedule> {
-    const userId = req.user.sub;
     return this.loanService.createPaymentSchedule(
       id,
       createScheduleDto,
@@ -175,9 +166,8 @@ export class LoanController {
     @Param('id') id: string,
     @Param('scheduleId') scheduleId: string,
     @Body() updateData: Partial<CreatePaymentScheduleDto>,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<PaymentSchedule> {
-    const userId = req.user.sub;
     return this.loanService.updatePaymentSchedule(
       id,
       scheduleId,
@@ -197,9 +187,8 @@ export class LoanController {
   async removePaymentSchedule(
     @Param('id') id: string,
     @Param('scheduleId') scheduleId: string,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<void> {
-    const userId = req.user.sub;
     return this.loanService.removePaymentSchedule(id, scheduleId, userId);
   }
 
@@ -214,9 +203,8 @@ export class LoanController {
   })
   async getPrepayments(
     @Param('id') id: string,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<Prepayment[]> {
-    const userId = req.user.sub;
     return this.loanService.getPrepayments(id, userId);
   }
 
@@ -232,9 +220,8 @@ export class LoanController {
   async createPrepayment(
     @Param('id') id: string,
     @Body() createPrepaymentDto: CreatePrepaymentDto,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<Prepayment> {
-    const userId = req.user.sub;
     return this.loanService.createPrepayment(id, createPrepaymentDto, userId);
   }
 
@@ -248,9 +235,8 @@ export class LoanController {
   })
   async applyPrepayment(
     @Param('prepaymentId') prepaymentId: string,
-    @Request() req,
+    @Param('userId') userId: string,
   ): Promise<Prepayment> {
-    const userId = req.user.sub;
     return this.loanService.applyPrepayment(prepaymentId, userId);
   }
 }

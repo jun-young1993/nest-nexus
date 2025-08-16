@@ -1,4 +1,13 @@
-import { IsString, IsNumber, IsDate, IsEnum, IsOptional, IsBoolean, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsBoolean,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Field, Float, Int } from '@nestjs/graphql';
@@ -11,7 +20,10 @@ export class CreateLoanDto {
   name: string;
 
   @Field({ nullable: true })
-  @ApiPropertyOptional({ description: '대출 설명', example: '주택 구매를 위한 담보대출' })
+  @ApiPropertyOptional({
+    description: '대출 설명',
+    example: '주택 구매를 위한 담보대출',
+  })
   @IsOptional()
   @IsString()
   description?: string;
@@ -37,7 +49,11 @@ export class CreateLoanDto {
   term: number;
 
   @Field()
-  @ApiProperty({ description: '상환 방식', enum: RepaymentType, example: RepaymentType.EQUAL_INSTALLMENT })
+  @ApiProperty({
+    description: '상환 방식',
+    enum: RepaymentType,
+    example: RepaymentType.EQUAL_INSTALLMENT,
+  })
   @IsEnum(RepaymentType)
   repaymentType: RepaymentType;
 
@@ -87,4 +103,12 @@ export class CreateLoanDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @Field()
+  @ApiProperty({
+    description: '사용자 ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsString()
+  userId: string;
 }
