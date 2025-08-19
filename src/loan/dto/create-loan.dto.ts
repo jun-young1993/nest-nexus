@@ -101,7 +101,7 @@ export class CreateLoanDto {
   @Field()
   @ApiProperty({
     description: '사용자 ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 'eb8ca10c-6ab4-4e82-8c7a-791b5549cb52',
   })
   @IsString()
   userId: string;

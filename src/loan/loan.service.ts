@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, FindManyOptions } from 'typeorm';
 import { Loan, LoanStatus, RepaymentType } from './entities/loan.entity';
 import {
   PaymentSchedule,
@@ -17,7 +17,6 @@ import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { CreatePaymentScheduleDto } from './dto/create-payment-schedule.dto';
 import { CreatePrepaymentDto } from './dto/create-prepayment.dto';
-import * as financial from 'financial';
 
 @Injectable()
 export class LoanService {
@@ -53,11 +52,12 @@ export class LoanService {
           createLoanDto.startDate,
           createLoanDto.term,
         ),
+        isActive: false,
       });
 
       const savedLoan = await this.loanRepository.save(loan);
 
-      await this.generatePaymentSchedules(savedLoan);
+      this.generatePaymentSchedules(savedLoan);
 
       await queryRunner.commitTransaction();
 
@@ -85,10 +85,10 @@ export class LoanService {
   /**
    * 대출 상세 조회
    */
-  async findOne(id: string, userId: string): Promise<Loan> {
+  async findOne(id: string): Promise<Loan> {
     const loan = await this.loanRepository.findOne({
-      where: { id, userId, isActive: true },
-      relations: ['paymentSchedules', 'prepayments', 'analytics'],
+      where: { id, isActive: true },
+      // relations: ['paymentSchedules', 'prepayments', 'analytics'],
     });
 
     if (!loan) {
@@ -98,8 +98,16 @@ export class LoanService {
     return loan;
   }
 
-  async findOneOrFail(id: string, userId: string): Promise<Loan> {
-    const loan = await this.findOne(id, userId);
+  async findOneById(id: string): Promise<Loan> {
+    const loan = await this.loanRepository.findOne({
+      where: { id, isActive: true },
+      relations: ['paymentSchedules', 'prepayments', 'analytics'],
+    });
+    return loan;
+  }
+
+  async findOneByIdOrFail(id: string): Promise<Loan> {
+    const loan = await this.findOneById(id);
     if (!loan) {
       throw new NotFoundException('대출을 찾을 수 없습니다.');
     }
@@ -109,12 +117,8 @@ export class LoanService {
   /**
    * 대출 정보 수정
    */
-  async update(
-    id: string,
-    updateLoanDto: UpdateLoanDto,
-    userId: string,
-  ): Promise<Loan> {
-    const loan = await this.findOne(id, userId);
+  async update(id: string, updateLoanDto: UpdateLoanDto): Promise<Loan> {
+    const loan = await this.findOne(id);
 
     // 대출 상태가 완료되거나 취소된 경우 수정 불가
     if (
@@ -144,8 +148,8 @@ export class LoanService {
   /**
    * 대출 삭제 (소프트 삭제)
    */
-  async remove(id: string, userId: string): Promise<void> {
-    const loan = await this.findOneOrFail(id, userId);
+  async remove(id: string): Promise<void> {
+    const loan = await this.findOneByIdOrFail(id);
 
     loan.isActive = false;
     loan.deletedAt = new Date();
@@ -159,14 +163,11 @@ export class LoanService {
    */
   async getPaymentSchedules(
     loanId: string,
-    userId: string,
+    options?: FindManyOptions<PaymentSchedule>,
   ): Promise<PaymentSchedule[]> {
-    const loan = await this.findOneOrFail(loanId, userId);
-
-    // console.log(loan);
     return this.paymentScheduleRepository.find({
       where: { loanId },
-      order: { paymentNumber: 'ASC' },
+      ...options,
     });
   }
 
@@ -176,9 +177,8 @@ export class LoanService {
   async createPaymentSchedule(
     loanId: string,
     createScheduleDto: CreatePaymentScheduleDto,
-    userId: string,
   ): Promise<PaymentSchedule> {
-    await this.findOne(loanId, userId); // 대출 존재 확인
+    await this.findOne(loanId); // 대출 존재 확인
 
     const schedule = this.paymentScheduleRepository.create({
       ...createScheduleDto,
@@ -195,9 +195,8 @@ export class LoanService {
     loanId: string,
     scheduleId: string,
     updateData: Partial<CreatePaymentScheduleDto>,
-    userId: string,
   ): Promise<PaymentSchedule> {
-    await this.findOne(loanId, userId); // 대출 존재 확인
+    await this.findOne(loanId); // 대출 존재 확인
 
     const schedule = await this.paymentScheduleRepository.findOne({
       where: { id: scheduleId, loanId },
@@ -217,9 +216,8 @@ export class LoanService {
   async removePaymentSchedule(
     loanId: string,
     scheduleId: string,
-    userId: string,
   ): Promise<void> {
-    await this.findOne(loanId, userId); // 대출 존재 확인
+    await this.findOne(loanId); // 대출 존재 확인
 
     const schedule = await this.paymentScheduleRepository.findOne({
       where: { id: scheduleId, loanId },
@@ -235,8 +233,8 @@ export class LoanService {
   /**
    * 중도상환 목록 조회
    */
-  async getPrepayments(loanId: string, userId: string): Promise<Prepayment[]> {
-    await this.findOne(loanId, userId); // 대출 존재 확인
+  async getPrepayments(loanId: string): Promise<Prepayment[]> {
+    await this.findOne(loanId); // 대출 존재 확인
 
     return this.prepaymentRepository.find({
       where: { loanId },
@@ -251,9 +249,8 @@ export class LoanService {
   async createPrepayment(
     loanId: string,
     createPrepaymentDto: CreatePrepaymentDto,
-    userId: string,
   ): Promise<Prepayment> {
-    const loan = await this.findOne(loanId, userId);
+    const loan = await this.findOne(loanId);
 
     // 중도상환 금액이 잔액을 초과하는지 확인
     if (createPrepaymentDto.amount > loan.remainingBalance) {
@@ -337,10 +334,10 @@ export class LoanService {
    * 상환 계획표 자동 생성
    * 대출 상환 방식에 따라 월별 상환 계획을 계산하여 생성
    */
-  private async generatePaymentSchedules(loan: Loan): Promise<void> {
+  async generatePaymentSchedules(loan: Loan): Promise<void> {
     const schedules: Partial<PaymentSchedule>[] = [];
-    const totalMonths = loan.term;
-    const monthlyRate = loan.interestRate; // 월 이자율
+    const totalMonths = loan.term; // 대출 기간
+    const monthlyRate = loan.interestRate / 100 / 12; // 월 이자율
 
     // 대출 시작일 기준으로 월 상환일 계산
     const paymentDay = loan.paymentDay || loan.startDate.getDate();
@@ -360,6 +357,7 @@ export class LoanService {
       switch (loan.repaymentType) {
         case RepaymentType.EQUAL_INSTALLMENT:
           // 원리금균등상환: 매월 동일한 금액
+          // 공식: M = P * r * (1 + r)^n / ((1 + r)^n - 1)
           const monthlyPayment = this.calculateEqualInstallment(
             loan.amount,
             monthlyRate,
@@ -395,6 +393,7 @@ export class LoanService {
 
         case RepaymentType.EQUAL_PRINCIPAL:
           // 원금균등상환: 매월 원금은 동일, 이자는 감소
+          // 공식: M = P / n + (P * r)
           principalAmount = loan.amount / totalMonths;
           remainingBalance = loan.amount - principalAmount * month;
           interestAmount = remainingBalance * monthlyRate;
@@ -403,6 +402,7 @@ export class LoanService {
 
         case RepaymentType.BULLET_PAYMENT:
           // 만기일시상환: 만기까지 이자만, 원금은 만기에
+          // 공식: M = P * r (중간 달), M = P + (P * r) (마지막 달)
           if (month === totalMonths) {
             // 마지막 달: 원금 + 이자
             principalAmount = loan.amount;
@@ -437,14 +437,15 @@ export class LoanService {
         lateFee: 0,
       });
     }
-
+    loan.isActive = true;
+    await this.loanRepository.save(loan);
     // 상환 계획표 일괄 저장
     await this.paymentScheduleRepository.save(schedules);
   }
 
   /**
    * 원리금균등상환 월 상환금 계산
-   * financial 라이브러리의 pmt 함수 사용
+   * 공식: M = P * r * (1 + r)^n / ((1 + r)^n - 1)
    */
   private calculateEqualInstallment(
     principal: number,
@@ -454,21 +455,20 @@ export class LoanService {
     if (monthlyRate === 0) {
       return principal / totalMonths;
     }
+    console.log('principal', principal);
+    console.log('monthlyRate', monthlyRate);
+    console.log('totalMonths', totalMonths);
+    // M = P * r * (1 + r)^n / ((1 + r)^n - 1)
+    const numerator =
+      principal * monthlyRate * Math.pow(1 + monthlyRate, totalMonths);
+    const denominator = Math.pow(1 + monthlyRate, totalMonths) - 1;
 
-    // financial.pmt(rate, nper, pv, fv, type)
-    // rate: 이자율, nper: 기간, pv: 현재가치(원금), fv: 미래가치, type: 지급시점
-    const monthlyPayment = (financial as any).pmt(
-      monthlyRate,
-      totalMonths,
-      -principal,
-      0,
-      0,
-    );
-    return Math.abs(monthlyPayment); // 음수로 반환되므로 절댓값 처리
+    return numerator / denominator;
   }
 
   /**
    * 원리금균등상환에서 특정 시점의 남은 원금 계산
+   * 공식: FV = P * (1 + r)^n - PMT * ((1 + r)^n - 1) / r
    */
   private calculateRemainingPrincipal(
     principal: number,
@@ -479,15 +479,11 @@ export class LoanService {
     if (month === 0) return principal;
     if (monthlyRate === 0) return principal - monthlyPayment * month;
 
-    // financial.fv(rate, nper, pmt, pv, type)
-    // rate: 이자율, nper: 기간, pmt: 지급금액, pv: 현재가치, type: 지급시점
-    const futureValue = (financial as any).fv(
-      monthlyRate,
-      month,
-      monthlyPayment,
-      -principal,
-      0,
-    );
+    // FV = P * (1 + r)^n - PMT * ((1 + r)^n - 1) / r
+    const futureValue =
+      principal * Math.pow(1 + monthlyRate, month) -
+      (monthlyPayment * (Math.pow(1 + monthlyRate, month) - 1)) / monthlyRate;
+
     return Math.abs(futureValue);
   }
 
@@ -518,10 +514,7 @@ export class LoanService {
   /**
    * 대출 상환 진행률 계산
    */
-  async calculateRepaymentProgress(
-    loanId: string,
-    userId: string,
-  ): Promise<{
+  async calculateRepaymentProgress(loanId: string): Promise<{
     totalAmount: number;
     paidAmount: number;
     remainingAmount: number;
@@ -529,7 +522,6 @@ export class LoanService {
     completedPayments: number;
     totalPayments: number;
   }> {
-    const loan = await this.findOne(loanId, userId);
     const schedules = await this.paymentScheduleRepository.find({
       where: { loanId },
       order: { paymentNumber: 'ASC' },
@@ -563,10 +555,7 @@ export class LoanService {
   /**
    * 대출 이자 총액 계산
    */
-  async calculateTotalInterest(
-    loanId: string,
-    userId: string,
-  ): Promise<number> {
+  async calculateTotalInterest(loanId: string): Promise<number> {
     const schedules = await this.paymentScheduleRepository.find({
       where: { loanId },
     });
@@ -582,11 +571,10 @@ export class LoanService {
    */
   async recalculatePaymentSchedules(
     loanId: string,
-    userId: string,
     prepaymentAmount: number,
     prepaymentDate: Date,
   ): Promise<void> {
-    const loan = await this.findOne(loanId, userId);
+    const loan = await this.findOne(loanId);
 
     // 조기상환 후 남은 원금 계산
     const currentBalance = await this.getCurrentBalance(loanId);
@@ -621,6 +609,7 @@ export class LoanService {
 
       switch (loan.repaymentType) {
         case RepaymentType.EQUAL_INSTALLMENT:
+          // 공식: M = P * r * (1 + r)^n / ((1 + r)^n - 1)
           const monthlyPayment = this.calculateEqualInstallment(
             newBalance,
             monthlyRate,
@@ -654,6 +643,7 @@ export class LoanService {
           break;
 
         case RepaymentType.EQUAL_PRINCIPAL:
+          // 공식: M = P / n + (P * r)
           principalAmount = newBalance / remainingMonths;
           remainingBalance = newBalance - principalAmount * (i + 1);
           interestAmount = remainingBalance * monthlyRate;
@@ -661,6 +651,7 @@ export class LoanService {
           break;
 
         case RepaymentType.BULLET_PAYMENT:
+          // 공식: M = P * r (중간 달), M = P + (P * r) (마지막 달)
           if (i === remainingMonths - 1) {
             principalAmount = newBalance;
             interestAmount = newBalance * monthlyRate;

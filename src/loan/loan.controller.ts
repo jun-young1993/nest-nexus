@@ -23,6 +23,7 @@ import { CreatePrepaymentDto } from './dto/create-prepayment.dto';
 import { Loan } from './entities/loan.entity';
 import { PaymentSchedule } from './entities/payment-schedule.entity';
 import { Prepayment } from './entities/prepayment.entity';
+import { FindOptionsOrderValue } from 'typeorm';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -30,6 +31,14 @@ export class LoanController {
   private readonly logger = new Logger(LoanController.name);
 
   constructor(private readonly loanService: LoanService) {}
+
+  @Get('test')
+  async test() {
+    const loanId = 'e014a203-47e6-4f0f-b2d0-d459a108ce57';
+    const loan = await this.loanService.findOne(loanId);
+    this.loanService.generatePaymentSchedules(loan);
+    return loan;
+  }
 
   @Post()
   @ApiOperation({ summary: '새 대출 생성' })
@@ -70,12 +79,8 @@ export class LoanController {
   })
   @ApiResponse({ status: 404, description: '대출을 찾을 수 없습니다.' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async findOne(
-    @Param('id') id: string,
-    @Param('userId') userId: string,
-  ): Promise<Loan> {
-    this.logger.log(`대출 상세 조회: ${id}, 사용자 ${userId}`);
-    return this.loanService.findOne(id, userId);
+  async findOne(@Param('id') id: string): Promise<Loan> {
+    return this.loanService.findOne(id);
   }
 
   @Patch(':id')
@@ -93,10 +98,8 @@ export class LoanController {
   async update(
     @Param('id') id: string,
     @Body() updateLoanDto: UpdateLoanDto,
-    @Param('userId') userId: string,
   ): Promise<Loan> {
-    this.logger.log(`대출 수정: ${id}, 사용자 ${userId}`);
-    return this.loanService.update(id, updateLoanDto, userId);
+    return this.loanService.update(id, updateLoanDto);
   }
 
   @Delete(':id')
@@ -108,18 +111,17 @@ export class LoanController {
   })
   @ApiResponse({ status: 404, description: '대출을 찾을 수 없습니다.' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async remove(
-    @Param('id') id: string,
-    @Param('userId') userId: string,
-  ): Promise<void> {
-    this.logger.log(`대출 삭제: ${id}, 사용자 ${userId}`);
-    return this.loanService.remove(id, userId);
+  async remove(@Param('id') id: string): Promise<void> {
+    return this.loanService.remove(id);
   }
 
   // 상환 스케줄 관련 엔드포인트
   @Get(':id/schedule')
   @ApiOperation({ summary: '대출의 상환 스케줄 조회' })
   @ApiParam({ name: 'id', description: '대출 ID' })
+  @ApiParam({ name: 'skip', description: '건너뛸 개수', required: false })
+  @ApiParam({ name: 'take', description: '조회할 개수', required: false })
+  @ApiParam({ name: 'order', description: '정렬 방식', required: false })
   @ApiResponse({
     status: 200,
     description: '상환 스케줄이 성공적으로 조회되었습니다.',
@@ -127,9 +129,15 @@ export class LoanController {
   })
   async getPaymentSchedules(
     @Param('id') id: string,
-    @Param('userId') userId: string,
+    @Param('skip') skip: number = 0,
+    @Param('take') take: number = 15,
+    @Param('order') order: FindOptionsOrderValue = 'ASC',
   ): Promise<PaymentSchedule[]> {
-    return this.loanService.getPaymentSchedules(id, userId);
+    return this.loanService.getPaymentSchedules(id, {
+      skip,
+      take,
+      order: { paymentNumber: order },
+    });
   }
 
   @Post(':id/schedule')
@@ -144,13 +152,8 @@ export class LoanController {
   async createPaymentSchedule(
     @Param('id') id: string,
     @Body() createScheduleDto: CreatePaymentScheduleDto,
-    @Param('userId') userId: string,
   ): Promise<PaymentSchedule> {
-    return this.loanService.createPaymentSchedule(
-      id,
-      createScheduleDto,
-      userId,
-    );
+    return this.loanService.createPaymentSchedule(id, createScheduleDto);
   }
 
   @Patch(':id/schedule/:scheduleId')
@@ -166,14 +169,8 @@ export class LoanController {
     @Param('id') id: string,
     @Param('scheduleId') scheduleId: string,
     @Body() updateData: Partial<CreatePaymentScheduleDto>,
-    @Param('userId') userId: string,
   ): Promise<PaymentSchedule> {
-    return this.loanService.updatePaymentSchedule(
-      id,
-      scheduleId,
-      updateData,
-      userId,
-    );
+    return this.loanService.updatePaymentSchedule(id, scheduleId, updateData);
   }
 
   @Delete(':id/schedule/:scheduleId')
@@ -187,9 +184,8 @@ export class LoanController {
   async removePaymentSchedule(
     @Param('id') id: string,
     @Param('scheduleId') scheduleId: string,
-    @Param('userId') userId: string,
   ): Promise<void> {
-    return this.loanService.removePaymentSchedule(id, scheduleId, userId);
+    return this.loanService.removePaymentSchedule(id, scheduleId);
   }
 
   // 중도상환 관련 엔드포인트
@@ -201,11 +197,8 @@ export class LoanController {
     description: '중도상환 목록이 성공적으로 조회되었습니다.',
     type: [Prepayment],
   })
-  async getPrepayments(
-    @Param('id') id: string,
-    @Param('userId') userId: string,
-  ): Promise<Prepayment[]> {
-    return this.loanService.getPrepayments(id, userId);
+  async getPrepayments(@Param('id') id: string): Promise<Prepayment[]> {
+    return this.loanService.getPrepayments(id);
   }
 
   @Post(':id/prepayments')
@@ -220,9 +213,8 @@ export class LoanController {
   async createPrepayment(
     @Param('id') id: string,
     @Body() createPrepaymentDto: CreatePrepaymentDto,
-    @Param('userId') userId: string,
   ): Promise<Prepayment> {
-    return this.loanService.createPrepayment(id, createPrepaymentDto, userId);
+    return this.loanService.createPrepayment(id, createPrepaymentDto);
   }
 
   @Post('prepayments/:prepaymentId/apply')
