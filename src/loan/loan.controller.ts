@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Logger,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,15 +15,18 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { LoanService } from './loan.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { CreatePaymentScheduleDto } from './dto/create-payment-schedule.dto';
 import { CreatePrepaymentDto } from './dto/create-prepayment.dto';
+import { PaymentStatusInfo } from './dto/payment-status.dto';
 import { Loan } from './entities/loan.entity';
 import { PaymentSchedule } from './entities/payment-schedule.entity';
 import { Prepayment } from './entities/prepayment.entity';
+import { PaymentStatus } from './entities/payment-schedule.entity';
 import { FindOptionsOrderValue } from 'typeorm';
 
 @ApiTags('loans')
@@ -115,13 +119,62 @@ export class LoanController {
     return this.loanService.remove(id);
   }
 
+  // 상환 상태 조회 엔드포인트
+  @Get('payment/status')
+  @ApiOperation({ summary: '상환 상태 enum 항목 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '상환 상태 enum 항목들이 성공적으로 조회되었습니다.',
+    type: [PaymentStatusInfo],
+  })
+  async getPaymentStatuses(): Promise<PaymentStatusInfo[]> {
+    // PaymentStatus enum의 모든 값을 자동으로 매핑
+    const statusMapping = new Map<
+      PaymentStatus,
+      { value: string; description: string }
+    >([
+      [
+        PaymentStatus.PENDING,
+        { value: '대기', description: '아직 상환 예정인 상태' },
+      ],
+      [
+        PaymentStatus.PAID,
+        { value: '납부완료', description: '정상적으로 상환이 완료된 상태' },
+      ],
+      [
+        PaymentStatus.PARTIAL,
+        { value: '부분납부', description: '일부만 상환된 상태' },
+      ],
+      [
+        PaymentStatus.OVERDUE,
+        { value: '연체', description: '상환 기한을 넘어서 지연된 상태' },
+      ],
+      [
+        PaymentStatus.CANCELLED,
+        { value: '취소', description: '상환이 취소된 상태' },
+      ],
+    ]);
+
+    // enum의 모든 값을 루프로 돌려서 자동 생성
+    const statuses: PaymentStatusInfo[] = Object.values(PaymentStatus).map(
+      (status) => ({
+        key: status,
+        value: statusMapping.get(status)?.value || status,
+        description: statusMapping.get(status)?.description || `${status} 상태`,
+      }),
+    );
+
+    return statuses;
+  }
+
   // 상환 스케줄 관련 엔드포인트
   @Get(':id/schedule')
   @ApiOperation({ summary: '대출의 상환 스케줄 조회' })
   @ApiParam({ name: 'id', description: '대출 ID' })
-  @ApiParam({ name: 'skip', description: '건너뛸 개수', required: false })
-  @ApiParam({ name: 'take', description: '조회할 개수', required: false })
-  @ApiParam({ name: 'order', description: '정렬 방식', required: false })
+  @ApiQuery({ name: 'skip', description: '건너뛸 개수', required: false })
+  @ApiQuery({ name: 'take', description: '조회할 개수', required: false })
+  @ApiQuery({ name: 'order', description: '정렬 방식', required: false })
+  @ApiQuery({ name: 'status', description: '상태', required: false })
   @ApiResponse({
     status: 200,
     description: '상환 스케줄이 성공적으로 조회되었습니다.',
@@ -129,16 +182,23 @@ export class LoanController {
   })
   async getPaymentSchedules(
     @Param('id') id: string,
-    @Param('skip') skip: number = 0,
-    @Param('take') take: number = 15,
-    @Param('order') order: FindOptionsOrderValue = 'ASC',
+    @Query('skip') skip: number = 0,
+    @Query('take') take: number = 15,
+    @Query('order') order: FindOptionsOrderValue = 'ASC',
+    @Query('status') status: PaymentSchedule['status'],
   ): Promise<PaymentSchedule[]> {
-    return this.loanService.getPaymentSchedules(id, {
-      skip,
-      take,
-      order: { paymentNumber: order },
-    });
+    return this.loanService.getPaymentSchedules(
+      id,
+      {
+        skip,
+        take,
+        order: { paymentNumber: order },
+      },
+      { status },
+    );
   }
+
+  
 
   @Post(':id/schedule')
   @ApiOperation({ summary: '상환 스케줄 생성' })

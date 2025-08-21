@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, FindManyOptions } from 'typeorm';
+import { Repository, DataSource, FindManyOptions, FindOptionsWhere } from 'typeorm';
 import { Loan, LoanStatus, RepaymentType } from './entities/loan.entity';
 import {
   PaymentSchedule,
@@ -164,9 +164,14 @@ export class LoanService {
   async getPaymentSchedules(
     loanId: string,
     options?: FindManyOptions<PaymentSchedule>,
+    optionsWhere?: FindOptionsWhere<PaymentSchedule>,
   ): Promise<PaymentSchedule[]> {
+    const where: FindOptionsWhere<PaymentSchedule> = {
+      loanId,
+      ...optionsWhere,
+    };
     return this.paymentScheduleRepository.find({
-      where: { loanId },
+      where,
       ...options,
     });
   }
