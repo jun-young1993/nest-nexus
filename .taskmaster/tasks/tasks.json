@@ -2,51 +2,11 @@
   "master": {
     "tasks": [
       {
-        "id": 18,
-        "title": "Setup NestJS Project",
-        "description": "Initialize a new NestJS project for the Loan D-Day & Repayment Tracking App.",
-        "details": "Use the NestJS CLI to create a new project. Ensure TypeORM is included for database interactions. Set up initial project structure with necessary modules.",
-        "testStrategy": "Verify project setup by running the NestJS server and checking for any initialization errors.",
-        "priority": "high",
-        "dependencies": [],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 19,
-        "title": "Design Database Schema",
-        "description": "Design and implement the database schema based on the provided entity definitions.",
-        "details": "Use TypeORM decorators to define entities for Users, Loans, PaymentSchedules, Prepayments, PrepaymentSchedules, Notifications, UserSettings, SyncLogs, LoanAnalytics, and AuditLogs. Ensure all relationships and constraints are correctly implemented.",
-        "testStrategy": "Run TypeORM migrations to create the database schema and verify the tables and relationships are correctly set up.",
-        "priority": "high",
-        "dependencies": [
-          18
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
-        "id": 20,
-        "title": "Implement User Entity and Authentication",
-        "description": "Implement the User entity and set up authentication mechanisms.",
-        "details": "Define the User entity with all fields and relationships. Implement authentication using JWT and bcrypt for password hashing. Set up routes for user registration and login.",
-        "testStrategy": "Test user registration and login endpoints with valid and invalid data to ensure proper authentication and error handling.",
-        "priority": "high",
-        "dependencies": [
-          19
-        ],
-        "status": "pending",
-        "subtasks": []
-      },
-      {
         "id": 21,
         "title": "Develop Loan Management API",
         "description": "Implement the API endpoints for managing loans.",
         "status": "done",
-        "dependencies": [
-          19,
-          20
-        ],
+        "dependencies": [],
         "priority": "high",
         "details": "The Loan Management API has been completed with the following features: CRUD operations for loans, payment schedules, and prepayments using NestJS. The API supports different repayment methods, transaction handling for data consistency, and financial calculations for monthly payments and interest. JWT authentication is implemented for security, and Swagger is used for API documentation. The API is integrated with TypeORM for database operations and is part of the LoanModule in the main application.",
         "testStrategy": "Unit and integration tests have been written for each endpoint to ensure correct functionality and data integrity. Tests cover CRUD operations, payment schedule management, prepayment processing, and security features.",
@@ -141,7 +101,6 @@
         "testStrategy": "Test notification sending and receiving with various types and priorities to ensure correct delivery and user interaction.",
         "priority": "medium",
         "dependencies": [
-          20,
           21
         ],
         "status": "pending",
@@ -155,7 +114,6 @@
         "testStrategy": "Simulate sync operations with conflicting data to test conflict resolution and data consistency.",
         "priority": "medium",
         "dependencies": [
-          20,
           21
         ],
         "status": "pending",
@@ -182,9 +140,7 @@
         "details": "Create endpoints for retrieving and updating user settings and preferences. Ensure settings are correctly applied and stored in the database.",
         "testStrategy": "Test user settings endpoints to verify correct retrieval and application of settings changes.",
         "priority": "medium",
-        "dependencies": [
-          20
-        ],
+        "dependencies": [],
         "status": "pending",
         "subtasks": []
       },
@@ -196,7 +152,6 @@
         "testStrategy": "Verify audit logs are correctly generated and stored by performing actions and checking log entries.",
         "priority": "low",
         "dependencies": [
-          20,
           21,
           24
         ],
@@ -210,9 +165,7 @@
         "details": "Implement SQL indexes as specified in the PRD on fields such as email, status, created_at, and foreign keys. Use TypeORM's query runner to apply these indexes.",
         "testStrategy": "Run performance tests on database queries to ensure indexes are improving query speed without affecting data integrity.",
         "priority": "low",
-        "dependencies": [
-          19
-        ],
+        "dependencies": [],
         "status": "pending",
         "subtasks": []
       }
