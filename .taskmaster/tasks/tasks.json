@@ -168,11 +168,79 @@
         "dependencies": [],
         "status": "pending",
         "subtasks": []
+      },
+      {
+        "id": 30,
+        "title": "Develop Comprehensive Loan Repayment Summary API",
+        "description": "Implement an API to provide a detailed summary of loan repayment information, including total repayment, interest, and other key metrics.",
+        "details": "Develop an API endpoint that aggregates and calculates comprehensive loan repayment details. This should include total repayment amount, total interest paid, average monthly repayment, total number of months, principal amount, interest rate, repayment type, start date, maturity date, remaining principal, remaining interest, next repayment date, repayment progress, interest ratio, principal ratio, monthly repayment summary, and potential savings from early repayment. Use existing loan data models and ensure the API efficiently queries and processes data. Consider using caching strategies to optimize performance for frequently accessed data. Ensure the API is secure and follows best practices for data privacy and protection.",
+        "testStrategy": "Create unit tests to verify each component of the API, including calculations for total repayment, interest, and monthly summaries. Perform integration tests to ensure the API correctly aggregates data from the database and returns accurate summaries. Use mock data to simulate various loan scenarios and validate the API's responses. Additionally, conduct performance testing to ensure the API handles large datasets efficiently and meets response time requirements.",
+        "status": "done",
+        "dependencies": [
+          26,
+          29
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design API Architecture",
+            "description": "Create the architectural design for the Loan Repayment Summary API, ensuring it integrates with existing loan data models.",
+            "dependencies": [],
+            "details": "Outline the API structure, endpoints, and data flow. Ensure compatibility with existing systems and scalability for future enhancements.",
+            "status": "done",
+            "testStrategy": "Review the design with stakeholders and perform architectural validation to ensure it meets all requirements."
+          },
+          {
+            "id": 2,
+            "title": "Implement Data Aggregation Logic",
+            "description": "Develop the logic to aggregate and calculate comprehensive loan repayment details.",
+            "dependencies": [
+              "30.1"
+            ],
+            "details": "Implement calculations for total repayment, interest, average monthly repayment, and other metrics using existing loan data.",
+            "status": "done",
+            "testStrategy": "Create unit tests to verify the accuracy of each calculation and ensure data is aggregated correctly."
+          },
+          {
+            "id": 3,
+            "title": "Develop API Endpoints",
+            "description": "Create the API endpoints to expose the loan repayment summary data.",
+            "dependencies": [
+              "30.2"
+            ],
+            "details": "Develop endpoints for accessing loan repayment summaries, ensuring they are secure and efficient.",
+            "status": "done",
+            "testStrategy": "Perform integration tests to verify endpoints return accurate data and handle requests efficiently."
+          },
+          {
+            "id": 4,
+            "title": "Implement Caching Strategies",
+            "description": "Optimize API performance by implementing caching strategies for frequently accessed data.",
+            "dependencies": [
+              "30.3"
+            ],
+            "details": "Use caching mechanisms to reduce load times and improve response efficiency for the API.",
+            "status": "done",
+            "testStrategy": "Test caching effectiveness by measuring response times and ensuring data consistency."
+          },
+          {
+            "id": 5,
+            "title": "Ensure Security and Compliance",
+            "description": "Implement security measures and ensure the API complies with data privacy regulations.",
+            "dependencies": [
+              "30.3"
+            ],
+            "details": "Apply security best practices, including authentication and encryption, to protect sensitive loan data.",
+            "status": "done",
+            "testStrategy": "Conduct security audits and compliance checks to ensure the API meets all regulatory requirements."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-08-08T01:28:30.770Z",
-      "updated": "2025-08-15T05:31:00.483Z",
+      "updated": "2025-08-23T04:55:46.688Z",
       "description": "Tasks for master context"
     }
   }

@@ -28,6 +28,7 @@ import { PaymentSchedule } from './entities/payment-schedule.entity';
 import { Prepayment } from './entities/prepayment.entity';
 import { PaymentStatus } from './entities/payment-schedule.entity';
 import { FindOptionsOrderValue } from 'typeorm';
+import { LoanRepaymentSummaryDto } from './dto/loan-repayment-summary.dto';
 
 @ApiTags('loans')
 @Controller('loans')
@@ -198,8 +199,6 @@ export class LoanController {
     );
   }
 
-  
-
   @Post(':id/schedule')
   @ApiOperation({ summary: '상환 스케줄 생성' })
   @ApiParam({ name: 'id', description: '대출 ID' })
@@ -290,5 +289,39 @@ export class LoanController {
     @Param('userId') userId: string,
   ): Promise<Prepayment> {
     return this.loanService.applyPrepayment(prepaymentId, userId);
+  }
+
+  // 대출 상환 요약 관련 엔드포인트
+  @Get(':id/summary')
+  @ApiOperation({ summary: '대출 상환 요약 조회' })
+  @ApiParam({ name: 'id', description: '대출 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '대출 상환 요약이 성공적으로 조회되었습니다.',
+    type: LoanRepaymentSummaryDto,
+  })
+  @ApiResponse({ status: 404, description: '대출을 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getLoanRepaymentSummary(
+    @Param('id') id: string,
+  ): Promise<LoanRepaymentSummaryDto> {
+    this.logger.log(`대출 상환 요약 조회: 대출 ${id}`);
+    return this.loanService.getLoanRepaymentSummary(id);
+  }
+
+  @Get('user/:userId/summary')
+  @ApiOperation({ summary: '사용자의 모든 대출 상환 요약 조회' })
+  @ApiParam({ name: 'userId', description: '사용자 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '모든 대출 상환 요약이 성공적으로 조회되었습니다.',
+    type: [LoanRepaymentSummaryDto],
+  })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getAllLoansRepaymentSummary(
+    @Param('userId') userId: string,
+  ): Promise<LoanRepaymentSummaryDto[]> {
+    this.logger.log(`사용자 대출 상환 요약 조회: 사용자 ${userId}`);
+    return this.loanService.getAllLoansRepaymentSummary(userId);
   }
 }
