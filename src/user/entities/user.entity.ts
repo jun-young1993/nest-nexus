@@ -14,6 +14,7 @@ import { GoalUser } from '../../goal/entities/goal-user.entity';
 import { NoticeView } from '../../notice/entities/notice-view.entity';
 import { UserGroup } from './user-group.entity';
 import { Loan } from '../../loan/entities/loan.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -39,6 +40,10 @@ export class User {
     default: UserType.USER,
   })
   type: UserType;
+
+  @ApiProperty({ description: 'FCM TOKEN' })
+  @Column({ nullable: true })
+  fcmToken: string;
 
   @Field()
   @Column({ default: true })

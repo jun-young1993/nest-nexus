@@ -48,4 +48,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean; // 활성 상태 (선택 사항, 기본값 true)
+
+  @ApiProperty({
+    example: '1234',
+    description: 'The User FCM Token',
+  })
+  @IsOptional()
+  @IsString()
+  fcmToken?: string; // FCM 토큰
 }
