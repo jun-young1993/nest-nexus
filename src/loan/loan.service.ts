@@ -5,7 +5,12 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, FindManyOptions, FindOptionsWhere } from 'typeorm';
+import {
+  Repository,
+  DataSource,
+  FindManyOptions,
+  FindOptionsWhere,
+} from 'typeorm';
 import { Loan, LoanStatus, RepaymentType } from './entities/loan.entity';
 import {
   PaymentSchedule,
@@ -17,6 +22,10 @@ import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { CreatePaymentScheduleDto } from './dto/create-payment-schedule.dto';
 import { CreatePrepaymentDto } from './dto/create-prepayment.dto';
+import {
+  LoanRepaymentSummaryDto,
+  MonthlyRepaymentSummary,
+} from './dto/loan-repayment-summary.dto';
 
 @Injectable()
 export class LoanService {
@@ -48,8 +57,9 @@ export class LoanService {
       const loan = this.loanRepository.create({
         ...createLoanDto,
         userId,
+        startDate: new Date(createLoanDto.startDate),
         endDate: this.calculateEndDate(
-          createLoanDto.startDate,
+          new Date(createLoanDto.startDate),
           createLoanDto.term,
         ),
         isActive: false,
@@ -691,5 +701,298 @@ export class LoanService {
     });
 
     return latestSchedule ? latestSchedule.remainingBalance : 0;
+  }
+
+  /**
+   * 대출 상환 요약 조회
+   */
+  async getLoanRepaymentSummary(
+    loanId: string,
+  ): Promise<LoanRepaymentSummaryDto> {
+    const loan = await this.findOne(loanId);
+    if (!loan) {
+      throw new NotFoundException(`대출을 찾을 수 없습니다: ${loanId}`);
+    }
+
+    // 상환 스케줄 조회
+    const paymentSchedules = await this.paymentScheduleRepository.find({
+      where: { loanId },
+      order: { paymentNumber: 'ASC' },
+    });
+
+    // 중도상환 조회
+    const prepayments = await this.prepaymentRepository.find({
+      where: { loanId, status: PrepaymentStatus.APPLIED },
+    });
+
+    // 상환 요약 계산
+    const summary = this.calculateRepaymentSummary(
+      loan,
+      paymentSchedules,
+      prepayments,
+    );
+
+    return summary;
+  }
+
+  /**
+   * 사용자의 모든 대출 상환 요약 조회
+   */
+  async getAllLoansRepaymentSummary(
+    userId: string,
+  ): Promise<LoanRepaymentSummaryDto[]> {
+    const loans = await this.findAllByUserId(userId);
+    const summaries: LoanRepaymentSummaryDto[] = [];
+
+    for (const loan of loans) {
+      try {
+        const summary = await this.getLoanRepaymentSummary(loan.id);
+        summaries.push(summary);
+      } catch (error) {
+        this.logger.error(
+          `대출 ${loan.id} 상환 요약 계산 실패: ${error.message}`,
+        );
+      }
+    }
+
+    return summaries;
+  }
+
+  /**
+   * 상환 요약 계산 로직
+   */
+  private calculateRepaymentSummary(
+    loan: Loan,
+    paymentSchedules: PaymentSchedule[],
+    prepayments: Prepayment[],
+  ): LoanRepaymentSummaryDto {
+    // 기본 정보
+    const totalPayments = paymentSchedules.length;
+    const completedPayments = paymentSchedules.filter(
+      (s) => s.status === PaymentStatus.PAID,
+    ).length;
+    const overduePayments = paymentSchedules.filter(
+      (s) => s.status === PaymentStatus.OVERDUE,
+    ).length;
+
+    // 총 상환금 및 이자 계산
+    const totalRepaymentAmount = paymentSchedules.reduce(
+      (sum, s) => sum + parseFloat(s.totalAmount.toString()),
+      0,
+    );
+    const totalInterestAmount = paymentSchedules.reduce(
+      (sum, s) => sum + parseFloat(s.interestAmount.toString()),
+      0,
+    );
+
+    // 중도상환 정보
+    const totalPrepaymentAmount = prepayments.reduce(
+      (sum, p) => sum + p.amount,
+      0,
+    );
+    const prepaymentInterestSavings = this.calculatePrepaymentInterestSavings(
+      loan,
+      paymentSchedules,
+      prepayments,
+    );
+
+    // 남은 원금 및 이자
+    const remainingPrincipal = this.calculateRemainingPrincipalForSummary(
+      loan,
+      paymentSchedules,
+    );
+    const remainingInterest = this.calculateRemainingInterestForSummary(
+      loan,
+      paymentSchedules,
+    );
+
+    // 다음 상환일
+    const nextPaymentDate = this.getNextPaymentDate(paymentSchedules);
+
+    // 상환 진행률
+    const repaymentProgress =
+      totalPayments > 0 ? (completedPayments / totalPayments) * 100 : 0;
+
+    // 이자 및 원금 비율
+    const interestRatio =
+      totalRepaymentAmount > 0
+        ? (totalInterestAmount / totalRepaymentAmount) * 100
+        : 0;
+    const principalRatio = 100 - interestRatio;
+
+    // 월별 상환 요약
+    // const monthlySummary = this.createMonthlySummary(paymentSchedules);
+
+    return {
+      // 대출 기본 정보
+      // loanId: loan.id, // 대출 고유 식별자 (UUID)
+      // loanName: loan.name, // 대출명 (사용자가 설정한 이름)
+      // principalAmount: loan.amount, // 대출 원금 (초기 대출 금액)
+      // interestRate: loan.interestRate, // 연 이자율 (연간 %)
+      // term: loan.term, // 대출 기간 (개월 단위)
+      // repaymentType: loan.repaymentType, // 상환 방식 (원리금균등, 원금균등, 만기일시)
+      // startDate: loan.startDate, // 대출 시작일
+      // endDate: loan.endDate, // 대출 만기일 (계산된 날짜)
+
+      // 상환 금액 정보
+      totalRepaymentAmount, // 총 상환금 (원금 + 이자 합계)
+      totalInterestAmount, // 총 이자 (전체 상환 기간 동안의 이자 합계)
+      // 월 평균 상환금 (총 상환금 / 총 개월 수)
+      averageMonthlyPayment:
+        totalPayments > 0 ? totalRepaymentAmount / totalPayments : 0,
+
+      // 남은 상환 정보
+      remainingPrincipal, // 남은 원금 (아직 상환되지 않은 원금)
+      remainingInterest, // 남은 이자 (아직 납부되지 않은 이자)
+      nextPaymentDate, // 다음 상환 예정일 (다음번 상환해야 할 날짜)
+
+      // 상환 진행률 및 비율
+      repaymentProgress: Math.round(repaymentProgress * 100) / 100, // 상환 진행률 (%)
+      interestRatio: Math.round(interestRatio * 100) / 100, // 이자 비율 (총 상환금 대비 이자 %)
+      principalRatio: Math.round(principalRatio * 100) / 100, // 원금 비율 (총 상환금 대비 원금 %)
+
+      // 상환 건수 통계
+      completedPayments, // 완료된 상환 건수 (납부완료 상태)
+      totalPayments, // 전체 상환 건수 (총 개월 수)
+      overduePayments, // 연체 건수 (연체 상태인 상환 건수)
+
+      // 중도상환 정보
+      totalPrepaymentAmount, // 중도상환 총액 (적용된 중도상환 금액 합계)
+      prepaymentInterestSavings, // 중도상환 시 절약되는 이자 (원래 이자 - 새로운 이자)
+
+      // 상세 정보
+      // monthlySummary, // 월별 상환 요약 배열 (각 월의 상환 계획 및 실제 내역)
+      // createdAt: loan.createdAt, // 대출 생성일시
+      // updatedAt: loan.updatedAt, // 대출 최종 수정일시
+    };
+  }
+
+  /**
+   * 남은 원금 계산 (상환 요약용)
+   */
+  private calculateRemainingPrincipalForSummary(
+    loan: Loan,
+    paymentSchedules: PaymentSchedule[],
+  ): number {
+    const paidPrincipal = paymentSchedules
+      .filter((s) => s.status === PaymentStatus.PAID)
+      .reduce((sum, s) => sum + s.principalAmount, 0);
+
+    return Math.max(0, loan.amount - paidPrincipal);
+  }
+
+  /**
+   * 남은 이자 계산 (상환 요약용)
+   */
+  private calculateRemainingInterestForSummary(
+    loan: Loan,
+    paymentSchedules: PaymentSchedule[],
+  ): number {
+    const paidInterest = paymentSchedules
+      .filter((s) => s.status === PaymentStatus.PAID)
+      .reduce((sum, s) => sum + s.interestAmount, 0);
+
+    const totalInterest = paymentSchedules.reduce(
+      (sum, s) => sum + s.interestAmount,
+      0,
+    );
+
+    return Math.max(0, totalInterest - paidInterest);
+  }
+
+  /**
+   * 다음 상환일 조회
+   */
+  private getNextPaymentDate(paymentSchedules: PaymentSchedule[]): Date | null {
+    const nextSchedule = paymentSchedules.find(
+      (s) => s.status === PaymentStatus.PENDING,
+    );
+    return nextSchedule ? nextSchedule.paymentDate : null;
+  }
+
+  /**
+   * 중도상환 시 절약되는 이자 계산
+   */
+  private calculatePrepaymentInterestSavings(
+    loan: Loan,
+    paymentSchedules: PaymentSchedule[],
+    prepayments: Prepayment[],
+  ): number {
+    if (prepayments.length === 0) return 0;
+
+    let totalSavings = 0;
+    const monthlyRate = loan.interestRate / 100 / 12;
+
+    for (const prepayment of prepayments) {
+      const prepaymentDate = new Date(prepayment.createdAt);
+      const remainingSchedules = paymentSchedules.filter(
+        (s) =>
+          new Date(s.paymentDate) > prepaymentDate &&
+          s.status === PaymentStatus.PENDING,
+      );
+
+      if (remainingSchedules.length > 0) {
+        const remainingBalance = remainingSchedules[0].remainingBalance;
+        const newBalance = remainingBalance - prepayment.amount;
+
+        if (newBalance > 0) {
+          // 기존 이자와 새로운 이자의 차이 계산
+          const originalInterest = remainingSchedules.reduce(
+            (sum, s) => sum + s.interestAmount,
+            0,
+          );
+          const newInterest = this.calculateNewInterest(
+            newBalance,
+            monthlyRate,
+            remainingSchedules.length,
+          );
+          totalSavings += Math.max(0, originalInterest - newInterest);
+        }
+      }
+    }
+
+    return Math.round(totalSavings);
+  }
+
+  /**
+   * 새로운 잔액으로 계산된 이자
+   */
+  private calculateNewInterest(
+    newBalance: number,
+    monthlyRate: number,
+    remainingMonths: number,
+  ): number {
+    let totalInterest = 0;
+    let currentBalance = newBalance;
+
+    for (let i = 0; i < remainingMonths; i++) {
+      const monthlyInterest = currentBalance * monthlyRate;
+      totalInterest += monthlyInterest;
+
+      // 원금 상환 (균등 원금 상환 방식 가정)
+      const monthlyPrincipal = newBalance / remainingMonths;
+      currentBalance -= monthlyPrincipal;
+    }
+
+    return totalInterest;
+  }
+
+  /**
+   * 월별 상환 요약 생성
+   */
+  private createMonthlySummary(
+    paymentSchedules: PaymentSchedule[],
+  ): MonthlyRepaymentSummary[] {
+    return paymentSchedules.map((schedule) => ({
+      paymentNumber: schedule.paymentNumber,
+      paymentDate: schedule.paymentDate,
+      principal: schedule.principalAmount,
+      interest: schedule.interestAmount,
+      totalPayment: schedule.totalAmount,
+      remainingPrincipal: schedule.remainingBalance,
+      status: schedule.status,
+      actualPaymentDate: schedule.paidAt,
+      actualPaymentAmount: schedule.actualPaidAmount,
+    }));
   }
 }

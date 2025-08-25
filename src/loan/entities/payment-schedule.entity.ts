@@ -64,7 +64,15 @@ export class PaymentSchedule {
    * 상환 방식에 따라 매월 동일하거나 달라질 수 있음
    */
   @Field(() => Float)
-  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  @Column({
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   principalAmount: number;
 
   /**
@@ -74,7 +82,15 @@ export class PaymentSchedule {
    * 남은 원금을 기준으로 계산되므로 매월 달라질 수 있음
    */
   @Field(() => Float)
-  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  @Column({
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   interestAmount: number;
 
   /**
@@ -84,7 +100,15 @@ export class PaymentSchedule {
    * 원리금균등상환의 경우 매월 동일
    */
   @Field(() => Float)
-  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  @Column({
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   totalAmount: number;
 
   /**
@@ -94,7 +118,15 @@ export class PaymentSchedule {
    * 매월 원금 상환 금액만큼 감소
    */
   @Field(() => Float)
-  @Column({ type: 'decimal', precision: 15, scale: 2 })
+  @Column({
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    transformer: {
+      to: (value: number) => value,
+      from: (value: string) => parseFloat(value),
+    },
+  })
   remainingBalance: number;
 
   /**
