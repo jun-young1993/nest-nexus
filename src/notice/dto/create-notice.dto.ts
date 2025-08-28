@@ -29,6 +29,7 @@ export class CreateNoticeDto {
   noticeGroupId: string;
 
   @IsString()
+  @IsOptional()
   @ApiProperty({
     example: 'test notice user id',
   })

@@ -3,11 +3,15 @@ import { NoticeService } from './notice.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { Like } from 'typeorm';
+import { UserService } from 'src/user/user.service';
 
 @ApiTags('Notice')
 @Controller('notice')
 export class NoticeController {
-  constructor(private readonly noticeService: NoticeService) {}
+  constructor(
+    private readonly noticeService: NoticeService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new notice' })
@@ -18,6 +22,10 @@ export class NoticeController {
   })
   @ApiBody({ type: CreateNoticeDto })
   async createNotice(@Body() createNoticeDto: CreateNoticeDto) {
+    if (!createNoticeDto.userName) {
+      const user = await this.userService.findOneOrFail(createNoticeDto.userId);
+      createNoticeDto.userName = user.username;
+    }
     return this.noticeService.create(createNoticeDto);
   }
 
