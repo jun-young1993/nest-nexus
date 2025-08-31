@@ -32,11 +32,11 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<User> {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepository.findOne({ where: { id, isActive: true } });
   }
 
   async findOneOrFail(id: string): Promise<User> {
-    return this.userRepository.findOneOrFail({ where: { id } });
+    return this.userRepository.findOneOrFail({ where: { id, isActive: true } });
   }
 
   async count(): Promise<number> {
