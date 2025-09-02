@@ -236,11 +236,38 @@
             "testStrategy": "Conduct security audits and compliance checks to ensure the API meets all regulatory requirements."
           }
         ]
+      },
+      {
+        "id": 31,
+        "title": "Auto-set PaymentSchedule Status to PAID for Past Dates",
+        "description": "Modify the PaymentSchedule creation logic to automatically set the status to PAID if the payment date is in the past.",
+        "details": "Update the service layer responsible for creating PaymentSchedule entities to include logic that checks if the paymentDate is before the current date (considering the application's timezone). If the paymentDate is in the past, set the status of the PaymentSchedule to PAID using the existing status enum. Ensure that this logic does not alter the DTO input contract and is consistent with the existing NestJS and TypeORM patterns. Utilize any existing date utilities for timezone handling to ensure accuracy. Update the repository or service method that persists the PaymentSchedule to include this logic.",
+        "testStrategy": "Create unit tests to verify that a PaymentSchedule with a paymentDate in the past is automatically set to PAID. Test cases should include paymentDates that are in the past, today, and in the future to ensure correct behavior. Validate that the status remains unchanged for today and future dates. Ensure tests cover timezone edge cases and utilize mock data to simulate different scenarios. Verify that the logic integrates correctly with the existing service and repository layers.",
+        "status": "pending",
+        "dependencies": [
+          22
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 32,
+        "title": "Implement Daily Scheduler for Payment Schedule Notifications",
+        "description": "Create a daily scheduler to check for PaymentSchedule rows with paymentDate one day ahead using @nestjs/schedule.",
+        "details": "Utilize the @nestjs/schedule package to set up a cron job that runs once daily at a configurable time. This job should query the database for PaymentSchedule entries where the paymentDate is exactly one day ahead, relative to the application's timezone. Log the count of these schedules and their IDs. Implement a service method that returns this list for potential reuse in notifications. Ensure the scheduler can be enabled or disabled via a feature flag or configuration key. Follow the existing module structure, either integrating into the loan module or a dedicated scheduling module if available. Maintain read-only access to the database and prepare the code for future notification extensions.",
+        "testStrategy": "Write unit tests for the service method using a repository mock to ensure it correctly queries schedules with paymentDate set to tomorrow. Verify that the scheduler logs the correct count and IDs of schedules. Test the feature flag or configuration key to ensure the scheduler can be toggled on and off. Use mock data to simulate different scenarios and ensure the scheduler behaves as expected.",
+        "status": "pending",
+        "dependencies": [
+          22,
+          31
+        ],
+        "priority": "medium",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-08-08T01:28:30.770Z",
-      "updated": "2025-08-23T04:55:46.688Z",
+      "updated": "2025-09-01T07:43:36.938Z",
       "description": "Tasks for master context"
     }
   }
