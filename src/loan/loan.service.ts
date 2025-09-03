@@ -187,6 +187,26 @@ export class LoanService {
   }
 
   /**
+   * 특정 상환 스케줄 조회
+   */
+  async getPaymentSchedule(
+    loanId: string,
+    scheduleId: string,
+  ): Promise<PaymentSchedule> {
+    await this.findOne(loanId); // 대출 존재 확인
+
+    const schedule = await this.paymentScheduleRepository.findOne({
+      where: { id: scheduleId, loanId },
+    });
+
+    if (!schedule) {
+      throw new NotFoundException('상환 스케줄을 찾을 수 없습니다.');
+    }
+
+    return schedule;
+  }
+
+  /**
    * 상환 스케줄 생성
    */
   async createPaymentSchedule(
@@ -195,9 +215,25 @@ export class LoanService {
   ): Promise<PaymentSchedule> {
     await this.findOne(loanId); // 대출 존재 확인
 
+    // 과거 날짜인 경우 자동으로 PAID 상태로 설정
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 시간을 00:00:00으로 설정하여 날짜만 비교
+
+    const paymentDate = new Date(createScheduleDto.paymentDate);
+    paymentDate.setHours(0, 0, 0, 0); // 시간을 00:00:00으로 설정하여 날짜만 비교
+
+    const isPastDate = paymentDate < today;
+
     const schedule = this.paymentScheduleRepository.create({
       ...createScheduleDto,
       loanId,
+      // 과거 날짜인 경우 자동으로 PAID 상태로 설정하고 paidAt도 설정
+      ...(isPastDate && {
+        status: PaymentStatus.PAID,
+        paidAt: new Date(),
+        actualPaidAmount:
+          createScheduleDto.actualPaidAmount || createScheduleDto.totalAmount,
+      }),
     });
 
     return this.paymentScheduleRepository.save(schedule);
@@ -223,6 +259,95 @@ export class LoanService {
 
     Object.assign(schedule, updateData);
     return this.paymentScheduleRepository.save(schedule);
+  }
+
+  /**
+   * 상환 스케줄 상태 업데이트
+   */
+  async updatePaymentScheduleStatus(
+    loanId: string,
+    scheduleId: string,
+    statusUpdate: {
+      status: PaymentStatus;
+      actualPaidAmount?: number;
+      notes?: string;
+    },
+  ): Promise<PaymentSchedule> {
+    await this.findOne(loanId); // 대출 존재 확인
+
+    const schedule = await this.paymentScheduleRepository.findOne({
+      where: { id: scheduleId, loanId },
+    });
+
+    if (!schedule) {
+      throw new NotFoundException('상환 스케줄을 찾을 수 없습니다.');
+    }
+
+    // 상태 업데이트
+    schedule.status = statusUpdate.status;
+
+    // PAID 상태로 변경 시 paidAt 설정
+    if (statusUpdate.status === PaymentStatus.PAID && !schedule.paidAt) {
+      schedule.paidAt = new Date();
+    }
+
+    // 실제 납부 금액 업데이트
+    if (statusUpdate.actualPaidAmount !== undefined) {
+      schedule.actualPaidAmount = statusUpdate.actualPaidAmount;
+    }
+
+    // 메모 업데이트
+    if (statusUpdate.notes !== undefined) {
+      schedule.notes = statusUpdate.notes;
+    }
+
+    return this.paymentScheduleRepository.save(schedule);
+  }
+
+  /**
+   * 상환 스케줄 통계 조회
+   */
+  async getPaymentScheduleStats(loanId: string): Promise<{
+    totalSchedules: number;
+    paidSchedules: number;
+    pendingSchedules: number;
+    overdueSchedules: number;
+    totalPaidAmount: number;
+    totalRemainingAmount: number;
+  }> {
+    await this.findOne(loanId); // 대출 존재 확인
+
+    const schedules = await this.paymentScheduleRepository.find({
+      where: { loanId },
+    });
+
+    const totalSchedules = schedules.length;
+    const paidSchedules = schedules.filter(
+      (s) => s.status === PaymentStatus.PAID,
+    ).length;
+    const pendingSchedules = schedules.filter(
+      (s) => s.status === PaymentStatus.PENDING,
+    ).length;
+    const overdueSchedules = schedules.filter(
+      (s) => s.status === PaymentStatus.OVERDUE,
+    ).length;
+
+    const totalPaidAmount = schedules
+      .filter((s) => s.status === PaymentStatus.PAID)
+      .reduce((sum, s) => sum + (s.actualPaidAmount || 0), 0);
+
+    const totalRemainingAmount = schedules
+      .filter((s) => s.status !== PaymentStatus.PAID)
+      .reduce((sum, s) => sum + s.totalAmount, 0);
+
+    return {
+      totalSchedules,
+      paidSchedules,
+      pendingSchedules,
+      overdueSchedules,
+      totalPaidAmount,
+      totalRemainingAmount,
+    };
   }
 
   /**

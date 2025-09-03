@@ -77,7 +77,7 @@
         "dependencies": [
           21
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": []
       },
       {
@@ -243,7 +243,7 @@
         "description": "Modify the PaymentSchedule creation logic to automatically set the status to PAID if the payment date is in the past.",
         "details": "Update the service layer responsible for creating PaymentSchedule entities to include logic that checks if the paymentDate is before the current date (considering the application's timezone). If the paymentDate is in the past, set the status of the PaymentSchedule to PAID using the existing status enum. Ensure that this logic does not alter the DTO input contract and is consistent with the existing NestJS and TypeORM patterns. Utilize any existing date utilities for timezone handling to ensure accuracy. Update the repository or service method that persists the PaymentSchedule to include this logic.",
         "testStrategy": "Create unit tests to verify that a PaymentSchedule with a paymentDate in the past is automatically set to PAID. Test cases should include paymentDates that are in the past, today, and in the future to ensure correct behavior. Validate that the status remains unchanged for today and future dates. Ensure tests cover timezone edge cases and utilize mock data to simulate different scenarios. Verify that the logic integrates correctly with the existing service and repository layers.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           22
         ],
@@ -267,7 +267,7 @@
     ],
     "metadata": {
       "created": "2025-08-08T01:28:30.770Z",
-      "updated": "2025-09-01T07:43:36.938Z",
+      "updated": "2025-09-03T02:24:47.200Z",
       "description": "Tasks for master context"
     }
   }

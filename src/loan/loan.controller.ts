@@ -18,6 +18,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { LoanService } from './loan.service';
+import { PaymentScheduleSchedulerService } from './payment-schedule-scheduler.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { CreatePaymentScheduleDto } from './dto/create-payment-schedule.dto';
@@ -35,7 +36,10 @@ import { LoanRepaymentSummaryDto } from './dto/loan-repayment-summary.dto';
 export class LoanController {
   private readonly logger = new Logger(LoanController.name);
 
-  constructor(private readonly loanService: LoanService) {}
+  constructor(
+    private readonly loanService: LoanService,
+    private readonly paymentScheduleSchedulerService: PaymentScheduleSchedulerService,
+  ) {}
 
   @Get('test')
   async test() {
@@ -199,6 +203,40 @@ export class LoanController {
     );
   }
 
+  @Get(':id/schedule/stats')
+  @ApiOperation({ summary: '대출의 상환 스케줄 통계 조회' })
+  @ApiParam({ name: 'id', description: '대출 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '상환 스케줄 통계가 성공적으로 조회되었습니다.',
+  })
+  async getPaymentScheduleStats(@Param('id') id: string): Promise<{
+    totalSchedules: number;
+    paidSchedules: number;
+    pendingSchedules: number;
+    overdueSchedules: number;
+    totalPaidAmount: number;
+    totalRemainingAmount: number;
+  }> {
+    return this.loanService.getPaymentScheduleStats(id);
+  }
+
+  @Get(':id/schedule/:scheduleId')
+  @ApiOperation({ summary: '특정 상환 스케줄 조회' })
+  @ApiParam({ name: 'id', description: '대출 ID' })
+  @ApiParam({ name: 'scheduleId', description: '상환 스케줄 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '상환 스케줄이 성공적으로 조회되었습니다.',
+    type: PaymentSchedule,
+  })
+  async getPaymentSchedule(
+    @Param('id') id: string,
+    @Param('scheduleId') scheduleId: string,
+  ): Promise<PaymentSchedule> {
+    return this.loanService.getPaymentSchedule(id, scheduleId);
+  }
+
   @Post(':id/schedule')
   @ApiOperation({ summary: '상환 스케줄 생성' })
   @ApiParam({ name: 'id', description: '대출 ID' })
@@ -230,6 +268,32 @@ export class LoanController {
     @Body() updateData: Partial<CreatePaymentScheduleDto>,
   ): Promise<PaymentSchedule> {
     return this.loanService.updatePaymentSchedule(id, scheduleId, updateData);
+  }
+
+  @Patch(':id/schedule/:scheduleId/status')
+  @ApiOperation({ summary: '상환 스케줄 상태 업데이트' })
+  @ApiParam({ name: 'id', description: '대출 ID' })
+  @ApiParam({ name: 'scheduleId', description: '상환 스케줄 ID' })
+  @ApiResponse({
+    status: 200,
+    description: '상환 스케줄 상태가 성공적으로 업데이트되었습니다.',
+    type: PaymentSchedule,
+  })
+  async updatePaymentScheduleStatus(
+    @Param('id') id: string,
+    @Param('scheduleId') scheduleId: string,
+    @Body()
+    statusUpdate: {
+      status: PaymentStatus;
+      actualPaidAmount?: number;
+      notes?: string;
+    },
+  ): Promise<PaymentSchedule> {
+    return this.loanService.updatePaymentScheduleStatus(
+      id,
+      scheduleId,
+      statusUpdate,
+    );
   }
 
   @Delete(':id/schedule/:scheduleId')
@@ -323,5 +387,20 @@ export class LoanController {
   ): Promise<LoanRepaymentSummaryDto[]> {
     this.logger.log(`사용자 대출 상환 요약 조회: 사용자 ${userId}`);
     return this.loanService.getAllLoansRepaymentSummary(userId);
+  }
+
+  @Get('scheduler/test-upcoming')
+  @ApiOperation({ summary: '내일 상환 예정 스케줄 수동 조회 (테스트용)' })
+  @ApiResponse({
+    status: 200,
+    description: '내일 상환 예정 스케줄 조회가 완료되었습니다.',
+  })
+  async testUpcomingSchedules(): Promise<{ message: string }> {
+    this.logger.log('내일 상환 예정 스케줄 수동 조회 시작');
+    await this.paymentScheduleSchedulerService.getUpcomingSchedulesManually();
+    return {
+      message:
+        '내일 상환 예정 스케줄 조회가 완료되었습니다. 로그를 확인하세요.',
+    };
   }
 }

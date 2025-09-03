@@ -149,6 +149,15 @@ const admobLogger = winston.createLogger({
   ],
 });
 
+const paymentScheduleSchedulerLogger = winston.createLogger({
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
+  transports: [
+    new winston.transports.DailyRotateFile({
+      filename: 'storage/logs/payment-schedule-scheduler-%DATE%.log',
+    }),
+  ],
+});
+
 // 개발 환경일 경우 콘솔 출력 추가
 if (process.env.NODE_ENV !== 'production') {
   generalLogger.add(
@@ -162,6 +171,12 @@ if (process.env.NODE_ENV !== 'production') {
     }),
   );
   admobLogger.add(
+    new winston.transports.Console({
+      format: combine(colorize(), logFormat),
+    }),
+  );
+
+  paymentScheduleSchedulerLogger.add(
     new winston.transports.Console({
       format: combine(colorize(), logFormat),
     }),
@@ -261,5 +276,20 @@ export class AdmobLogger {
 
   warn(message: string, metadata?: any) {
     admobLogger.warn(message, metadata);
+  }
+}
+
+export class PaymentScheduleSchedulerLogger {
+  log(message: string, metadata?: any) {
+    paymentScheduleSchedulerLogger.info(message, metadata);
+  }
+
+  error(message: string, metadata?: any) {
+    const error = metadata?.error || { message };
+    paymentScheduleSchedulerLogger.error(message, { ...metadata, error });
+  }
+
+  warn(message: string, metadata?: any) {
+    paymentScheduleSchedulerLogger.warn(message, metadata);
   }
 }
