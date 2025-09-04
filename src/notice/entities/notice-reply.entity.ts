@@ -6,8 +6,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { NoticeReplyReport } from './notice-reply-report.entity';
 
 @Entity()
 export class NoticeReply {
@@ -36,4 +38,7 @@ export class NoticeReply {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToMany(() => NoticeReplyReport, (report) => report.noticeReply)
+  reports: NoticeReplyReport[];
 }
