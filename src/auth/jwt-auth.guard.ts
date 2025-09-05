@@ -14,7 +14,7 @@ export class JwtAuthGuard implements CanActivate {
     const ctx = context.getArgs()[2]; // GraphQL Context
 
     const authHeader = ctx.req.headers.authorization;
-    console.log('=>(jwt-auth.guard.ts:15) ctx.req.headers', ctx.req.headers);
+
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header missing');
     }

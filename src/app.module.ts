@@ -41,6 +41,7 @@ import { McpServerModule } from './mcp/mcp-server.module';
 import { AdmobModule } from './admob/admob.module';
 import { AppRewardModule } from './app-reward/app-reward.module';
 import { LoanModule } from './loan/loan.module';
+import { SequenceModule } from './sequence/sequence.module';
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { LoanModule } from './loan/loan.module';
     AdmobModule,
     AppRewardModule,
     LoanModule,
+    SequenceModule,
   ],
   controllers: [],
   providers: [],

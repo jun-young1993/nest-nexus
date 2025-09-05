@@ -57,6 +57,10 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date; // 수정 날짜
 
+  @Column({ nullable: true, length: 45 })
+  registrationIp: string; // 사용자 등록 시점의 IP 주소
+  // End of Selection
+
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[]; // 작성한 게시글
 

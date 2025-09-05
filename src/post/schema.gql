@@ -134,6 +134,10 @@ type User {
   updatedAt: DateTime!
 }
 
+type AuthResponse {
+  accessToken: String!
+}
+
 type PostTag {
   id: String!
   name: String!
@@ -168,16 +172,12 @@ type Posts {
   pagination: PaginationInfo!
 }
 
-type AuthResponse {
-  accessToken: String!
-}
-
 type Query {
+  me: User
   getPosts(limit: Float, page: Float, tagId: String, type: PostType): Posts!
   getPost(id: String!): Post!
   getTagsWithPostCount: [TagWithPostCount!]!
   getPostTags: [PostTag!]!
-  me: User
 }
 
 """게시글 타입"""
@@ -187,17 +187,17 @@ enum PostType {
 }
 
 type Mutation {
-  createPost(input: CreatePostInputModel!): Post!
   login(input: LoginInputModel!): AuthResponse!
+  createPost(input: CreatePostInputModel!): Post!
+}
+
+input LoginInputModel {
+  email: String!
+  password: String!
 }
 
 input CreatePostInputModel {
   tagIds: [String!]!
   title: String!
   content: String!
-}
-
-input LoginInputModel {
-  email: String!
-  password: String!
 }

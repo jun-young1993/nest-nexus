@@ -5,11 +5,17 @@ import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { SequenceService } from 'src/sequence/sequence.service';
+import { SequenceName } from 'src/sequence/sequence.constance';
+import { RealIP } from 'nestjs-real-ip';
 
 @ApiTags('Users') // Swagger 그룹 태그
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly sequenceService: SequenceService,
+  ) {}
 
   @ApiOperation({ summary: 'Create a new user' }) // API 설명
   @ApiResponse({
@@ -19,7 +25,17 @@ export class UserController {
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @Post()
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  async createUser(
+    @RealIP() ip: string,
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<User> {
+    const count = await this.sequenceService.generateNextSequence(
+      SequenceName.USER_NUMBER,
+    );
+    if (createUserDto.username === null) {
+      createUserDto.username = `user ${count}`;
+    }
+    createUserDto.registrationIp = ip;
     return this.userService.createUser(createUserDto);
   }
 

@@ -56,4 +56,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   fcmToken?: string; // FCM 토큰
+
+  @ApiProperty({
+    example: '1234',
+    description: 'The User Registration IP',
+  })
+  @IsOptional()
+  @IsString()
+  registrationIp?: string; // 등록 시점의 IP 주소
 }
