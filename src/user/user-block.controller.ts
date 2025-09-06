@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -52,6 +53,9 @@ export class UserBlockController {
     this.logger.log(
       `사용자 블록 생성 요청: ${blockerId} -> ${createUserBlockDto.blockedId}`,
     );
+    if (blockerId === createUserBlockDto.blockedId) {
+      throw new BadRequestException('자기 자신을 블록할 수 없습니다.');
+    }
     return this.userBlockService.createUserBlock(blockerId, createUserBlockDto);
   }
 
