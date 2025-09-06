@@ -9,7 +9,7 @@ import {
   Index,
   Unique,
 } from 'typeorm';
-import { Field, ID, ObjectType, Int } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
 
 /**
@@ -69,10 +69,10 @@ export class UserBlock {
    * - INACTIVE: 비활성 블록 (해제됨)
    */
   @Field()
-  @Column({ 
-    type: 'enum', 
-    enum: BlockStatus, 
-    default: BlockStatus.ACTIVE 
+  @Column({
+    type: 'enum',
+    enum: BlockStatus,
+    default: BlockStatus.ACTIVE,
   })
   status: BlockStatus;
 

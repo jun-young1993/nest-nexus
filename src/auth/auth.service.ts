@@ -46,6 +46,9 @@ export class AuthService {
       accessToken: this.jwtService.sign(payload, options),
     };
   }
+  async findOne(id: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id } });
+  }
 
   async validateToken(token: string): Promise<User | null> {
     try {

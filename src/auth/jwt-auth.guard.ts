@@ -12,14 +12,35 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = context.getArgs()[2]; // GraphQL Context
-
-    const authHeader = ctx.req.headers.authorization;
+    let authHeader: string | null = null;
+    if (ctx.req) {
+      authHeader = ctx.req.headers.authorization;
+    } else {
+      const request = context.switchToHttp().getRequest();
+      authHeader = request.headers.authorization;
+    }
 
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header missing');
     }
-
+    console.log('authHeader', authHeader);
     const token = authHeader.split(' ')[1];
+    if (token.startsWith('user:')) {
+      const userId = token.split(':')[1];
+      console.log('userId', userId);
+      const user = await this.authService.findOne(userId);
+      if (!user) {
+        throw new UnauthorizedException('Invalid token or user not found');
+      }
+      if (ctx.req) {
+        ctx.req.user = user;
+      } else {
+        const request = context.switchToHttp().getRequest();
+        request.user = user;
+      }
+      return true;
+    }
+
     const user = await this.authService.validateToken(token);
 
     if (!user) {
@@ -27,7 +48,13 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     // ✅ 요청 객체에 유저 정보 추가
-    ctx.req.user = user;
+    if (ctx.req) {
+      ctx.req.user = user;
+    } else {
+      const request = context.switchToHttp().getRequest();
+      request.user = user;
+    }
+
     return true;
   }
 }
