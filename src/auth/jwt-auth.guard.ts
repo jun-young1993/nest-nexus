@@ -23,11 +23,11 @@ export class JwtAuthGuard implements CanActivate {
     if (!authHeader) {
       throw new UnauthorizedException('Authorization header missing');
     }
-    console.log('authHeader', authHeader);
+
     const token = authHeader.split(' ')[1];
     if (token.startsWith('user:')) {
       const userId = token.split(':')[1];
-      console.log('userId', userId);
+
       const user = await this.authService.findOne(userId);
       if (!user) {
         throw new UnauthorizedException('Invalid token or user not found');

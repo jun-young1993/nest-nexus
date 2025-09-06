@@ -64,4 +64,6 @@ export class Notice {
 
   @OneToMany(() => NoticeView, (noticeView) => noticeView.notice)
   noticeViews: NoticeView[];
+
+  isBlocked: boolean = false;
 }

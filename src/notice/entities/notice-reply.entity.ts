@@ -41,4 +41,6 @@ export class NoticeReply {
 
   @OneToMany(() => NoticeReplyReport, (report) => report.noticeReply)
   reports: NoticeReplyReport[];
+
+  isBlocked: boolean = false;
 }

@@ -17,6 +17,7 @@ import { NoticeView } from './entities/notice-view.entity';
 import { NoticeViewService } from './notice-view.service';
 import { NoticeReplyReport } from './entities/notice-reply-report.entity';
 import { NoticeReplyReportService } from './notice-reply-report.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { NoticeReplyReportService } from './notice-reply-report.service';
       NoticeView,
       NoticeReplyReport,
     ]),
+    AuthModule,
   ],
   controllers: [
     NoticeController,

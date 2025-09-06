@@ -1,16 +1,36 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { NoticeService } from './notice.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { Like } from 'typeorm';
 import { UserService } from 'src/user/user.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { UserBlockService } from 'src/user/user-block.service';
 
 @ApiTags('Notice')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @Controller('notice')
 export class NoticeController {
   constructor(
     private readonly noticeService: NoticeService,
     private readonly userService: UserService,
+    private readonly userBlockService: UserBlockService,
   ) {}
 
   @Post()
@@ -57,17 +77,27 @@ export class NoticeController {
     status: 200,
   })
   async findByName(
+    @Request() req: any,
     @Param('name') name: string,
     @Query('take') take?: number,
     @Query('skip') skip?: number,
     @Query('title') title?: string,
   ) {
-    return this.noticeService.findByName(name, {
+    const blockerId = req.user.id;
+    const notices = await this.noticeService.findByName(name, {
       skip: skip || 0,
       take: take || 10,
       where: {
         title: title ? Like(`%${title}%`) : undefined,
       },
     });
+    for (const notice of notices) {
+      const isBlocked = await this.userBlockService.isUserBlocked(
+        blockerId,
+        notice.userId,
+      );
+      notice.isBlocked = isBlocked;
+    }
+    return notices;
   }
 }
