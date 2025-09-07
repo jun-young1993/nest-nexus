@@ -54,11 +54,18 @@ export class NoticeController {
   @ApiResponse({
     status: 200,
   })
-  async findOne(@Param('id') id: string, @Query('userId') userId?: string) {
+  async findOne(@Request() req: any, @Param('id') id: string) {
+    const userId = req.user.id;
     const notice = await this.noticeService.findOne(id);
 
     await this.noticeService.incrementViewCount(id, userId);
-
+    if (notice) {
+      const isBlocked = await this.userBlockService.isUserBlocked(
+        userId,
+        notice.userId,
+      );
+      notice.isBlocked = isBlocked;
+    }
     return notice;
   }
 
