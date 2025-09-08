@@ -114,4 +114,21 @@ export class UserController {
   async removeFcmToken(@Param('id') id: string): Promise<User> {
     return this.userService.removeFcmToken(id);
   }
+
+  @ApiOperation({ summary: 'Update user name' })
+  @ApiResponse({
+    status: 200,
+    description: 'User name updated successfully',
+    type: User,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiParam({ name: 'username', description: 'User name' })
+  @Patch(':id/username/:username')
+  async updateUserName(
+    @Param('id') id: string,
+    @Param('username') username: string,
+  ): Promise<User> {
+    return this.userService.updateUserName(id, username);
+  }
 }

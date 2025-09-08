@@ -48,6 +48,11 @@ export class UserService {
     await this.userRepository.update(id, updateUserDto);
   }
 
+  async updateUserName(id: string, username: string): Promise<User> {
+    await this.userRepository.update(id, { username });
+    return this.userRepository.findOne({ where: { id } });
+  }
+
   /**
    * FCM 토큰 업데이트 (PATCH)
    */
