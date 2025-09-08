@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -46,5 +46,47 @@ export class UserService {
     }
 
     await this.userRepository.update(id, updateUserDto);
+  }
+
+  /**
+   * FCM 토큰 업데이트 (PATCH)
+   */
+  async updateFcmToken(id: string, fcmToken: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id, isActive: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`사용자를 찾을 수 없습니다. ID: ${id}`);
+    }
+
+    // FCM 토큰만 업데이트
+    await this.userRepository.update(id, {
+      fcmToken: fcmToken,
+    });
+
+    // 업데이트된 사용자 정보 반환
+    return this.userRepository.findOne({ where: { id } });
+  }
+
+  /**
+   * FCM 토큰 제거
+   */
+  async removeFcmToken(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id, isActive: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`사용자를 찾을 수 없습니다. ID: ${id}`);
+    }
+
+    // FCM 토큰을 null로 설정
+    await this.userRepository.update(id, {
+      fcmToken: null,
+    });
+
+    // 업데이트된 사용자 정보 반환
+    return this.userRepository.findOne({ where: { id } });
   }
 }

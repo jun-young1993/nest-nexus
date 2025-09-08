@@ -1,5 +1,14 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Put,
+  Patch,
+  Delete,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
@@ -74,5 +83,35 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<void> {
     return await this.userService.updateUser(id, updateUserDto);
+  }
+
+  @ApiOperation({ summary: 'Update user FCM token' })
+  @ApiResponse({
+    status: 200,
+    description: 'FCM token updated successfully',
+    type: User,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @Patch(':id/fcm-token/:fcmToken')
+  async updateFcmToken(
+    @Param('id') id: string,
+    @Param('fcmToken') fcmToken: string,
+  ): Promise<User> {
+    return this.userService.updateFcmToken(id, fcmToken);
+  }
+
+  @ApiOperation({ summary: 'Remove user FCM token' })
+  @ApiResponse({
+    status: 200,
+    description: 'FCM token removed successfully',
+    type: User,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @Delete(':id/fcm-token')
+  async removeFcmToken(@Param('id') id: string): Promise<User> {
+    return this.userService.removeFcmToken(id);
   }
 }
