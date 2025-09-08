@@ -7,6 +7,7 @@ import {
   PaymentStatus,
 } from './entities/payment-schedule.entity';
 import { PaymentScheduleSchedulerLogger } from 'src/config/logger.config';
+import { FcmAdminService } from 'src/fcm-admin/fcm-admin.service';
 
 /**
  * Payment Schedule 스케줄러 서비스
@@ -19,6 +20,7 @@ export class PaymentScheduleSchedulerService {
   constructor(
     @InjectRepository(PaymentSchedule)
     private readonly paymentScheduleRepository: Repository<PaymentSchedule>,
+    private readonly fcmAdminService: FcmAdminService,
   ) {}
 
   /**
@@ -30,6 +32,22 @@ export class PaymentScheduleSchedulerService {
     this.logger.log('Payment Schedule 알림 체크 시작');
 
     try {
+      
+      
+      const testToken =
+        'ePRZpLhXUkUtnua_ohLdkm:APA91bEbNKtb5C2sbp3ox6FD4arqEnDr1xD0ktJsj58QfEhnGYIeTTl09-Nzvm5QryWWs6SdL20nvIN50aPpvu7QuTnlxLpYSokMNRkAOwCZX1IBtzoGFJQ';
+      const result = await this.fcmAdminService.sendMessage({
+        tokens: [testToken],
+        notification: {
+          title: 'Test',
+          body: 'Test',
+        },
+      });
+      console.log(result.successCount);
+      console.log(result.failureCount);
+      console.log(result.responses);
+      console.log(result.responses[0].error);
+      return;
       const upcomingSchedules = await this.getUpcomingPaymentSchedules();
 
       if (upcomingSchedules.length === 0) {
