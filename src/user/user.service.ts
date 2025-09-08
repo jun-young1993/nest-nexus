@@ -41,7 +41,7 @@ export class UserService {
 
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<void> {
     const user = await this.findOneOrFail(id);
-    if (updateUserDto.fcmToken === null && user.fcmToken) {
+    if (updateUserDto.fcmToken === null) {
       updateUserDto.fcmToken = user.fcmToken;
     }
 
