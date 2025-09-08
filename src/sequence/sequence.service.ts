@@ -156,7 +156,7 @@ export class SequenceService {
     }
 
     // 시퀀스 번호 증가
-    sequence.sequenceNumber += 1;
+    sequence.sequenceNumber = Number(sequence.sequenceNumber) + 1;
     await this.sequenceRepository.save(sequence);
 
     // 포맷된 시퀀스 번호 생성

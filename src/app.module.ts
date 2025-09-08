@@ -42,6 +42,7 @@ import { AdmobModule } from './admob/admob.module';
 import { AppRewardModule } from './app-reward/app-reward.module';
 import { LoanModule } from './loan/loan.module';
 import { SequenceModule } from './sequence/sequence.module';
+import loanScheduleFcmConfig from './config/loan-schedule-fcm.config';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { SequenceModule } from './sequence/sequence.module';
         logConfig,
         dbConfig,
         myHomeParkingFcmConfig,
+        loanScheduleFcmConfig,
         mailConfig,
       ],
       envFilePath: ['.env'],

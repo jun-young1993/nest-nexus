@@ -41,7 +41,8 @@ export type DbConfig = {
   database: string;
   synchronize: boolean;
 };
-export type MyHomeParkingFcmConfig = {
+
+export type FcmConfig = {
   type: string;
   projectId: string;
   privateKeyId: string;
@@ -55,6 +56,10 @@ export type MyHomeParkingFcmConfig = {
   universeDomain: string;
 };
 
+export type MyHomeParkingFcmConfig = FcmConfig;
+
+export type LoanScheduleFcmConfig = FcmConfig;
+
 export type AllConfigType = {
   app: AppConfig;
   alie: AlieConfig;
@@ -64,6 +69,7 @@ export type AllConfigType = {
   gemini: GeminiConfig;
   db: DbConfig;
   myHomeParkingFcm: MyHomeParkingFcmConfig;
+  loanScheduleFcm: LoanScheduleFcmConfig;
 };
 
 export type MailConfig = {

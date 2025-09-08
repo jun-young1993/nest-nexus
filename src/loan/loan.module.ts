@@ -10,6 +10,9 @@ import { Prepayment } from './entities/prepayment.entity';
 import { PrepaymentSchedule } from './entities/prepayment-schedule.entity';
 import { LoanAnalytics } from './entities/loan-analytics.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { FcmAdminModule } from 'src/fcm-admin/fcm-admin.module';
+import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from 'src/config/config.type';
 
 @Module({
   imports: [
@@ -22,6 +25,11 @@ import { AuthModule } from 'src/auth/auth.module';
     ]),
     ScheduleModule.forRoot(),
     AuthModule,
+    FcmAdminModule.forRootAsync({
+      useFactory: (configService: ConfigService<AllConfigType>) => {
+        return configService.get('loanScheduleFcm');
+      },
+    }),
   ],
   controllers: [LoanController],
   providers: [LoanService, PaymentScheduleSchedulerService],
