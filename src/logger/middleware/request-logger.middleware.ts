@@ -12,8 +12,7 @@ export class RequestLoggerMiddleware implements NestMiddleware {
     // 요청 로깅
 
     this.httpLogger.log('Request', {
-      startTime,
-      method,
+      httpMethod: method.toUpperCase(),
       originalUrl,
       body,
       params,
@@ -27,7 +26,6 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const duration = Date.now() - startTime;
       const { statusCode } = res;
       this.httpLogger.log('Response', {
-        startTime,
         method,
         originalUrl,
         statusCode,
