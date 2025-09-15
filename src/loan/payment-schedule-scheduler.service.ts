@@ -32,8 +32,6 @@ export class PaymentScheduleSchedulerService {
     this.logger.log('Payment Schedule 알림 체크 시작');
 
     try {
-      
-      
       const testToken =
         'ePRZpLhXUkUtnua_ohLdkm:APA91bEbNKtb5C2sbp3ox6FD4arqEnDr1xD0ktJsj58QfEhnGYIeTTl09-Nzvm5QryWWs6SdL20nvIN50aPpvu7QuTnlxLpYSokMNRkAOwCZX1IBtzoGFJQ';
       const result = await this.fcmAdminService.sendMessage({

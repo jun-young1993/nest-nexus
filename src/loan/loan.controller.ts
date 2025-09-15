@@ -199,7 +199,7 @@ export class LoanController {
         take,
         order: { paymentNumber: order },
       },
-      { status },
+      { status: status === null ? undefined : status },
     );
   }
 
