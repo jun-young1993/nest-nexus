@@ -60,6 +60,21 @@ export type MyHomeParkingFcmConfig = FcmConfig;
 
 export type LoanScheduleFcmConfig = FcmConfig;
 
+export type MailConfig = {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  fromName: string;
+  from: string;
+};
+
+export type AwsS3CredentialsConfig = {
+  accessKeyId: string;
+  secretAccessKey: string;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   alie: AlieConfig;
@@ -70,14 +85,5 @@ export type AllConfigType = {
   db: DbConfig;
   myHomeParkingFcm: MyHomeParkingFcmConfig;
   loanScheduleFcm: LoanScheduleFcmConfig;
-};
-
-export type MailConfig = {
-  host: string;
-  port: number;
-  secure: boolean;
-  user: string;
-  pass: string;
-  fromName: string;
-  from: string;
+  awsS3Credentials: AwsS3CredentialsConfig;
 };

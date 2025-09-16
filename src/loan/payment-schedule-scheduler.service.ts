@@ -7,7 +7,7 @@ import {
   PaymentStatus,
 } from './entities/payment-schedule.entity';
 import { PaymentScheduleSchedulerLogger } from 'src/config/logger.config';
-import { FcmAdminService } from 'src/fcm-admin/fcm-admin.service';
+import { FcmAdminService } from 'src/firebase/fcm-admin/fcm-admin.service';
 
 /**
  * Payment Schedule 스케줄러 서비스

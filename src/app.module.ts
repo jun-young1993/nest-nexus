@@ -43,7 +43,8 @@ import { AppRewardModule } from './app-reward/app-reward.module';
 import { LoanModule } from './loan/loan.module';
 import { SequenceModule } from './sequence/sequence.module';
 import loanScheduleFcmConfig from './config/loan-schedule-fcm.config';
-
+import awsS3CredentialsConfig from './config/s3-credentials.config';
+import { AwsS3Module } from './aws/s3/aws-s3.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -59,6 +60,7 @@ import loanScheduleFcmConfig from './config/loan-schedule-fcm.config';
         myHomeParkingFcmConfig,
         loanScheduleFcmConfig,
         mailConfig,
+        awsS3CredentialsConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -94,6 +96,7 @@ import loanScheduleFcmConfig from './config/loan-schedule-fcm.config';
     AppRewardModule,
     LoanModule,
     SequenceModule,
+    AwsS3Module.forRoot(),
   ],
   controllers: [],
   providers: [],
