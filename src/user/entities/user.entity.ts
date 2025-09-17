@@ -15,6 +15,7 @@ import { NoticeView } from '../../notice/entities/notice-view.entity';
 import { UserGroup } from './user-group.entity';
 import { Loan } from '../../loan/entities/loan.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { S3Object } from 'src/aws/s3/entities/s3-object.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -77,4 +78,7 @@ export class User {
   // One-to-Many 관계: User와 Loan
   @OneToMany(() => Loan, (loan) => loan.user)
   loans: Loan[]; // 사용자의 대출 목록
+
+  @OneToMany(() => S3Object, (s3Object) => s3Object.user)
+  s3Objects: S3Object[];
 }

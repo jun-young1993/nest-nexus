@@ -70,9 +70,22 @@ export type MailConfig = {
   from: string;
 };
 
+type AwsS3AppByConfig = {
+  region: 'us-east-1';
+  bucket: 'juny-babylog-assets';
+};
+
+export type AwsS3AppNames = 'baby-log';
+
+export interface AwsS3AppConfig
+  extends Record<AwsS3AppNames, AwsS3AppByConfig> {
+  'baby-log': AwsS3AppByConfig;
+}
+
 export type AwsS3CredentialsConfig = {
   accessKeyId: string;
   secretAccessKey: string;
+  awsS3AppConfig: AwsS3AppConfig;
 };
 
 export type AllConfigType = {
