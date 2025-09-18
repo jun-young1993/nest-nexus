@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { AllConfigType, AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -91,5 +91,18 @@ export class AwsS3Service {
       results.push(result);
     }
     return results;
+  }
+
+  async getObjects(
+    user: User,
+    options: FindManyOptions<S3Object>,
+  ): Promise<S3Object[]> {
+    return await this.s3ObjectRepository.find({
+      where: {
+        user: user,
+      },
+      order: { createdAt: 'DESC' },
+      ...options,
+    });
   }
 }

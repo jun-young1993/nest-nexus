@@ -5,6 +5,8 @@ import {
   UseInterceptors,
   Param,
   UseGuards,
+  Get,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -13,6 +15,8 @@ import {
   ApiResponse,
   ApiConsumes,
   ApiBearerAuth,
+  ApiQuery,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { AwsS3Service } from './aws-s3.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -20,6 +24,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AwsS3AppNames } from 'src/config/config.type';
+import { S3Object } from './entities/s3-object.entity';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -117,5 +122,25 @@ export class AwsS3Controller {
         error: error.message,
       };
     }
+  }
+
+  @ApiOperation({ summary: 'S3 객체 목록 조회' })
+  @ApiQuery({ name: 'skip', description: '건너뛸 개수', required: false })
+  @ApiQuery({ name: 'take', description: '조회할 개수', required: false })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체 목록 조회 성공',
+    type: [S3Object],
+  })
+  @Get('objects')
+  async getObjects(
+    @CurrentUser() user: User,
+    @Query('skip') skip: number,
+    @Query('take') take: number,
+  ) {
+    return await this.awsS3Service.getObjects(user, {
+      skip: skip || 0,
+      take: take || 10,
+    });
   }
 }
