@@ -212,12 +212,10 @@ export class UserGroupService {
    * 사용자가 속한 그룹들 조회
    */
   async findGroupsByUserId(userId: string): Promise<UserGroup[]> {
-    return await this.userGroupRepository
-      .createQueryBuilder('userGroup')
-      .innerJoin('userGroup.users', 'user')
-      .where('user.id = :userId', { userId })
-      .andWhere('userGroup.isActive = :isActive', { isActive: true })
-      .getMany();
+    return await this.userGroupRepository.find({
+      where: { users: { id: userId }, isActive: true },
+      relations: ['users'],
+    });
   }
 
   /**

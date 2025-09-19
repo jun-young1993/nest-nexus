@@ -102,28 +102,25 @@ export class UserGroupController {
   }
 
   /**
-   * ID로 특정 그룹 조회
-   * GET /user-groups/:id
+   * 사용자가 속한 그룹들 조회
+   * GET /user-groups/groups
    */
-  @Get(':id')
+  @Get('groups')
   @ApiOperation({
-    summary: 'Get user group by ID',
-    description: 'Retrieves a specific user group by its unique identifier',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'User group unique identifier (UUID)',
-    type: String,
+    summary: 'Get groups for a user',
+    description: 'Retrieves all groups that a specific user belongs to',
   })
   @ApiOkResponse({
-    description: 'User group retrieved successfully',
-    type: UserGroup,
+    description: 'User groups retrieved successfully',
+    type: [UserGroup],
   })
   @ApiNotFoundResponse({
-    description: 'User group not found',
+    description: 'User not found',
   })
-  async findOne(@Param('id') id: string): Promise<UserGroup> {
-    return await this.userGroupService.findOne(id);
+  async findGroupsByUserId(@CurrentUser() user: User): Promise<UserGroup[]> {
+    console.log('user', user);
+
+    return await this.userGroupService.findGroupsByUserId(user.id);
   }
 
   /**
@@ -188,28 +185,28 @@ export class UserGroupController {
   }
 
   /**
-   * 사용자가 속한 그룹들 조회
-   * GET /user-groups/user/:userId
+   * ID로 특정 그룹 조회
+   * GET /user-groups/:id
    */
-  @Get('find-groups-by-user')
+  @Get(':id')
   @ApiOperation({
-    summary: 'Get groups for a user',
-    description: 'Retrieves all groups that a specific user belongs to',
+    summary: 'Get user group by ID',
+    description: 'Retrieves a specific user group by its unique identifier',
   })
   @ApiParam({
-    name: 'userId',
-    description: 'User unique identifier (UUID)',
+    name: 'id',
+    description: 'User group unique identifier (UUID)',
     type: String,
   })
   @ApiOkResponse({
-    description: 'User groups retrieved successfully',
-    type: [UserGroup],
+    description: 'User group retrieved successfully',
+    type: UserGroup,
   })
   @ApiNotFoundResponse({
-    description: 'User not found',
+    description: 'User group not found',
   })
-  async findGroupsByUserId(@CurrentUser() user: User): Promise<UserGroup[]> {
-    return await this.userGroupService.findGroupsByUserId(user.id);
+  async findOne(@Param('id') id: string): Promise<UserGroup> {
+    return await this.userGroupService.findOne(id);
   }
 
   /**
