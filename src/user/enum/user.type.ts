@@ -7,4 +7,5 @@ export enum UserType {
   MCP_CLIENT = 'mcp-client',
   MONEY_TREE = 'money-tree',
   LOAN_COUNTDOWN = 'loan-countdown',
+  BABY_LOG = 'baby-log',
 }
