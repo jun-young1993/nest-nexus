@@ -191,7 +191,7 @@ export class UserGroupController {
    * 사용자가 속한 그룹들 조회
    * GET /user-groups/user/:userId
    */
-  @Get('user/:userId')
+  @Get('find-groups-by-user')
   @ApiOperation({
     summary: 'Get groups for a user',
     description: 'Retrieves all groups that a specific user belongs to',
@@ -208,10 +208,8 @@ export class UserGroupController {
   @ApiNotFoundResponse({
     description: 'User not found',
   })
-  async findGroupsByUserId(
-    @Param('userId') userId: string,
-  ): Promise<UserGroup[]> {
-    return await this.userGroupService.findGroupsByUserId(userId);
+  async findGroupsByUserId(@CurrentUser() user: User): Promise<UserGroup[]> {
+    return await this.userGroupService.findGroupsByUserId(user.id);
   }
 
   /**
