@@ -44,7 +44,7 @@ export class UserController {
     if (createUserDto.username === null) {
       createUserDto.username = `user ${count}`;
     }
-    createUserDto.registrationIp = ip;
+    createUserDto.registrationIp = createUserDto.registrationIp || ip;
     return this.userService.createUser(createUserDto);
   }
 
