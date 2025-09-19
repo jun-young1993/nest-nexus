@@ -97,12 +97,15 @@ export class AwsS3Service {
     user: User,
     options: FindManyOptions<S3Object>,
   ): Promise<S3Object[]> {
-    return await this.s3ObjectRepository.find({
+    // 방법 1: userId로 조회
+    const result = await this.s3ObjectRepository.find({
       where: {
-        user: user,
+        user: { id: user.id }, // 관계를 통한 조회
       },
       order: { createdAt: 'DESC' },
       ...options,
     });
+
+    return result;
   }
 }
