@@ -112,4 +112,13 @@ export class AwsS3Service {
   async findOneOrFail(id: string): Promise<S3Object> {
     return await this.s3ObjectRepository.findOneOrFail({ where: { id } });
   }
+
+  async count(user: User, options: FindManyOptions<S3Object>): Promise<number> {
+    return await this.s3ObjectRepository.count({
+      where: {
+        user: { id: user.id }, // 관계를 통한 조회
+      },
+      ...options,
+    });
+  }
 }
