@@ -108,4 +108,8 @@ export class AwsS3Service {
 
     return result;
   }
+
+  async findOneOrFail(id: string): Promise<S3Object> {
+    return await this.s3ObjectRepository.findOneOrFail({ where: { id } });
+  }
 }

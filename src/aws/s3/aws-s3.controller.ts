@@ -143,4 +143,17 @@ export class AwsS3Controller {
       take: take || 10,
     });
   }
+
+  @Get('objects/:id')
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체 조회 성공',
+    type: S3Object,
+  })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getObject(@Param('id') id: string) {
+    return await this.awsS3Service.findOneOrFail(id);
+  }
 }
