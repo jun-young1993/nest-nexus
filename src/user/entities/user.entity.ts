@@ -51,6 +51,10 @@ export class User {
   isActive: boolean; // 활성 상태
 
   @Field()
+  @Column({ default: false })
+  isAdmin: boolean;
+
+  @Field()
   @CreateDateColumn()
   createdAt: Date; // 생성 날짜
 

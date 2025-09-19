@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiConflictResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UserGroupService } from './user-group.service';
 import { CreateUserGroupDto } from './dto/create-user-group.dto';
@@ -30,8 +32,12 @@ import { AddUserToGroupDto } from './dto/add-user-to-group.dto';
 import { RemoveUserFromGroupDto } from './dto/remove-user-from-group.dto';
 import { UserGroup } from './entities/user-group.entity';
 import { User } from './entities/user.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @ApiTags('User Groups')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 @Controller('user-groups')
 export class UserGroupController {
   constructor(private readonly userGroupService: UserGroupService) {}
@@ -62,9 +68,10 @@ export class UserGroupController {
     description: 'Conflict - group name already exists',
   })
   async create(
+    @CurrentUser() user: User,
     @Body() createUserGroupDto: CreateUserGroupDto,
   ): Promise<UserGroup> {
-    return await this.userGroupService.create(createUserGroupDto);
+    return await this.userGroupService.create(user, createUserGroupDto);
   }
 
   /**

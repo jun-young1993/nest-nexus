@@ -130,6 +130,7 @@ type User {
   username: String!
   email: String!
   isActive: Boolean!
+  isAdmin: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
