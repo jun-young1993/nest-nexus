@@ -129,7 +129,9 @@ export class UserGroupController {
   @ApiNotFoundResponse({
     description: 'User not found',
   })
-  async findGroupsByUserId(@CurrentUser() user: User): Promise<UserGroup[]> {
+  async findGroupsByUserId(
+    @CurrentUser() user: User,
+  ): Promise<UserGroup | null> {
     console.log('user', user);
 
     return await this.userGroupService.findGroupsByUserId(user.id);

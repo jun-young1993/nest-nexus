@@ -162,8 +162,7 @@ export class AwsS3Controller {
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getObjectCount(@CurrentUser() user: User) {
     const count = await this.awsS3Service.count(user);
-    console.log('count', count);
-    return { count };
+    return count;
   }
 
   @Get('objects/:id')
