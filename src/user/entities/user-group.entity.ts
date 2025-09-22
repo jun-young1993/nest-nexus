@@ -25,11 +25,11 @@ export class UserGroup {
   @ApiProperty({
     description: 'Name of the user group (must be unique)',
     example: 'Developers',
-    maxLength: 100,
+    nullable: true,
   })
   @Field()
-  @Column({ length: 100, unique: true })
-  name: string; // 그룹 이름 (유니크)
+  @Column({ nullable: true })
+  name?: string; // 그룹 이름 (유니크)
 
   @ApiProperty({
     description: 'Description of the user group',
@@ -39,7 +39,7 @@ export class UserGroup {
   })
   @Field()
   @Column({ length: 500, nullable: true })
-  description: string; // 그룹 설명
+  description?: string; // 그룹 설명
 
   @ApiProperty({
     description: 'Whether the group is active',
@@ -58,6 +58,23 @@ export class UserGroup {
   @Field()
   @Column({ default: false })
   isSystem: boolean; // 시스템 그룹 여부 (삭제 방지)
+
+  @ApiProperty({
+    description: 'The number of the group',
+    example: 1,
+  })
+  @Field()
+  @Column({ default: '000000' })
+  number: string; // 그룹 번호
+
+  @ApiProperty({
+    description: 'Whether users can join this group',
+    example: true,
+    default: true,
+  })
+  @Field()
+  @Column({ default: true })
+  isJoinable: boolean; // 그룹 참여 가능 여부
 
   @ApiProperty({
     description: 'When the group was created',

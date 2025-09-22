@@ -27,17 +27,9 @@ export class UserGroupService {
   async create(
     user: User,
     createUserGroupDto: CreateUserGroupDto,
+    number: string,
   ): Promise<UserGroup> {
-    const { name } = createUserGroupDto;
-
     // 그룹 이름 중복 확인
-    const existingGroup = await this.userGroupRepository.findOne({
-      where: { name },
-    });
-
-    if (existingGroup) {
-      throw new BadRequestException(`Group with name '${name}' already exists`);
-    }
 
     user.isAdmin = true;
     await this.userRepository.save(user);
@@ -46,6 +38,7 @@ export class UserGroupService {
       ...createUserGroupDto,
       isActive: createUserGroupDto.isActive ?? true,
       isSystem: createUserGroupDto.isSystem ?? false,
+      number,
       users: [user],
     });
 
@@ -53,21 +46,22 @@ export class UserGroupService {
   }
 
   /**
-   * 모든 사용자 그룹 조회
+   * 사용자의 첫 번째 그룹 조회
    */
-  async findAll(): Promise<UserGroup[]> {
-    return await this.userGroupRepository.find({
+  async findOneByUserId(user: User): Promise<UserGroup | null> {
+    return await this.userGroupRepository.findOne({
+      where: { users: { id: user.id } },
       relations: ['users'],
       order: { createdAt: 'DESC' },
     });
   }
 
   /**
-   * 활성 상태인 그룹만 조회
+   * 활성 상태인 사용자의 첫 번째 그룹 조회
    */
-  async findActiveGroups(): Promise<UserGroup[]> {
-    return await this.userGroupRepository.find({
-      where: { isActive: true },
+  async findActiveGroupByUserId(user: User): Promise<UserGroup | null> {
+    return await this.userGroupRepository.findOne({
+      where: { isActive: true, users: { id: user.id } },
       relations: ['users'],
       order: { createdAt: 'DESC' },
     });

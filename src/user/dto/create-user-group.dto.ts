@@ -7,13 +7,14 @@ export class CreateUserGroupDto {
   @ApiProperty({
     description: 'User group name (must be unique)',
     example: 'Developers',
-    minLength: 1,
+    minLength: 0,
     maxLength: 100,
   })
   @Field()
   @IsString()
-  @Length(1, 100)
-  name: string; // 그룹 이름
+  @IsOptional()
+  @Length(0, 100)
+  name?: string; // 그룹 이름
 
   @ApiPropertyOptional({
     description: 'Optional description for the user group',
@@ -37,7 +38,8 @@ export class CreateUserGroupDto {
   isActive?: boolean; // 그룹 활성 상태 (기본값: true)
 
   @ApiPropertyOptional({
-    description: 'Whether this is a system group (default: false, cannot be modified/deleted)',
+    description:
+      'Whether this is a system group (default: false, cannot be modified/deleted)',
     example: false,
     default: false,
   })
@@ -45,4 +47,14 @@ export class CreateUserGroupDto {
   @IsOptional()
   @IsBoolean()
   isSystem?: boolean; // 시스템 그룹 여부 (기본값: false)
+
+  @ApiPropertyOptional({
+    description: 'Whether users can join this group',
+    example: true,
+    default: true,
+  })
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isJoinable?: boolean; // 그룹 참여 가능 여부
 }

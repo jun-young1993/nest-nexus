@@ -34,13 +34,18 @@ import { UserGroup } from './entities/user-group.entity';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { SequenceService } from 'src/sequence/sequence.service';
+import { SequenceName } from 'src/sequence/sequence.constance';
 
 @ApiTags('User Groups')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @Controller('user-groups')
 export class UserGroupController {
-  constructor(private readonly userGroupService: UserGroupService) {}
+  constructor(
+    private readonly userGroupService: UserGroupService,
+    private readonly sequenceService: SequenceService,
+  ) {}
 
   /**
    * 새로운 사용자 그룹 생성
@@ -71,7 +76,11 @@ export class UserGroupController {
     @CurrentUser() user: User,
     @Body() createUserGroupDto: CreateUserGroupDto,
   ): Promise<UserGroup> {
-    return await this.userGroupService.create(user, createUserGroupDto);
+    const number = await this.sequenceService.generateNextSequence(
+      SequenceName.USER_GROUP_NUMBER,
+    );
+
+    return await this.userGroupService.create(user, createUserGroupDto, number);
   }
 
   /**
@@ -91,14 +100,17 @@ export class UserGroupController {
       'Filter by active status (true for active only, false for inactive only)',
   })
   @ApiOkResponse({
-    description: 'List of user groups retrieved successfully',
-    type: [UserGroup],
+    description: 'User group retrieved successfully',
+    type: UserGroup,
   })
-  async findAll(@Query('active') active?: boolean): Promise<UserGroup[]> {
+  async findAll(
+    @CurrentUser() user: User,
+    @Query('active') active?: boolean,
+  ): Promise<UserGroup | null> {
     if (active === true) {
-      return await this.userGroupService.findActiveGroups();
+      return await this.userGroupService.findActiveGroupByUserId(user);
     }
-    return await this.userGroupService.findAll();
+    return await this.userGroupService.findOneByUserId(user);
   }
 
   /**

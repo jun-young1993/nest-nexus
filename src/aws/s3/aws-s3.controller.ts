@@ -144,6 +144,28 @@ export class AwsS3Controller {
     });
   }
 
+  @Get('objects/count')
+  @ApiOperation({ summary: 'S3 객체 개수 조회' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체 개수 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        count: {
+          type: 'number',
+          description: 'S3 객체 개수',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getObjectCount(@CurrentUser() user: User) {
+    const count = await this.awsS3Service.count(user);
+    console.log('count', count);
+    return { count };
+  }
+
   @Get('objects/:id')
   @ApiParam({ name: 'id', description: 'S3 객체 ID' })
   @ApiResponse({
@@ -155,17 +177,5 @@ export class AwsS3Controller {
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getObject(@Param('id') id: string) {
     return await this.awsS3Service.findOneOrFail(id);
-  }
-
-  @Get('objects/count')
-  @ApiResponse({
-    status: 200,
-    description: 'S3 객체 개수 조회 성공',
-    type: Number,
-  })
-  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
-  async getObjectCount(@CurrentUser() user: User) {
-    return await this.awsS3Service.count(user);
   }
 }
