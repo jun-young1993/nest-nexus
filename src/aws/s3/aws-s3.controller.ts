@@ -177,4 +177,73 @@ export class AwsS3Controller {
   async getObject(@Param('id') id: string) {
     return await this.awsS3Service.findOneOrFail(id);
   }
+
+  @Get('objects/year/:year/month/:month/day/:day')
+  @ApiParam({ name: 'year', description: '조회 년도 (YYYY)' })
+  @ApiParam({ name: 'month', description: '조회 월 (MM)' })
+  @ApiParam({ name: 'day', description: '조회 일 (DD)' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체 조회 성공',
+    type: [S3Object],
+  })
+  async getObjectsByDate(
+    @CurrentUser() user: User,
+    @Param('year') year: string,
+    @Param('month') month: string,
+    @Param('day') day: string,
+  ) {
+    return await this.awsS3Service.getObjectsByDate(user, year, month, day);
+  }
+
+  @Get('objects/year/:year/month/:month/existence')
+  @ApiParam({ name: 'year', description: '조회 년도 (YYYY)', example: '2025' })
+  @ApiParam({ name: 'month', description: '조회 월 (MM)', example: '09' })
+  @ApiOperation({ summary: '해당 월의 날짜별 S3 객체 존재 여부 체크' })
+  @ApiResponse({
+    status: 200,
+    description: '해당 월의 날짜별 객체 존재 여부 조회 성공',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'boolean',
+      },
+      example: {
+        '2025-09-01': true,
+        '2025-09-02': false,
+        '2025-09-03': true,
+        '2025-09-04': false,
+        '2025-09-05': true,
+        // ... 해당 월의 모든 날짜
+        '2025-09-30': false,
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: '잘못된 년도/월 형식' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async checkObjectsExistenceByMonth(
+    @CurrentUser() user: User,
+    @Param('year') year: string,
+    @Param('month') month: string,
+  ) {
+    // 년도/월 형식 검증
+    const yearRegex = /^\d{4}$/;
+    const monthRegex = /^(0[1-9]|1[0-2])$/;
+
+    month = month.length === 1 ? '0' + month : month;
+
+    if (!yearRegex.test(year)) {
+      throw new Error('잘못된 년도 형식입니다. YYYY 형식을 사용해주세요.');
+    }
+
+    if (!monthRegex.test(month)) {
+      throw new Error('잘못된 월 형식입니다. MM 형식(01-12)을 사용해주세요.');
+    }
+
+    return await this.awsS3Service.checkObjectsExistenceByMonth(
+      year,
+      month,
+      user,
+    );
+  }
 }

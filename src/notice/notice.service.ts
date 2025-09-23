@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Notice } from './entities/notice.entity';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
+import { Between, FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { NoticeGroupService } from './notice-group.service';
 import { NoticeView } from './entities/notice-view.entity';
+import { getDatesInMonth } from 'src/utils/date/date-range-loop';
 
 @Injectable()
 export class NoticeService {
@@ -97,6 +98,78 @@ export class NoticeService {
         await this.noticeRepository.save(notice);
       }
     }
+
+    return notice;
+  }
+
+  async checkExistenceByMonth(name: string, year: string, month: string) {
+    const dates = getDatesInMonth(year, month);
+    const noticeGroup = await this.noticeGroupService.findOneByName(name);
+    if (!noticeGroup) {
+      throw new NotFoundException(`Notice group with name ${name} not found`);
+    }
+    const existenceChecks = await Promise.all(
+      dates.map(async (date) => {
+        const startDate = new Date(date + ' 00:00:00');
+        const endDate = new Date(date + ' 23:59:59');
+        const exists = await this.noticeRepository
+          .createQueryBuilder('notice')
+          .select('1')
+          .where('notice.noticeGroupId = :noticeGroupId', {
+            noticeGroupId: noticeGroup.id,
+          })
+          .andWhere('notice.createdAt >= :startDate', { startDate })
+          .andWhere('notice.createdAt <= :endDate', { endDate })
+          .getRawOne();
+        return {
+          date,
+          exists: !!exists,
+        };
+      }),
+    );
+    return existenceChecks.reduce(
+      (acc, { date, exists }) => {
+        acc[date] = exists;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
+  }
+
+  async getNoticeByDate(
+    name: string,
+    year: string,
+    month: string,
+    day: string,
+  ): Promise<Notice[]> {
+    const noticeGroup = await this.noticeGroupService.findOneByName(name);
+    if (!noticeGroup) {
+      throw new NotFoundException(`Notice group with name ${name} not found`);
+    }
+    // 해당 날짜의 시작과 끝 시간 계산
+    const startDate = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      0,
+      0,
+      0,
+    );
+    const endDate = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      23,
+      59,
+      59,
+    );
+
+    const notice = await this.noticeRepository.find({
+      where: {
+        noticeGroupId: noticeGroup.id,
+        createdAt: Between(startDate, endDate),
+      },
+    });
 
     return notice;
   }
