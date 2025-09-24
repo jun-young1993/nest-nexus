@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 import { NoticeType } from '../enum/notice.type';
 
 export class CreateNoticeDto {
@@ -40,4 +40,11 @@ export class CreateNoticeDto {
     example: 'notice user id',
   })
   userId: string;
+
+  @IsOptional()
+  @IsDateString()
+  @ApiProperty({
+    example: '2025-09-22T09:26:12.021Z',
+  })
+  createdAt?: string;
 }

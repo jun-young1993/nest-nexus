@@ -28,7 +28,15 @@ export class NoticeService {
       );
     }
 
-    const notice = this.noticeRepository.create(createNoticeDto);
+    // createdAt 처리: 파라미터로 들어오면 해당 날짜, 아니면 현재 날짜
+    const createdAt = createNoticeDto.createdAt
+      ? new Date(createNoticeDto.createdAt)
+      : new Date();
+
+    const notice = this.noticeRepository.create({
+      ...createNoticeDto,
+      createdAt,
+    });
 
     return await this.noticeRepository.save(notice);
   }

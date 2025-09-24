@@ -59,7 +59,7 @@ export class AwsS3Service {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       // 파일명 생성 개선
-      const key = `${nodeEnv}/${year}/${month}/${day}/${s3Object.id}.${extension}`;
+      const key = `${nodeEnv}/${user.id}/${year}/${month}/${day}/${s3Object.id}.${extension}`;
 
       const command = new PutObjectCommand({
         Bucket: bucket,
