@@ -8,6 +8,8 @@ import { FindManyOptions, Repository, Between } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getDatesInMonth } from 'src/utils/date/date-range-loop';
+import { UserStorageLimitService } from 'src/user/user-storage-limit.service';
+import { StorageLimitType } from 'src/user/entities/user-storage-limit.entity';
 
 @Injectable()
 export class AwsS3Service {
@@ -16,6 +18,7 @@ export class AwsS3Service {
     private readonly configService: ConfigService<AllConfigType>,
     @InjectRepository(S3Object)
     private readonly s3ObjectRepository: Repository<S3Object>,
+    private readonly userStorageLimitService: UserStorageLimitService,
   ) {}
 
   async uploadFile(
@@ -31,6 +34,12 @@ export class AwsS3Service {
           mimetype: file.mimetype,
           user: user,
         }),
+      );
+      // 파일 크기 추가 예시
+      await this.userStorageLimitService.addFileSize(
+        user,
+        StorageLimitType.S3_STORAGE,
+        file.size,
       );
 
       const awsS3CredentialsConfig = this.configService.get<AllConfigType>(
@@ -120,6 +129,15 @@ export class AwsS3Service {
         user: { id: user.id }, // 관계를 통한 조회
       },
     });
+  }
+
+  async filesize(user: User): Promise<number> {
+    return await this.s3ObjectRepository
+      .createQueryBuilder('s3')
+      .select('SUM(s3.size)', 'totalSize')
+      .where('s3.userId = :userId', { userId: user.id })
+      .getRawOne()
+      .then((result) => parseFloat(result.totalSize) || 0);
   }
 
   async getObjectsByDate(
@@ -215,5 +233,97 @@ export class AwsS3Service {
       },
       {} as Record<string, boolean>,
     );
+  }
+
+  /**
+   * 사용자의 스토리지 제한 체크
+   */
+  async checkStorageLimit(
+    user: User,
+    additionalSize: number = 0,
+  ): Promise<{
+    isOverLimit: boolean;
+    currentUsage: number;
+    limitValue: number;
+    remainingSpace: number;
+  }> {
+    return await this.userStorageLimitService.isOverLimit(
+      user,
+      StorageLimitType.S3_STORAGE,
+      additionalSize,
+    );
+  }
+
+  /**
+   * 사용자의 현재 스토리지 사용량 업데이트
+   */
+  async updateStorageUsage(user: User): Promise<void> {
+    const currentUsage = await this.filesize(user);
+
+    try {
+      await this.userStorageLimitService.updateCurrentUsage(
+        user,
+        StorageLimitType.S3_STORAGE,
+        currentUsage,
+      );
+    } catch (error) {
+      // 제한이 설정되지 않은 경우 무시
+      console.warn(
+        `Storage limit not found for user ${user.id}:`,
+        error.message,
+      );
+    }
+  }
+
+  /**
+   * 파일 업로드 전 제한 체크
+   */
+  async validateUpload(
+    user: User,
+    fileSize: number,
+  ): Promise<{
+    isValid: boolean;
+    message?: string;
+    limitInfo?: {
+      currentUsage: number;
+      limitValue: number;
+      remainingSpace: number;
+    };
+  }> {
+    const limitCheck = await this.checkStorageLimit(user, fileSize);
+
+    if (limitCheck.isOverLimit) {
+      return {
+        isValid: false,
+        message: `스토리지 용량을 초과합니다. 남은 용량: ${this.formatBytes(limitCheck.remainingSpace)}`,
+        limitInfo: {
+          currentUsage: limitCheck.currentUsage,
+          limitValue: limitCheck.limitValue,
+          remainingSpace: limitCheck.remainingSpace,
+        },
+      };
+    }
+
+    return {
+      isValid: true,
+      limitInfo: {
+        currentUsage: limitCheck.currentUsage,
+        limitValue: limitCheck.limitValue,
+        remainingSpace: limitCheck.remainingSpace,
+      },
+    };
+  }
+
+  /**
+   * 바이트를 읽기 쉬운 형태로 변환
+   */
+  private formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 }

@@ -7,6 +7,7 @@ import { AwsS3Service } from './aws-s3.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { S3Object } from './entities/s3-object.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({})
 export class AwsS3Module {
@@ -16,7 +17,12 @@ export class AwsS3Module {
   static forRoot(config?: { region?: string }): DynamicModule {
     return {
       module: AwsS3Module,
-      imports: [ConfigModule, AuthModule, TypeOrmModule.forFeature([S3Object])],
+      imports: [
+        ConfigModule,
+        AuthModule,
+        UserModule,
+        TypeOrmModule.forFeature([S3Object]),
+      ],
       controllers: [AwsS3Controller],
       providers: [
         AwsS3Service,

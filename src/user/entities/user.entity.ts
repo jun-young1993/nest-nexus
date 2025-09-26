@@ -16,6 +16,7 @@ import { UserGroup } from './user-group.entity';
 import { Loan } from '../../loan/entities/loan.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { S3Object } from 'src/aws/s3/entities/s3-object.entity';
+import { UserStorageLimit } from './user-storage-limit.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -85,4 +86,7 @@ export class User {
 
   @OneToMany(() => S3Object, (s3Object) => s3Object.user)
   s3Objects: S3Object[];
+
+  @OneToMany(() => UserStorageLimit, (storageLimit) => storageLimit.user)
+  storageLimits: UserStorageLimit[];
 }

@@ -149,6 +149,18 @@ const admobLogger = winston.createLogger({
   ],
 });
 
+const awsS3Logger = winston.createLogger({
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
+  transports: [
+    new winston.transports.DailyRotateFile({
+      filename: 'storage/logs/aws-s3-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '14d',
+    }),
+  ],
+});
+
 const paymentScheduleSchedulerLogger = winston.createLogger({
   format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
   transports: [
@@ -276,6 +288,21 @@ export class AdmobLogger {
 
   warn(message: string, metadata?: any) {
     admobLogger.warn(message, metadata);
+  }
+}
+
+export class AwsS3Logger {
+  log(message: string, metadata?: any) {
+    awsS3Logger.info(message, metadata);
+  }
+
+  error(message: string, metadata?: any) {
+    const error = metadata?.error || { message };
+    awsS3Logger.error(message, { ...metadata, error });
+  }
+
+  warn(message: string, metadata?: any) {
+    awsS3Logger.warn(message, metadata);
   }
 }
 

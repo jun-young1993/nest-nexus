@@ -25,13 +25,17 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
+import { AwsS3Logger } from 'src/config/logger.config';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('aws/s3')
 export class AwsS3Controller {
-  constructor(private readonly awsS3Service: AwsS3Service) {}
+  private readonly logger: AwsS3Logger;
+  constructor(private readonly awsS3Service: AwsS3Service) {
+    this.logger = new AwsS3Logger();
+  }
 
   @Post(':appName/upload')
   @ApiParam({
@@ -113,9 +117,11 @@ export class AwsS3Controller {
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     try {
-      return await this.awsS3Service.uploaFiles(files, appName, user);
+      this.logger.log('파일 업로드 시작:', { user, appName, files });
+      const result = await this.awsS3Service.uploaFiles(files, appName, user);
+      this.logger.log('파일 업로드 완료:', { result });
     } catch (error) {
-      console.error('파일 업로드 에러:', error);
+      this.logger.error('파일 업로드 에러:', error);
       return {
         success: false,
         message: `파일 업로드 실패: ${error.message}`,
@@ -163,6 +169,24 @@ export class AwsS3Controller {
   async getObjectCount(@CurrentUser() user: User) {
     const count = await this.awsS3Service.count(user);
     return count;
+  }
+
+  @Get('objects/filesize')
+  @ApiOperation({ summary: 'S3 객체 파일 크기 조회' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체 파일 크기 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        size: { type: 'number', description: 'S3 객체 파일 크기' },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getObjectFileSize(@CurrentUser() user: User) {
+    const size = await this.awsS3Service.filesize(user);
+    return size;
   }
 
   @Get('objects/:id')
