@@ -31,6 +31,13 @@ export class UserGroupService {
   ): Promise<UserGroup> {
     // 그룹 이름 중복 확인
 
+    const existingUserGroup = await this.findGroupsByUserId(user.id);
+    if (existingUserGroup) {
+      throw new BadRequestException(
+        `Group with name '${existingUserGroup.name}' already exists`,
+      );
+    }
+
     user.isAdmin = true;
     await this.userRepository.save(user);
 
@@ -210,6 +217,14 @@ export class UserGroupService {
       where: { users: { id: userId }, isActive: true },
       relations: ['users'],
     });
+  }
+
+  async findGroupsByUserIdOrFail(userId: string): Promise<UserGroup> {
+    const userGroup = await this.findGroupsByUserId(userId);
+    if (!userGroup) {
+      throw new NotFoundException(`User group with ID '${userId}' not found`);
+    }
+    return userGroup;
   }
 
   /**
