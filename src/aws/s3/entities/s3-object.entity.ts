@@ -6,7 +6,10 @@ import {
   JoinColumn,
   ManyToOne,
   CreateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { S3ObjectTag } from './s3-object-tag.entity';
 
 @Entity()
 export class S3Object {
@@ -37,4 +40,8 @@ export class S3Object {
   @ManyToOne(() => User, (user) => user.s3Objects)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @ManyToMany(() => S3ObjectTag, (tag) => tag.s3Objects)
+  @JoinTable()
+  tags: S3ObjectTag[];
 }

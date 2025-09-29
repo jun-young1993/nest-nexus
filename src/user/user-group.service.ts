@@ -242,4 +242,12 @@ export class UserGroupService {
     const userGroup = await this.findOne(groupId);
     return userGroup.users.length;
   }
+
+  async findGroupAdminByUser(user: User): Promise<User | null> {
+    const userGroup = await this.findGroupsByUserId(user.id);
+    if (!userGroup) {
+      return null;
+    }
+    return userGroup.users.find((user) => user.isAdmin) ?? null;
+  }
 }

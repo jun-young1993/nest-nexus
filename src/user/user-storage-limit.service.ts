@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   UserStorageLimit,
   StorageLimitType,
@@ -64,9 +64,10 @@ export class UserStorageLimitService {
   /**
    * 사용자의 모든 스토리지 제한 조회
    */
-  async findByUserId(userId: string): Promise<UserStorageLimit[]> {
+  async findByUserId(users: User[]): Promise<UserStorageLimit[]> {
+    const userId = users.filter((user) => user).map((user) => user.id);
     return await this.userStorageLimitRepository.find({
-      where: { userId },
+      where: { userId: In(userId) },
       order: { createdAt: 'DESC' },
     });
   }
@@ -75,12 +76,12 @@ export class UserStorageLimitService {
    * 특정 타입의 스토리지 제한 조회
    */
   async findByUserIdAndType(
-    user: User,
+    users: User[],
     limitType: StorageLimitType,
   ): Promise<UserStorageLimit | null> {
-    const userId = user.id;
+    const userId = users.filter((user) => user).map((user) => user.id);
     return await this.userStorageLimitRepository.findOne({
-      where: { userId, limitType },
+      where: { userId: In(userId), limitType },
     });
   }
 
@@ -88,13 +89,13 @@ export class UserStorageLimitService {
    * 특정 타입의 스토리지 제한 조회 (실패 시 예외 발생)
    */
   async findByUserAndTypeOrFail(
-    user: User,
+    users: User[],
     limitType: StorageLimitType,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(user, limitType);
+    const storageLimit = await this.findByUserIdAndType(users, limitType);
     if (!storageLimit) {
       throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${user.id}'`,
+        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
       );
     }
     return storageLimit;
@@ -133,15 +134,15 @@ export class UserStorageLimitService {
    * 현재 사용량 업데이트
    */
   async updateCurrentUsage(
-    user: User,
+    users: User[],
     limitType: StorageLimitType,
     newUsage: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(user, limitType);
+    const storageLimit = await this.findByUserIdAndType(users, limitType);
 
     if (!storageLimit) {
       throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${user.id}'`,
+        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
       );
     }
 
@@ -153,15 +154,15 @@ export class UserStorageLimitService {
    * 사용량 증가
    */
   async increaseUsage(
-    user: User,
+    users: User[],
     limitType: StorageLimitType,
     increment: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(user, limitType);
+    const storageLimit = await this.findByUserIdAndType(users, limitType);
 
     if (!storageLimit) {
       throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${user.id}'`,
+        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
       );
     }
 
@@ -173,15 +174,15 @@ export class UserStorageLimitService {
    * 사용량 감소
    */
   async decreaseUsage(
-    user: User,
+    users: User[],
     limitType: StorageLimitType,
     decrement: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(user, limitType);
+    const storageLimit = await this.findByUserIdAndType(users, limitType);
 
     if (!storageLimit) {
       throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${user.id}'`,
+        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
       );
     }
 
@@ -200,7 +201,7 @@ export class UserStorageLimitService {
     limitType: StorageLimitType,
     fileSize: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserAndTypeOrFail(user, limitType);
+    const storageLimit = await this.findByUserAndTypeOrFail([user], limitType);
 
     // 엔티티의 addFileSize 메서드 사용
     storageLimit.addFileSize(fileSize);
@@ -213,7 +214,7 @@ export class UserStorageLimitService {
    * 제한 초과 여부 확인
    */
   async isOverLimit(
-    user: User,
+    users: User[],
     limitType: StorageLimitType,
     additionalUsage: number = 0,
   ): Promise<{
@@ -222,7 +223,7 @@ export class UserStorageLimitService {
     limitValue: number;
     remainingSpace: number;
   }> {
-    const storageLimit = await this.findByUserIdAndType(user, limitType);
+    const storageLimit = await this.findByUserIdAndType(users, limitType);
 
     if (!storageLimit || !storageLimit.isActive || storageLimit.isExpired) {
       return {

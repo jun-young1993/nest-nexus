@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiOperation,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { AwsS3Service } from './aws-s3.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -26,6 +27,7 @@ import { User } from 'src/user/entities/user.entity';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
 import { AwsS3Logger } from 'src/config/logger.config';
+import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-user.decorator';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -133,6 +135,11 @@ export class AwsS3Controller {
   @ApiOperation({ summary: 'S3 객체 목록 조회' })
   @ApiQuery({ name: 'skip', description: '건너뛸 개수', required: false })
   @ApiQuery({ name: 'take', description: '조회할 개수', required: false })
+  @ApiHeader({
+    name: 'X-Include-User-Group-Admin',
+    description: '관리자 권한 포함 여부',
+    required: false,
+  })
   @ApiResponse({
     status: 200,
     description: 'S3 객체 목록 조회 성공',
@@ -141,10 +148,11 @@ export class AwsS3Controller {
   @Get('objects')
   async getObjects(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Query('skip') skip: number,
     @Query('take') take: number,
   ) {
-    return await this.awsS3Service.getObjects(user, {
+    return await this.awsS3Service.getObjects([user, groupAdminUser], {
       skip: skip || 0,
       take: take || 10,
     });
@@ -166,8 +174,11 @@ export class AwsS3Controller {
     },
   })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async getObjectCount(@CurrentUser() user: User) {
-    const count = await this.awsS3Service.count(user);
+  async getObjectCount(
+    @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
+  ) {
+    const count = await this.awsS3Service.count([user, groupAdminUser]);
     return count;
   }
 
@@ -184,8 +195,11 @@ export class AwsS3Controller {
     },
   })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async getObjectFileSize(@CurrentUser() user: User) {
-    const size = await this.awsS3Service.filesize(user);
+  async getObjectFileSize(
+    @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
+  ) {
+    const size = await this.awsS3Service.filesize([user, groupAdminUser]);
     return size;
   }
 
@@ -213,11 +227,17 @@ export class AwsS3Controller {
   })
   async getObjectsByDate(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Param('year') year: string,
     @Param('month') month: string,
     @Param('day') day: string,
   ) {
-    return await this.awsS3Service.getObjectsByDate(user, year, month, day);
+    return await this.awsS3Service.getObjectsByDate(
+      [user, groupAdminUser],
+      year,
+      month,
+      day,
+    );
   }
 
   @Get('objects/year/:year/month/:month/existence')
@@ -247,6 +267,7 @@ export class AwsS3Controller {
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async checkObjectsExistenceByMonth(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Param('year') year: string,
     @Param('month') month: string,
   ) {
@@ -264,10 +285,9 @@ export class AwsS3Controller {
       throw new Error('잘못된 월 형식입니다. MM 형식(01-12)을 사용해주세요.');
     }
 
-    return await this.awsS3Service.checkObjectsExistenceByMonth(
-      year,
-      month,
+    return await this.awsS3Service.checkObjectsExistenceByMonth(year, month, [
       user,
-    );
+      groupAdminUser,
+    ]);
   }
 }

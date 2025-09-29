@@ -8,6 +8,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { S3Object } from './entities/s3-object.entity';
 import { UserModule } from 'src/user/user.module';
+import { S3ObjectTag } from './entities/s3-object-tag.entity';
 
 @Module({})
 export class AwsS3Module {
@@ -21,7 +22,7 @@ export class AwsS3Module {
         ConfigModule,
         AuthModule,
         UserModule,
-        TypeOrmModule.forFeature([S3Object]),
+        TypeOrmModule.forFeature([S3Object, S3ObjectTag]),
       ],
       controllers: [AwsS3Controller],
       providers: [

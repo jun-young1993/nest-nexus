@@ -5,10 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { UserGroupService } from 'src/user/user-group.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userGroupService: UserGroupService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = context.getArgs()[2]; // GraphQL Context
@@ -36,6 +40,13 @@ export class JwtAuthGuard implements CanActivate {
         ctx.req.user = user;
       } else {
         const request = context.switchToHttp().getRequest();
+        const isIncludeUserGroupAdmin =
+          request.headers['x-include-user-group-admin'] == 'true';
+        if (isIncludeUserGroupAdmin) {
+          const groupAdminUser =
+            await this.userGroupService.findGroupAdminByUser(user);
+          request.groupAdminUser = groupAdminUser;
+        }
         request.user = user;
       }
       return true;

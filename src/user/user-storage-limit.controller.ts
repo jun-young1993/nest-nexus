@@ -28,6 +28,7 @@ import {
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
+import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-user.decorator';
 
 @ApiTags('User Storage Limits')
 @ApiBearerAuth()
@@ -63,9 +64,13 @@ export class UserStorageLimitController {
     type: [UserStorageLimit],
   })
   async findByUserId(
-    @Param('userId') userId: string,
+    @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
   ): Promise<UserStorageLimit[]> {
-    return await this.userStorageLimitService.findByUserId(userId);
+    return await this.userStorageLimitService.findByUserId([
+      user,
+      groupAdminUser,
+    ]);
   }
 
   @Get('user/:userId/type/:limitType')
@@ -84,10 +89,11 @@ export class UserStorageLimitController {
   @ApiResponse({ status: 404, description: '제한을 찾을 수 없음' })
   async findByUserIdAndType(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Param('limitType') limitType: StorageLimitType,
   ): Promise<UserStorageLimit | null> {
     return await this.userStorageLimitService.findByUserIdAndType(
-      user,
+      [user, groupAdminUser],
       limitType,
     );
   }
@@ -115,9 +121,13 @@ export class UserStorageLimitController {
   })
   async checkLimit(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Param('limitType') limitType: StorageLimitType,
   ) {
-    return await this.userStorageLimitService.isOverLimit(user, limitType);
+    return await this.userStorageLimitService.isOverLimit(
+      [user, groupAdminUser],
+      limitType,
+    );
   }
 
   @Patch(':id')
@@ -157,10 +167,11 @@ export class UserStorageLimitController {
   async updateUsage(
     @Body('newUsage') newUsage: number,
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
   ): Promise<UserStorageLimit> {
     // ID로 제한 정보를 먼저 조회
     const storageLimit = await this.userStorageLimitService.findByUserIdAndType(
-      user,
+      [user, groupAdminUser],
       StorageLimitType.S3_STORAGE,
     );
     if (!storageLimit) {
@@ -168,7 +179,7 @@ export class UserStorageLimitController {
     }
 
     return await this.userStorageLimitService.updateCurrentUsage(
-      storageLimit.user,
+      [user, groupAdminUser],
       storageLimit.limitType,
       newUsage,
     );
@@ -197,11 +208,12 @@ export class UserStorageLimitController {
   })
   async increaseUsage(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Body('limitType') limitType: StorageLimitType,
     @Body('increment') increment: number,
   ): Promise<UserStorageLimit> {
     return await this.userStorageLimitService.increaseUsage(
-      user,
+      [user, groupAdminUser],
       limitType,
       increment,
     );
@@ -227,11 +239,12 @@ export class UserStorageLimitController {
   })
   async decreaseUsage(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
     @Body('limitType') limitType: StorageLimitType,
     @Body('decrement') decrement: number,
   ): Promise<UserStorageLimit> {
     return await this.userStorageLimitService.decreaseUsage(
-      user,
+      [user, groupAdminUser],
       limitType,
       decrement,
     );
@@ -277,9 +290,10 @@ export class UserStorageLimitController {
   @HttpCode(HttpStatus.CREATED)
   async initializeS3StorageLimit(
     @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
   ): Promise<UserStorageLimit> {
     const storage = await this.userStorageLimitService.findByUserIdAndType(
-      user,
+      [user, groupAdminUser],
       StorageLimitType.S3_STORAGE,
     );
     if (storage) {

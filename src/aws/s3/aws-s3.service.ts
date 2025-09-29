@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { AllConfigType, AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
-import { FindManyOptions, Repository, Between } from 'typeorm';
+import { FindManyOptions, Repository, Between, In } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { getDatesInMonth } from 'src/utils/date/date-range-loop';
@@ -104,13 +104,13 @@ export class AwsS3Service {
   }
 
   async getObjects(
-    user: User,
+    users: User[],
     options: FindManyOptions<S3Object>,
   ): Promise<S3Object[]> {
     // 방법 1: userId로 조회
     const result = await this.s3ObjectRepository.find({
       where: {
-        user: { id: user.id }, // 관계를 통한 조회
+        user: { id: In(users.filter((user) => user).map((user) => user.id)) }, // 관계를 통한 조회
       },
       order: { createdAt: 'DESC' },
       ...options,
@@ -123,25 +123,27 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.findOneOrFail({ where: { id } });
   }
 
-  async count(user: User): Promise<number> {
+  async count(users: User[]): Promise<number> {
     return await this.s3ObjectRepository.count({
       where: {
-        user: { id: user.id }, // 관계를 통한 조회
+        user: { id: In(users.filter((user) => user).map((user) => user.id)) }, // 관계를 통한 조회
       },
     });
   }
 
-  async filesize(user: User): Promise<number> {
+  async filesize(users: User[]): Promise<number> {
     return await this.s3ObjectRepository
       .createQueryBuilder('s3')
       .select('SUM(s3.size)', 'totalSize')
-      .where('s3.userId = :userId', { userId: user.id })
+      .where('s3.userId = :userId', {
+        userId: In(users.filter((user) => user).map((user) => user.id)),
+      })
       .getRawOne()
       .then((result) => parseFloat(result.totalSize) || 0);
   }
 
   async getObjectsByDate(
-    user: User,
+    users: User[],
     year: string,
     month: string,
     day: string,
@@ -166,7 +168,7 @@ export class AwsS3Service {
 
     return await this.s3ObjectRepository.find({
       where: {
-        user: { id: user.id },
+        user: { id: In(users.filter((user) => user).map((user) => user.id)) },
         createdAt: Between(startDate, endDate),
       },
       order: { createdAt: 'DESC' },
@@ -183,13 +185,13 @@ export class AwsS3Service {
   async checkObjectsExistenceByMonth(
     year: string,
     month: string,
-    user: User,
+    users: User[],
   ): Promise<Record<string, boolean>> {
     // 유틸리티 함수를 사용하여 해당 월의 모든 날짜 생성
     const dates = getDatesInMonth(year, month);
 
     // 기존의 checkObjectsExistenceByDates 메서드 활용
-    return await this.checkObjectsExistenceByDates(dates, user);
+    return await this.checkObjectsExistenceByDates(dates, users);
   }
 
   /**
@@ -200,7 +202,7 @@ export class AwsS3Service {
    */
   async checkObjectsExistenceByDates(
     dates: string[],
-    user: User,
+    users: User[],
   ): Promise<Record<string, boolean>> {
     // 최고 성능: createdAt 범위 조건 사용 (인덱스 활용)
     const existenceChecks = await Promise.all(
@@ -212,7 +214,9 @@ export class AwsS3Service {
         const exists = await this.s3ObjectRepository
           .createQueryBuilder('s3')
           .select('1')
-          .where('s3.userId = :userId', { userId: user.id })
+          .where('s3.userId = :userId', {
+            userId: In(users.filter((user) => user).map((user) => user.id)),
+          })
           .andWhere('s3.createdAt >= :startDate', { startDate })
           .andWhere('s3.createdAt <= :endDate', { endDate })
           .limit(1)
@@ -239,7 +243,7 @@ export class AwsS3Service {
    * 사용자의 스토리지 제한 체크
    */
   async checkStorageLimit(
-    user: User,
+    users: User[],
     additionalSize: number = 0,
   ): Promise<{
     isOverLimit: boolean;
@@ -248,7 +252,7 @@ export class AwsS3Service {
     remainingSpace: number;
   }> {
     return await this.userStorageLimitService.isOverLimit(
-      user,
+      users,
       StorageLimitType.S3_STORAGE,
       additionalSize,
     );
@@ -257,19 +261,19 @@ export class AwsS3Service {
   /**
    * 사용자의 현재 스토리지 사용량 업데이트
    */
-  async updateStorageUsage(user: User): Promise<void> {
-    const currentUsage = await this.filesize(user);
+  async updateStorageUsage(users: User[]): Promise<void> {
+    const currentUsage = await this.filesize(users);
 
     try {
       await this.userStorageLimitService.updateCurrentUsage(
-        user,
+        users,
         StorageLimitType.S3_STORAGE,
         currentUsage,
       );
     } catch (error) {
       // 제한이 설정되지 않은 경우 무시
       console.warn(
-        `Storage limit not found for user ${user.id}:`,
+        `Storage limit not found for user ${users.filter((user) => user).map((user) => user.id)}:`,
         error.message,
       );
     }
@@ -279,7 +283,7 @@ export class AwsS3Service {
    * 파일 업로드 전 제한 체크
    */
   async validateUpload(
-    user: User,
+    users: User[],
     fileSize: number,
   ): Promise<{
     isValid: boolean;
@@ -290,7 +294,7 @@ export class AwsS3Service {
       remainingSpace: number;
     };
   }> {
-    const limitCheck = await this.checkStorageLimit(user, fileSize);
+    const limitCheck = await this.checkStorageLimit(users, fileSize);
 
     if (limitCheck.isOverLimit) {
       return {
