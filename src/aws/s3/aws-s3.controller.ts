@@ -26,18 +26,16 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
-import { AwsS3Logger } from 'src/config/logger.config';
 import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-user.decorator';
+import { createNestLogger } from 'src/factories/logger.factory';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('aws/s3')
 export class AwsS3Controller {
-  private readonly logger: AwsS3Logger;
-  constructor(private readonly awsS3Service: AwsS3Service) {
-    this.logger = new AwsS3Logger();
-  }
+  private readonly logger = createNestLogger(AwsS3Controller.name);
+  constructor(private readonly awsS3Service: AwsS3Service) {}
 
   @Post(':appName/upload')
   @ApiParam({
@@ -119,9 +117,13 @@ export class AwsS3Controller {
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     try {
-      this.logger.log('파일 업로드 시작:', { user, appName, files });
+      this.logger.log('파일 업로드 시작:', { user, appName });
       const result = await this.awsS3Service.uploaFiles(files, appName, user);
-      this.logger.log('파일 업로드 완료:', { result });
+
+      this.logger.log(
+        '파일 업로드 완료:',
+        result.map((r) => r.id),
+      );
     } catch (error) {
       this.logger.error('파일 업로드 에러:', error);
       return {
@@ -214,6 +216,41 @@ export class AwsS3Controller {
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getObject(@Param('id') id: string) {
     return await this.awsS3Service.findOneOrFail(id);
+  }
+
+  @Get('objects/:id/creation-date')
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체의 파일 생성 날짜 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '파일 생성 날짜 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'S3 객체 ID' },
+        originalName: { type: 'string', description: '원본 파일명' },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+          description: '데이터베이스 저장 날짜',
+        },
+        fileCreationDate: {
+          type: 'string',
+          format: 'date-time',
+          description: '파일의 실제 생성 날짜',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getObjectCreationDate(@Param('id') id: string) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    return {
+      id: s3Object.id,
+      originalName: s3Object.originalName,
+      createdAt: s3Object.createdAt,
+    };
   }
 
   @Get('objects/year/:year/month/:month/day/:day')

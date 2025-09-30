@@ -1,13 +1,20 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { S3ObjectTag } from './entities/s3-object-tag.entity';
 import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { UpdateS3ObjectTagDto } from './dto/update-s3-object-tag.dto';
+import { createNestLogger } from 'src/factories/logger.factory';
+import { ExistingException } from 'src/core/exceptions/existing.exception';
+import { S3Object } from './entities/s3-object.entity';
 
 @Injectable()
 export class S3ObjectTagService {
-  private readonly logger = new Logger(S3ObjectTagService.name);
+  private readonly logger = createNestLogger(S3ObjectTagService.name);
 
   constructor(
     @InjectRepository(S3ObjectTag)
@@ -17,20 +24,25 @@ export class S3ObjectTagService {
   /**
    * 새로운 S3ObjectTag 생성
    */
-  async create(createS3ObjectTagDto: CreateS3ObjectTagDto): Promise<S3ObjectTag> {
-    this.logger.log(`Creating S3ObjectTag with name: ${createS3ObjectTagDto.name}`);
+  async create(
+    createS3ObjectTagDto: CreateS3ObjectTagDto,
+  ): Promise<S3ObjectTag> {
+    this.logger.log(
+      `Creating S3ObjectTag with name: ${createS3ObjectTagDto.name}`,
+    );
 
-    // 이름 중복 확인
+    // 이름 중복 확인 (소문자로 변환하여 비교)
+    const normalizedName = createS3ObjectTagDto.name.toLowerCase();
     const existingTag = await this.s3ObjectTagRepository.findOne({
-      where: { name: createS3ObjectTagDto.name },
+      where: { name: normalizedName },
     });
 
     if (existingTag) {
-      throw new BadRequestException(`Tag with name '${createS3ObjectTagDto.name}' already exists`);
+      throw new ExistingException('Tag', createS3ObjectTagDto.name);
     }
 
     const tag = this.s3ObjectTagRepository.create({
-      name: createS3ObjectTagDto.name,
+      name: normalizedName, // 소문자로 저장
       color: createS3ObjectTagDto.color || '#FFFFFF',
       type: createS3ObjectTagDto.type,
     });
@@ -79,8 +91,9 @@ export class S3ObjectTagService {
    */
   async findByName(name: string): Promise<S3ObjectTag | null> {
     this.logger.log(`Finding S3ObjectTag with name: ${name}`);
+    const normalizedName = name.toLowerCase();
     const tag = await this.s3ObjectTagRepository.findOne({
-      where: { name },
+      where: { name: normalizedName },
       relations: ['s3Objects'],
     });
 
@@ -125,20 +138,27 @@ export class S3ObjectTagService {
   /**
    * S3ObjectTag 수정
    */
-  async update(id: string, updateS3ObjectTagDto: UpdateS3ObjectTagDto): Promise<S3ObjectTag> {
+  async update(
+    id: string,
+    updateS3ObjectTagDto: UpdateS3ObjectTagDto,
+  ): Promise<S3ObjectTag> {
     this.logger.log(`Updating S3ObjectTag with id: ${id}`);
 
     const tag = await this.findOne(id);
 
     // 이름 변경 시 중복 확인
     if (updateS3ObjectTagDto.name && updateS3ObjectTagDto.name !== tag.name) {
+      const normalizedName = updateS3ObjectTagDto.name.toLowerCase();
       const existingTag = await this.s3ObjectTagRepository.findOne({
-        where: { name: updateS3ObjectTagDto.name },
+        where: { name: normalizedName },
       });
 
       if (existingTag) {
-        throw new BadRequestException(`Tag with name '${updateS3ObjectTagDto.name}' already exists`);
+        throw new ExistingException('Tag', updateS3ObjectTagDto.name);
       }
+
+      // 소문자로 변환하여 저장
+      updateS3ObjectTagDto.name = normalizedName;
     }
 
     Object.assign(tag, updateS3ObjectTagDto);
@@ -170,14 +190,18 @@ export class S3ObjectTagService {
    * 여러 S3ObjectTag 삭제
    */
   async removeMultiple(ids: string[]): Promise<void> {
-    this.logger.log(`Removing multiple S3ObjectTags with ids: ${ids.join(', ')}`);
+    this.logger.log(
+      `Removing multiple S3ObjectTags with ids: ${ids.join(', ')}`,
+    );
 
     const tags = await this.findByIds(ids);
 
     // 연관된 S3Object가 있는 태그 확인
-    const tagsWithObjects = tags.filter(tag => tag.s3Objects && tag.s3Objects.length > 0);
+    const tagsWithObjects = tags.filter(
+      (tag) => tag.s3Objects && tag.s3Objects.length > 0,
+    );
     if (tagsWithObjects.length > 0) {
-      const tagNames = tagsWithObjects.map(tag => tag.name).join(', ');
+      const tagNames = tagsWithObjects.map((tag) => tag.name).join(', ');
       throw new BadRequestException(
         `Cannot delete tags: ${tagNames} because they are associated with S3Objects`,
       );
@@ -198,7 +222,7 @@ export class S3ObjectTagService {
       .orderBy('tag.type', 'ASC')
       .getRawMany();
 
-    const types = result.map(row => row.type);
+    const types = result.map((row) => row.type);
     this.logger.log(`Found ${types.length} available types`);
     return types;
   }
@@ -207,14 +231,48 @@ export class S3ObjectTagService {
    * 태그 생성 또는 조회 (upsert)
    */
   async createOrFind(tagData: CreateS3ObjectTagDto): Promise<S3ObjectTag> {
-    this.logger.log(`Creating or finding S3ObjectTag with name: ${tagData.name}`);
+    this.logger.log(
+      `Creating or finding S3ObjectTag with name: ${tagData.name}`,
+    );
 
-    let tag = await this.findByName(tagData.name);
+    // 입력 데이터를 소문자로 변환
+    const normalizedTagData = {
+      ...tagData,
+      name: tagData.name.toLowerCase(),
+    };
+
+    let tag = await this.findByName(normalizedTagData.name);
 
     if (!tag) {
-      tag = await this.create(tagData);
+      tag = await this.create(normalizedTagData);
     }
 
     return tag;
+  }
+
+  /**
+   * 태그 생성 (이미 존재하면 무시)
+   */
+  async createOrVoid(
+    tagData: CreateS3ObjectTagDto,
+  ): Promise<S3ObjectTag | null> {
+    this.logger.log(
+      `Creating S3ObjectTag with name: ${tagData.name} (or void if exists)`,
+    );
+
+    try {
+      const tag = await this.create(tagData);
+      this.logger.log(`S3ObjectTag created successfully with id: ${tag.id}`);
+      return tag;
+    } catch (error) {
+      if (error instanceof ExistingException) {
+        this.logger.log(
+          `S3ObjectTag '${tagData.name}' already exists, skipping creation`,
+        );
+        return null;
+      }
+      // 다른 에러는 그대로 throw
+      throw error;
+    }
   }
 }

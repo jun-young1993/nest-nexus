@@ -149,11 +149,11 @@ const admobLogger = winston.createLogger({
   ],
 });
 
-const awsS3Logger = winston.createLogger({
+const s3ObjectTagLogger = winston.createLogger({
   format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
   transports: [
     new winston.transports.DailyRotateFile({
-      filename: 'storage/logs/aws-s3-%DATE%.log',
+      filename: 'storage/logs/s3-object-tag-%DATE%.log',
       datePattern: 'YYYY-MM-DD',
       maxSize: '20m',
       maxFiles: '14d',
@@ -183,6 +183,12 @@ if (process.env.NODE_ENV !== 'production') {
     }),
   );
   admobLogger.add(
+    new winston.transports.Console({
+      format: combine(colorize(), logFormat),
+    }),
+  );
+
+  s3ObjectTagLogger.add(
     new winston.transports.Console({
       format: combine(colorize(), logFormat),
     }),
@@ -291,18 +297,18 @@ export class AdmobLogger {
   }
 }
 
-export class AwsS3Logger {
+export class S3ObjectTagLogger {
   log(message: string, metadata?: any) {
-    awsS3Logger.info(message, metadata);
+    s3ObjectTagLogger.info(message, metadata);
   }
 
   error(message: string, metadata?: any) {
     const error = metadata?.error || { message };
-    awsS3Logger.error(message, { ...metadata, error });
+    s3ObjectTagLogger.error(message, { ...metadata, error });
   }
 
   warn(message: string, metadata?: any) {
-    awsS3Logger.warn(message, metadata);
+    s3ObjectTagLogger.warn(message, metadata);
   }
 }
 

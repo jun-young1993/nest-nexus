@@ -9,6 +9,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { S3Object } from './entities/s3-object.entity';
 import { UserModule } from 'src/user/user.module';
 import { S3ObjectTag } from './entities/s3-object-tag.entity';
+import { S3ObjectTagController } from './s3-object-tag.controller';
+import { S3ObjectTagService } from './s3-object-tag.service';
 
 @Module({})
 export class AwsS3Module {
@@ -24,9 +26,10 @@ export class AwsS3Module {
         UserModule,
         TypeOrmModule.forFeature([S3Object, S3ObjectTag]),
       ],
-      controllers: [AwsS3Controller],
+      controllers: [AwsS3Controller, S3ObjectTagController],
       providers: [
         AwsS3Service,
+        S3ObjectTagService,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -47,7 +50,7 @@ export class AwsS3Module {
           inject: [ConfigService],
         },
       ],
-      exports: [AwsS3Service, 'S3_CLIENT'],
+      exports: [AwsS3Service, 'S3_CLIENT', S3ObjectTagService],
     };
   }
 }

@@ -1,0 +1,14 @@
+export enum TagType {
+  DATE = 'date',
+  YEAR = 'year',
+  MONTH = 'month',
+  DAY = 'day',
+  USER = 'user',
+  FILE = 'file',
+  FOLDER = 'folder',
+  TYPE = 'type',
+  CATEGORY = 'category',
+  TAG = 'tag',
+  LABEL = 'label',
+  DEFAULT = 'default',
+}

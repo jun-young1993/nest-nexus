@@ -8,8 +8,10 @@ import {
   CreateDateColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { S3ObjectTag } from './s3-object-tag.entity';
+import { S3ObjectLike } from './s3-object-like.entity';
 
 @Entity()
 export class S3Object {
@@ -35,7 +37,7 @@ export class S3Object {
   active: boolean;
 
   @CreateDateColumn()
-  createdAt: Date; // 생성 날짜
+  createdAt: Date; // 데이터베이스 저장 날짜
 
   @ManyToOne(() => User, (user) => user.s3Objects)
   @JoinColumn({ name: 'userId' })
@@ -44,4 +46,7 @@ export class S3Object {
   @ManyToMany(() => S3ObjectTag, (tag) => tag.s3Objects)
   @JoinTable()
   tags: S3ObjectTag[];
+
+  @OneToMany(() => S3ObjectLike, (like) => like.s3Object)
+  likes: S3ObjectLike[];
 }

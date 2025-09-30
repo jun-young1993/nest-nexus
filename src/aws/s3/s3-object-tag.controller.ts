@@ -12,7 +12,13 @@ import {
   ParseArrayPipe,
   NotFoundException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { S3ObjectTagService } from './s3-object-tag.service';
 import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { UpdateS3ObjectTagDto } from './dto/update-s3-object-tag.dto';
@@ -33,8 +39,13 @@ export class S3ObjectTagController {
     description: 'S3ObjectTag created successfully',
     type: S3ObjectTag,
   })
-  @ApiResponse({ status: 400, description: 'Bad request - tag name already exists' })
-  async create(@Body() createS3ObjectTagDto: CreateS3ObjectTagDto): Promise<S3ObjectTag> {
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - tag name already exists',
+  })
+  async create(
+    @Body() createS3ObjectTagDto: CreateS3ObjectTagDto,
+  ): Promise<S3ObjectTag> {
     return this.s3ObjectTagService.create(createS3ObjectTagDto);
   }
 
@@ -85,7 +96,8 @@ export class S3ObjectTagController {
     type: [S3ObjectTag],
   })
   async findByIds(
-    @Query('ids', new ParseArrayPipe({ items: String, separator: ',' })) ids: string[],
+    @Query('ids', new ParseArrayPipe({ items: String, separator: ',' }))
+    ids: string[],
   ): Promise<S3ObjectTag[]> {
     return this.s3ObjectTagService.findByIds(ids);
   }
@@ -126,7 +138,10 @@ export class S3ObjectTagController {
     type: S3ObjectTag,
   })
   @ApiResponse({ status: 404, description: 'S3ObjectTag not found' })
-  @ApiResponse({ status: 400, description: 'Bad request - tag name already exists' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - tag name already exists',
+  })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateS3ObjectTagDto: UpdateS3ObjectTagDto,
@@ -138,7 +153,10 @@ export class S3ObjectTagController {
   @ApiOperation({ summary: 'Delete S3ObjectTag' })
   @ApiResponse({ status: 200, description: 'S3ObjectTag deleted successfully' })
   @ApiResponse({ status: 404, description: 'S3ObjectTag not found' })
-  @ApiResponse({ status: 400, description: 'Bad request - tag is associated with S3Objects' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - tag is associated with S3Objects',
+  })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.s3ObjectTagService.remove(id);
   }
@@ -151,10 +169,17 @@ export class S3ObjectTagController {
     type: String,
     example: 'uuid1,uuid2,uuid3',
   })
-  @ApiResponse({ status: 200, description: 'S3ObjectTags deleted successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request - some tags are associated with S3Objects' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3ObjectTags deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - some tags are associated with S3Objects',
+  })
   async removeMultiple(
-    @Query('ids', new ParseArrayPipe({ items: String, separator: ',' })) ids: string[],
+    @Query('ids', new ParseArrayPipe({ items: String, separator: ',' }))
+    ids: string[],
   ): Promise<void> {
     return this.s3ObjectTagService.removeMultiple(ids);
   }
@@ -166,7 +191,28 @@ export class S3ObjectTagController {
     description: 'S3ObjectTag created or found',
     type: S3ObjectTag,
   })
-  async createOrFind(@Body() createS3ObjectTagDto: CreateS3ObjectTagDto): Promise<S3ObjectTag> {
+  async createOrFind(
+    @Body() createS3ObjectTagDto: CreateS3ObjectTagDto,
+  ): Promise<S3ObjectTag> {
     return this.s3ObjectTagService.createOrFind(createS3ObjectTagDto);
+  }
+
+  @Post('create-or-void')
+  @ApiOperation({ summary: 'Create S3ObjectTag or void if already exists' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3ObjectTag created successfully or null if already exists',
+    schema: {
+      oneOf: [{ $ref: '#/components/schemas/S3ObjectTag' }, { type: 'null' }],
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - validation error',
+  })
+  async createOrVoid(
+    @Body() createS3ObjectTagDto: CreateS3ObjectTagDto,
+  ): Promise<S3ObjectTag | null> {
+    return this.s3ObjectTagService.createOrVoid(createS3ObjectTagDto);
   }
 }

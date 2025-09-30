@@ -10,6 +10,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { getDatesInMonth } from 'src/utils/date/date-range-loop';
 import { UserStorageLimitService } from 'src/user/user-storage-limit.service';
 import { StorageLimitType } from 'src/user/entities/user-storage-limit.entity';
+import { S3ObjectTagService } from './s3-object-tag.service';
+import { S3ObjectTag } from './entities/s3-object-tag.entity';
+import { TagType } from './enum/tag.type';
+import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 
 @Injectable()
 export class AwsS3Service {
@@ -19,7 +23,32 @@ export class AwsS3Service {
     @InjectRepository(S3Object)
     private readonly s3ObjectRepository: Repository<S3Object>,
     private readonly userStorageLimitService: UserStorageLimitService,
+    private readonly s3ObjectTagService: S3ObjectTagService,
   ) {}
+
+  async createDateTag(s3Object: S3Object): Promise<S3ObjectTag[]> {
+    const tags = [
+      CreateS3ObjectTagDto.fromJson({
+        name: s3Object.createdAt.getFullYear().toString(),
+        type: TagType.YEAR,
+        color: '#FFFFFF',
+      }),
+      CreateS3ObjectTagDto.fromJson({
+        name: (s3Object.createdAt.getMonth() + 1).toString(),
+        type: TagType.MONTH,
+        color: '#FFFFFF',
+      }),
+      CreateS3ObjectTagDto.fromJson({
+        name: s3Object.createdAt.getDate().toString(),
+        type: TagType.DAY,
+        color: '#FFFFFF',
+      }),
+    ].map(async (tagData) => {
+      const tag = await this.s3ObjectTagService.createOrFind(tagData);
+      return tag;
+    });
+    return Promise.all(tags);
+  }
 
   async uploadFile(
     file: Express.Multer.File,
@@ -27,6 +56,7 @@ export class AwsS3Service {
     user: User,
   ): Promise<S3Object> {
     try {
+      // 파일의 생성 날짜 가져오기
       const s3Object = await this.s3ObjectRepository.save(
         this.s3ObjectRepository.create({
           originalName: file.originalname,
@@ -35,6 +65,8 @@ export class AwsS3Service {
           user: user,
         }),
       );
+      s3Object.tags = await this.createDateTag(s3Object);
+
       // 파일 크기 추가 예시
       await this.userStorageLimitService.addFileSize(
         user,
@@ -120,7 +152,10 @@ export class AwsS3Service {
   }
 
   async findOneOrFail(id: string): Promise<S3Object> {
-    return await this.s3ObjectRepository.findOneOrFail({ where: { id } });
+    return await this.s3ObjectRepository.findOneOrFail({
+      where: { id },
+      relations: ['tags'],
+    });
   }
 
   async count(users: User[]): Promise<number> {

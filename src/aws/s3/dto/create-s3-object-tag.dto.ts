@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsOptional, IsHexColor, MaxLength } from 'class-validator';
+import { plainToInstance, Transform } from 'class-transformer';
 
 export class CreateS3ObjectTagDto {
   @ApiProperty({
@@ -9,6 +10,7 @@ export class CreateS3ObjectTagDto {
   })
   @IsString()
   @MaxLength(50)
+  @Transform(({ value }) => value?.toLowerCase())
   name: string;
 
   @ApiProperty({
@@ -28,4 +30,8 @@ export class CreateS3ObjectTagDto {
   @IsString()
   @MaxLength(30)
   type: string;
+
+  static fromJson(json: any): CreateS3ObjectTagDto {
+    return plainToInstance(CreateS3ObjectTagDto, json);
+  }
 }
