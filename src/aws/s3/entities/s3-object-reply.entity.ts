@@ -4,10 +4,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { S3Object } from './s3-object.entity';
 import { User } from 'src/user/entities/user.entity';
+import { S3ObjectReplyReport } from './s3-object-reply-report.entity';
 
 @Entity()
 export class S3ObjectReply {
@@ -33,6 +35,9 @@ export class S3ObjectReply {
   @ManyToOne(() => User, (user) => user.s3ObjectReplies)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => S3ObjectReplyReport, (report) => report.s3ObjectReply)
+  reports: S3ObjectReplyReport[];
 
   @CreateDateColumn()
   createdAt: Date;

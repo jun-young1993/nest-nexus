@@ -13,6 +13,7 @@ import {
 import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
 import { S3ObjectReply } from './s3-object-reply.entity';
+import { S3ObjectReport } from './s3-object-report.entity';
 
 @Entity()
 export class S3Object {
@@ -53,4 +54,7 @@ export class S3Object {
 
   @OneToMany(() => S3ObjectReply, (reply) => reply.s3Object)
   replies: S3ObjectReply[];
+
+  @OneToMany(() => S3ObjectReport, (report) => report.s3Object)
+  reports: S3ObjectReport[];
 }

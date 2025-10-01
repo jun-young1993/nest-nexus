@@ -16,6 +16,11 @@ import { S3ObjectLikeController } from './s3-object-like.controller';
 import { S3ObjectLikeService } from './s3-object-like.service';
 import { S3ObjectReplyController } from './s3-object-reply.controller';
 import { S3ObjectReplyService } from './s3-object-reply.service';
+import { S3ObjectReport } from './entities/s3-object-report.entity';
+import { S3ObjectReplyReport } from './entities/s3-object-reply-report.entity';
+import { S3ObjectReportController } from './s3-object-report.controller';
+import { S3ObjectReportService } from './s3-object-report.service';
+import { S3ObjectReplyReportService } from './s3-object-reply-report.service';
 import { UserModule } from 'src/user/user.module';
 
 @Module({})
@@ -35,6 +40,8 @@ export class AwsS3Module {
           S3ObjectTag,
           S3ObjectReply,
           S3ObjectLike,
+          S3ObjectReport,
+          S3ObjectReplyReport,
         ]),
       ],
       controllers: [
@@ -42,12 +49,15 @@ export class AwsS3Module {
         S3ObjectTagController,
         S3ObjectLikeController,
         S3ObjectReplyController,
+        S3ObjectReportController,
       ],
       providers: [
         AwsS3Service,
         S3ObjectTagService,
         S3ObjectLikeService,
         S3ObjectReplyService,
+        S3ObjectReportService,
+        S3ObjectReplyReportService,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -74,6 +84,8 @@ export class AwsS3Module {
         S3ObjectTagService,
         S3ObjectLikeService,
         S3ObjectReplyService,
+        S3ObjectReportService,
+        S3ObjectReplyReportService,
       ],
     };
   }
