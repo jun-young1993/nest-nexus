@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
+import { S3ObjectReply } from './s3-object-reply.entity';
 
 @Entity()
 export class S3Object {
@@ -49,4 +50,7 @@ export class S3Object {
 
   @OneToMany(() => S3ObjectLike, (like) => like.s3Object)
   likes: S3ObjectLike[];
+
+  @OneToMany(() => S3ObjectReply, (reply) => reply.s3Object)
+  replies: S3ObjectReply[];
 }

@@ -154,7 +154,12 @@ export class AwsS3Service {
   async findOneOrFail(id: string): Promise<S3Object> {
     return await this.s3ObjectRepository.findOneOrFail({
       where: { id },
-      relations: ['tags'],
+      relations: ['tags', 'likes', 'replies', 'replies.user'],
+      order: {
+        replies: {
+          createdAt: 'DESC',
+        },
+      },
     });
   }
 

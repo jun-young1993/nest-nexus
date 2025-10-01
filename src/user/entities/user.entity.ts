@@ -18,6 +18,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { S3Object } from 'src/aws/s3/entities/s3-object.entity';
 import { UserStorageLimit } from './user-storage-limit.entity';
 import { S3ObjectLike } from 'src/aws/s3/entities/s3-object-like.entity';
+import { S3ObjectReply } from 'src/aws/s3/entities/s3-object-reply.entity';
 
 @ObjectType()
 @Entity('users') // 테이블 이름 설정
@@ -93,4 +94,7 @@ export class User {
 
   @OneToMany(() => S3ObjectLike, (like) => like.user)
   s3ObjectLikes: S3ObjectLike[];
+
+  @OneToMany(() => S3ObjectReply, (reply) => reply.user)
+  s3ObjectReplies: S3ObjectReply[];
 }

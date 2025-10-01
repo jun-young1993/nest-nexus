@@ -7,10 +7,16 @@ import { AwsS3Service } from './aws-s3.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { S3Object } from './entities/s3-object.entity';
-import { UserModule } from 'src/user/user.module';
 import { S3ObjectTag } from './entities/s3-object-tag.entity';
 import { S3ObjectTagController } from './s3-object-tag.controller';
 import { S3ObjectTagService } from './s3-object-tag.service';
+import { S3ObjectReply } from './entities/s3-object-reply.entity';
+import { S3ObjectLike } from './entities/s3-object-like.entity';
+import { S3ObjectLikeController } from './s3-object-like.controller';
+import { S3ObjectLikeService } from './s3-object-like.service';
+import { S3ObjectReplyController } from './s3-object-reply.controller';
+import { S3ObjectReplyService } from './s3-object-reply.service';
+import { UserModule } from 'src/user/user.module';
 
 @Module({})
 export class AwsS3Module {
@@ -24,12 +30,24 @@ export class AwsS3Module {
         ConfigModule,
         AuthModule,
         UserModule,
-        TypeOrmModule.forFeature([S3Object, S3ObjectTag]),
+        TypeOrmModule.forFeature([
+          S3Object,
+          S3ObjectTag,
+          S3ObjectReply,
+          S3ObjectLike,
+        ]),
       ],
-      controllers: [AwsS3Controller, S3ObjectTagController],
+      controllers: [
+        AwsS3Controller,
+        S3ObjectTagController,
+        S3ObjectLikeController,
+        S3ObjectReplyController,
+      ],
       providers: [
         AwsS3Service,
         S3ObjectTagService,
+        S3ObjectLikeService,
+        S3ObjectReplyService,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -50,7 +68,13 @@ export class AwsS3Module {
           inject: [ConfigService],
         },
       ],
-      exports: [AwsS3Service, 'S3_CLIENT', S3ObjectTagService],
+      exports: [
+        AwsS3Service,
+        'S3_CLIENT',
+        S3ObjectTagService,
+        S3ObjectLikeService,
+        S3ObjectReplyService,
+      ],
     };
   }
 }
