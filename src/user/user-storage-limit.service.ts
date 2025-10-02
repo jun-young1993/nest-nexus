@@ -211,6 +211,19 @@ export class UserStorageLimitService {
   }
 
   /**
+   * 파일 크기 감소 (엔티티 메서드 사용)
+   */
+  async decreaseFileSize(
+    user: User,
+    limitType: StorageLimitType,
+    fileSize: number,
+  ): Promise<UserStorageLimit> {
+    const storageLimit = await this.findByUserAndTypeOrFail([user], limitType);
+    storageLimit.decreaseFileSize(fileSize);
+    return await this.userStorageLimitRepository.save(storageLimit);
+  }
+
+  /**
    * 제한 초과 여부 확인
    */
   async isOverLimit(

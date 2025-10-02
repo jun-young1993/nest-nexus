@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { NoticeReportType } from 'src/notice/enum/notice-report-type.enum';
 
 export class CreateS3ObjectReplyReportDto {
@@ -20,21 +20,4 @@ export class CreateS3ObjectReplyReportDto {
   @IsString()
   @IsOptional()
   content?: string;
-
-  @ApiProperty({
-    description: '신고자 ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @IsString()
-  @IsNotEmpty()
-  reporterId: string;
-
-  @ApiProperty({
-    description: '신고할 S3ObjectReply ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @IsUUID()
-  @IsNotEmpty()
-  s3ObjectReplyId: string;
 }
-

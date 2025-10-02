@@ -156,4 +156,11 @@ export class UserStorageLimit {
       throw new Error('스토리지 용량을 초과합니다.');
     }
   }
+
+  decreaseFileSize(fileSize: number): void {
+    this.currentUsage -= fileSize;
+    if (this.currentUsage < 0) {
+      this.currentUsage = 0;
+    }
+  }
 }

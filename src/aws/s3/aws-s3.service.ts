@@ -1,5 +1,9 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { AllConfigType, AwsS3AppNames } from 'src/config/config.type';
@@ -50,6 +54,29 @@ export class AwsS3Service {
     return Promise.all(tags);
   }
 
+  getConfig(appName: AwsS3AppNames) {
+    const awsS3CredentialsConfig = this.configService.get<AllConfigType>(
+      'awsS3Credentials',
+      {
+        infer: true,
+      },
+    );
+
+    if (!awsS3CredentialsConfig.awsS3AppConfig[appName]) {
+      throw new Error(`알 수 없는 앱 이름: ${appName}`);
+    }
+
+    return awsS3CredentialsConfig;
+  }
+
+  getBucket(appName: AwsS3AppNames) {
+    return this.getConfig(appName).awsS3AppConfig[appName].bucket;
+  }
+
+  getRegion(appName: AwsS3AppNames) {
+    return this.getConfig(appName).awsS3AppConfig[appName].region;
+  }
+
   async uploadFile(
     file: Express.Multer.File,
     appName: AwsS3AppNames,
@@ -74,25 +101,16 @@ export class AwsS3Service {
         file.size,
       );
 
-      const awsS3CredentialsConfig = this.configService.get<AllConfigType>(
-        'awsS3Credentials',
-        {
-          infer: true,
-        },
-      );
       const appConfig = this.configService.get<AllConfigType>('app', {
         infer: true,
       });
-      if (!awsS3CredentialsConfig.awsS3AppConfig[appName]) {
-        throw new Error(`알 수 없는 앱 이름: ${appName}`);
-      }
+      const bucket = this.getBucket(appName);
+      const region = this.getRegion(appName);
 
       const nodeEnv = appConfig.node_env;
       if (!nodeEnv) {
         throw new Error('NODE_ENV가 설정되지 않았습니다.');
       }
-      const bucket = awsS3CredentialsConfig.awsS3AppConfig[appName].bucket;
-      const region = awsS3CredentialsConfig.awsS3AppConfig[appName].region;
 
       const extension = extname(file.originalname);
       const date = new Date();
@@ -112,7 +130,7 @@ export class AwsS3Service {
 
       await this.s3Client.send(command);
       s3Object.url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-      s3Object.active = true;
+      // Soft Delete를 사용하므로 active 필드 제거
       s3Object.key = key;
       await this.s3ObjectRepository.save(s3Object);
       return s3Object;
@@ -120,6 +138,33 @@ export class AwsS3Service {
       console.error('S3 업로드 실패:', error);
       throw new Error(`파일 업로드 실패: ${error.message}`);
     }
+  }
+
+  async deleteObject(
+    id: string,
+    appName: AwsS3AppNames,
+    user: User,
+  ): Promise<void> {
+    const bucket = this.getBucket(appName);
+
+    const s3Object = await this.findOneOrFail(id);
+
+    if (s3Object.user.id !== user.id) {
+      throw new ForbiddenException('권한이 없습니다.');
+    }
+
+    await this.s3ObjectRepository.softDelete(s3Object.id);
+    await this.userStorageLimitService.decreaseFileSize(
+      user,
+      StorageLimitType.S3_STORAGE,
+      s3Object.size,
+    );
+    await this.s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: s3Object.key,
+      }),
+    );
   }
 
   async uploaFiles(
@@ -154,7 +199,7 @@ export class AwsS3Service {
   async findOneOrFail(id: string): Promise<S3Object> {
     return await this.s3ObjectRepository.findOneOrFail({
       where: { id },
-      relations: ['tags', 'likes', 'replies', 'replies.user'],
+      relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
       order: {
         replies: {
           createdAt: 'DESC',
@@ -166,7 +211,8 @@ export class AwsS3Service {
   async count(users: User[]): Promise<number> {
     return await this.s3ObjectRepository.count({
       where: {
-        user: { id: In(users.filter((user) => user).map((user) => user.id)) }, // 관계를 통한 조회
+        user: { id: In(users.filter((user) => user).map((user) => user.id)) },
+        // deletedAt IS NULL 조건이 자동으로 적용됨
       },
     });
   }
@@ -222,6 +268,68 @@ export class AwsS3Service {
    * @param user - 현재 사용자
    * @returns 해당 월의 날짜별 객체 존재 여부
    */
+  async getSurroundingObjects(
+    currentId: string,
+    users: User[],
+    take: number = 2,
+  ): Promise<{
+    previous: S3Object[];
+    current: S3Object;
+    next: S3Object[];
+  }> {
+    // 사용자 필터링 조건
+    const userFilter = {
+      user: { id: In(users.filter((user) => user).map((user) => user.id)) },
+    };
+
+    // 기준 객체와 전체 개수를 한 번에 조회
+    const [currentObject] = await Promise.all([
+      this.s3ObjectRepository.findOneOrFail({
+        where: { id: currentId },
+        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+      }),
+    ]);
+
+    // 기준 객체의 생성일시를 기준으로 이전/이후 객체들을 한 번에 조회
+    const [previousObjects, nextObjects] = await Promise.all([
+      // 이전 2개 조회 (기준 객체보다 이전에 생성된 것들 중 최신 2개)
+      this.s3ObjectRepository.find({
+        where: {
+          ...userFilter,
+          createdAt: Between(new Date('1970-01-01'), currentObject.createdAt),
+        },
+        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+        order: { createdAt: 'DESC' },
+        take: take + 1, // 기준 객체 포함해서 3개 가져온 후 필터링
+      }),
+      // 이후 2개 조회 (기준 객체보다 이후에 생성된 것들 중 오래된 2개)
+      this.s3ObjectRepository.find({
+        where: {
+          ...userFilter,
+          createdAt: Between(currentObject.createdAt, new Date('2099-12-31')),
+        },
+        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+        order: { createdAt: 'ASC' },
+        take: take + 1, // 기준 객체 포함해서 3개 가져온 후 필터링
+      }),
+    ]);
+
+    // 기준 객체 제외하고 정확히 2개씩 반환
+    const filteredPrevious = previousObjects
+      .filter((obj) => obj.id !== currentId)
+      .slice(0, 2);
+
+    const filteredNext = nextObjects
+      .filter((obj) => obj.id !== currentId)
+      .slice(0, 2);
+
+    return {
+      previous: filteredPrevious,
+      current: currentObject,
+      next: filteredNext,
+    };
+  }
+
   async checkObjectsExistenceByMonth(
     year: string,
     month: string,

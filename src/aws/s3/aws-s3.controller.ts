@@ -7,6 +7,7 @@ import {
   UseGuards,
   Get,
   Query,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -132,6 +133,25 @@ export class AwsS3Controller {
         error: error.message,
       };
     }
+  }
+
+  @ApiParam({
+    name: 'appName',
+    description: '앱 이름 (baby-log)',
+    example: 'baby-log',
+  })
+  @Delete(':appName/delete/:id')
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체 삭제' })
+  @ApiResponse({ status: 200, description: 'S3 객체 삭제 성공' })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async deleteObject(
+    @Param('id') id: string,
+    @Param('appName') appName: AwsS3AppNames,
+    @CurrentUser() user: User,
+  ) {
+    return await this.awsS3Service.deleteObject(id, appName, user);
   }
 
   @ApiOperation({ summary: 'S3 객체 목록 조회' })
@@ -274,6 +294,53 @@ export class AwsS3Controller {
       year,
       month,
       day,
+    );
+  }
+
+  @ApiQuery({
+    name: 'take',
+    description: '앞뒤로 조회할 개수 (기본값: 2)',
+    required: false,
+    example: 2,
+  })
+  @Get('objects/:id/surrounding')
+  @ApiParam({ name: 'id', description: '기준 S3 객체 ID' })
+  @ApiOperation({ summary: '기준 S3 객체의 앞뒤 N개씩 조회 (기본값: 2개)' })
+  @ApiResponse({
+    status: 200,
+    description: '기준 객체의 앞뒤 데이터 조회 성공',
+    schema: {
+      type: 'object',
+      properties: {
+        previous: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/S3Object' },
+          description: '기준 객체 이전 N개 데이터',
+        },
+        current: {
+          $ref: '#/components/schemas/S3Object',
+          description: '기준 객체',
+        },
+        next: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/S3Object' },
+          description: '기준 객체 이후 N개 데이터',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: '기준 S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getSurroundingObjects(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+    @CurrentGroupAdminUser() groupAdminUser: User,
+    @Query('take') take?: number,
+  ) {
+    return await this.awsS3Service.getSurroundingObjects(
+      id,
+      [user, groupAdminUser],
+      take || 2,
     );
   }
 

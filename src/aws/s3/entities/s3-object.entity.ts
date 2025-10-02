@@ -9,6 +9,7 @@ import {
   ManyToMany,
   JoinTable,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
@@ -35,11 +36,14 @@ export class S3Object {
   @Column({ nullable: true })
   mimetype?: string;
 
-  @Column({ nullable: false, default: false })
+  @Column({ nullable: false, default: true })
   active: boolean;
 
   @CreateDateColumn()
   createdAt: Date; // 데이터베이스 저장 날짜
+
+  @DeleteDateColumn()
+  deletedAt?: Date; // Soft Delete를 위한 삭제 날짜
 
   @ManyToOne(() => User, (user) => user.s3Objects)
   @JoinColumn({ name: 'userId' })

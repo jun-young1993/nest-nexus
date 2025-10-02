@@ -16,9 +16,11 @@ export class S3ObjectReportService {
 
   async create(
     createS3ObjectReportDto: CreateS3ObjectReportDto,
+    s3ObjectId: string,
+    reporterId: string,
   ): Promise<S3ObjectReport> {
     const s3Object = await this.s3ObjectRepository.findOne({
-      where: { id: createS3ObjectReportDto.s3ObjectId },
+      where: { id: s3ObjectId },
     });
 
     if (!s3Object) {
@@ -28,7 +30,7 @@ export class S3ObjectReportService {
     const report = this.s3ObjectReportRepository.create({
       type: createS3ObjectReportDto.type,
       content: createS3ObjectReportDto.content,
-      reporterId: createS3ObjectReportDto.reporterId,
+      reporterId: reporterId,
       s3Object,
     });
 
