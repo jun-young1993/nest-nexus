@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CreateNoticeGroupDto } from './dto/create-notice-group.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { NoticeGroupService } from './notice-group.service';
@@ -35,7 +35,10 @@ export class NoticeGroupController {
     status: 200,
     description: 'The notice group has been successfully retrieved.',
   })
-  async getNoticeGroupByName(@Param('name') name: string) {
-    return this.noticeGroupService.findOneByName(name);
+  async getNoticeGroupByName(
+    @Param('name') name: string,
+    @Query('relations') relations?: string[],
+  ) {
+    return this.noticeGroupService.findOneByName(name, relations);
   }
 }
