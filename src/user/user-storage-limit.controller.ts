@@ -301,7 +301,7 @@ export class UserStorageLimitController {
     }
     return await this.userStorageLimitService.createDefaultLimits(user, {
       limitType: StorageLimitType.S3_STORAGE,
-      limitValue: 1073741824, // 1GB
+      limitValue: 214748364, // 2MB
       description: '기본 S3 스토리지 용량 제한',
     });
   }

@@ -92,12 +92,8 @@ export class UserStorageLimitService {
     users: User[],
     limitType: StorageLimitType,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(users, limitType);
-    if (!storageLimit) {
-      throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
-      );
-    }
+    const storageLimit = await this.findByUserAndTypeOrFail(users, limitType);
+
     return storageLimit;
   }
 
@@ -138,13 +134,7 @@ export class UserStorageLimitService {
     limitType: StorageLimitType,
     newUsage: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(users, limitType);
-
-    if (!storageLimit) {
-      throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
-      );
-    }
+    const storageLimit = await this.findByUserAndTypeOrFail(users, limitType);
 
     storageLimit.currentUsage = newUsage;
     return await this.userStorageLimitRepository.save(storageLimit);
@@ -158,13 +148,7 @@ export class UserStorageLimitService {
     limitType: StorageLimitType,
     increment: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(users, limitType);
-
-    if (!storageLimit) {
-      throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
-      );
-    }
+    const storageLimit = await this.findByUserAndTypeOrFail(users, limitType);
 
     storageLimit.currentUsage += increment;
     return await this.userStorageLimitRepository.save(storageLimit);
@@ -178,13 +162,7 @@ export class UserStorageLimitService {
     limitType: StorageLimitType,
     decrement: number,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserIdAndType(users, limitType);
-
-    if (!storageLimit) {
-      throw new NotFoundException(
-        `Storage limit of type '${limitType}' not found for user '${users.filter((user) => user).map((user) => user.id)}'`,
-      );
-    }
+    const storageLimit = await this.findByUserAndTypeOrFail(users, limitType);
 
     storageLimit.currentUsage = Math.max(
       0,
