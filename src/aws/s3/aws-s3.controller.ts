@@ -8,6 +8,8 @@ import {
   Get,
   Query,
   Delete,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -102,13 +104,25 @@ export class AwsS3Controller {
   })
   @ApiResponse({
     status: 400,
-    description: '파일 업로드 실패',
+    description: '잘못된 요청 (파일 형식 오류, 크기 초과 등)',
     schema: {
       type: 'object',
       properties: {
-        success: { type: 'boolean', example: false },
+        statusCode: { type: 'number', example: 400 },
+        message: { type: 'string', example: 'Bad Request' },
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: '서버 내부 오류 (파일 업로드 실패)',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 500 },
         message: { type: 'string', example: '파일 업로드 실패: 에러 메시지' },
-        error: { type: 'string', example: '에러 상세 내용' },
+        error: { type: 'string', example: 'Internal Server Error' },
       },
     },
   })
@@ -125,13 +139,20 @@ export class AwsS3Controller {
         '파일 업로드 완료:',
         result.map((r) => r.id),
       );
+
+      return result;
     } catch (error) {
-      this.logger.error('파일 업로드 에러:', error);
-      return {
-        success: false,
+      this.logger.error(`파일 업로드 에러: ${error.message}`);
+
+      // 비즈니스 로직 에러인 경우 400, 시스템 에러인 경우 500
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException({
         message: `파일 업로드 실패: ${error.message}`,
         error: error.message,
-      };
+      });
     }
   }
 

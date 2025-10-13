@@ -135,7 +135,6 @@ export class AwsS3Service {
       await this.s3ObjectRepository.save(s3Object);
       return s3Object;
     } catch (error) {
-      console.error('S3 업로드 실패:', error);
       throw new Error(`파일 업로드 실패: ${error.message}`);
     }
   }
