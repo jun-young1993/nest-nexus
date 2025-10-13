@@ -7,6 +7,8 @@ import {
   Put,
   Patch,
   Delete,
+  HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
@@ -65,9 +67,19 @@ export class UserController {
     description: 'Get a user by ID',
     type: User,
   })
+  @ApiResponse({
+    status: 204,
+    description: 'User not found - No Content',
+  })
   @Get(':id')
   async getUser(@Param('id') id: string): Promise<User> {
-    return this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
+    console.log('user');
+    console.log(user);
+    if (user === null) {
+      throw new HttpException('User not found', HttpStatus.NO_CONTENT);
+    }
+    return user;
   }
 
   @ApiOperation({ summary: 'Update a user' })
