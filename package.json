@@ -47,6 +47,7 @@
     "cookie-parser": "^1.4.7",
     "express-basic-auth": "^1.2.1",
     "firebase-admin": "^13.2.0",
+    "google-auth-library": "^10.4.1",
     "graphql": "^16.10.0",
     "handlebars": "^4.7.8",
     "install": "^0.13.0",

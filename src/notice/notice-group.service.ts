@@ -26,7 +26,7 @@ export class NoticeGroupService {
   async findOneByName(name: string, relations?: string[]) {
     return await this.noticeGroupRepository.findOne({
       where: { name },
-      relations: relations || ['notices'],
+      relations: relations || [],
     });
   }
 

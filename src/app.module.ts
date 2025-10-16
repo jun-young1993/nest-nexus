@@ -45,6 +45,8 @@ import { SequenceModule } from './sequence/sequence.module';
 import loanScheduleFcmConfig from './config/loan-schedule-fcm.config';
 import awsS3CredentialsConfig from './config/s3-credentials.config';
 import { AwsS3Module } from './aws/s3/aws-s3.module';
+import cloudRunConfig from './config/cloud-run.config';
+import { CloudRunEmotionModule } from './cloud-run/emotion/cloud-run-emotion.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -61,6 +63,7 @@ import { AwsS3Module } from './aws/s3/aws-s3.module';
         loanScheduleFcmConfig,
         mailConfig,
         awsS3CredentialsConfig,
+        cloudRunConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -97,6 +100,7 @@ import { AwsS3Module } from './aws/s3/aws-s3.module';
     LoanModule,
     SequenceModule,
     AwsS3Module.forRoot(),
+    CloudRunEmotionModule,
   ],
   controllers: [],
   providers: [],

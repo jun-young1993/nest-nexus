@@ -92,8 +92,12 @@ export class UserStorageLimitService {
     users: User[],
     limitType: StorageLimitType,
   ): Promise<UserStorageLimit> {
-    const storageLimit = await this.findByUserAndTypeOrFail(users, limitType);
-
+    const storageLimit = await this.findByUserIdAndType(users, limitType);
+    if (!storageLimit) {
+      throw new NotFoundException(
+        `Storage limit of type '${limitType}' not found for user ${users.filter((user) => user).map((user) => user.id)}`,
+      );
+    }
     return storageLimit;
   }
 

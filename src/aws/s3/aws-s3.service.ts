@@ -18,6 +18,9 @@ import { S3ObjectTagService } from './s3-object-tag.service';
 import { S3ObjectTag } from './entities/s3-object-tag.entity';
 import { TagType } from './enum/tag.type';
 import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventName } from 'src/enums/event-name.enum';
+import { S3CreatedEvent } from './events/s3-created.event';
 
 @Injectable()
 export class AwsS3Service {
@@ -28,6 +31,7 @@ export class AwsS3Service {
     private readonly s3ObjectRepository: Repository<S3Object>,
     private readonly userStorageLimitService: UserStorageLimitService,
     private readonly s3ObjectTagService: S3ObjectTagService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createDateTag(s3Object: S3Object): Promise<S3ObjectTag[]> {
@@ -82,16 +86,16 @@ export class AwsS3Service {
     appName: AwsS3AppNames,
     user: User,
   ): Promise<S3Object> {
+    // 파일의 생성 날짜 가져오기
+    const s3Object = await this.s3ObjectRepository.save(
+      this.s3ObjectRepository.create({
+        originalName: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype,
+        user: user,
+      }),
+    );
     try {
-      // 파일의 생성 날짜 가져오기
-      const s3Object = await this.s3ObjectRepository.save(
-        this.s3ObjectRepository.create({
-          originalName: file.originalname,
-          size: file.size,
-          mimetype: file.mimetype,
-          user: user,
-        }),
-      );
       s3Object.tags = await this.createDateTag(s3Object);
 
       // 파일 크기 추가 예시
@@ -133,9 +137,14 @@ export class AwsS3Service {
       // Soft Delete를 사용하므로 active 필드 제거
       s3Object.key = key;
       await this.s3ObjectRepository.save(s3Object);
+
+      this.eventEmitter.emit(
+        EventName.S3_OBJECT_CREATED,
+        new S3CreatedEvent(s3Object),
+      );
       return s3Object;
     } catch (error) {
-      console.error('S3 업로드 실패:', error);
+      await this.s3ObjectRepository.softDelete(s3Object.id);
       throw new Error(`파일 업로드 실패: ${error.message}`);
     }
   }

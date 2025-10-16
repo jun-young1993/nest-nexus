@@ -88,6 +88,15 @@ export type AwsS3CredentialsConfig = {
   awsS3AppConfig: AwsS3AppConfig;
 };
 
+export type CloudRunEmotionConfig = {
+  key_path: string;
+  base_url: string;
+};
+
+export type CloudRunConfig = {
+  emotion: CloudRunEmotionConfig;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   alie: AlieConfig;
@@ -99,4 +108,5 @@ export type AllConfigType = {
   myHomeParkingFcm: MyHomeParkingFcmConfig;
   loanScheduleFcm: LoanScheduleFcmConfig;
   awsS3Credentials: AwsS3CredentialsConfig;
+  cloudRun: CloudRunConfig;
 };

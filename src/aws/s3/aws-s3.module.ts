@@ -25,6 +25,9 @@ import { UserModule } from 'src/user/user.module';
 import { S3ObjectReplyReportController } from './s3-object-reply-report.controller';
 import { S3ObjectScopeService } from './s3-object-scope.service';
 import { S3ObjectQueryService } from './s3-object-query.service';
+import { CloudRunEmotionModule } from 'src/cloud-run/emotion/cloud-run-emotion.module';
+import { CloudRunEmotionService } from 'src/cloud-run/emotion/cloud-run-emotion.service';
+import { S3CreatedListener } from './listeners/s3-created.listener';
 
 @Module({})
 export class AwsS3Module {
@@ -46,6 +49,7 @@ export class AwsS3Module {
           S3ObjectReport,
           S3ObjectReplyReport,
         ]),
+        CloudRunEmotionModule,
       ],
       controllers: [
         AwsS3Controller,
@@ -64,6 +68,8 @@ export class AwsS3Module {
         S3ObjectReplyReportService,
         S3ObjectScopeService,
         S3ObjectQueryService,
+        CloudRunEmotionService,
+        S3CreatedListener,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -94,6 +100,8 @@ export class AwsS3Module {
         S3ObjectReplyReportService,
         S3ObjectScopeService,
         S3ObjectQueryService,
+        CloudRunEmotionService,
+        S3CreatedListener,
       ],
     };
   }

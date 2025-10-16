@@ -15,6 +15,7 @@ import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
 import { S3ObjectReply } from './s3-object-reply.entity';
 import { S3ObjectReport } from './s3-object-report.entity';
+import { FileType, getFileType } from 'src/utils/file-type.util';
 
 @Entity()
 export class S3Object {
@@ -61,4 +62,48 @@ export class S3Object {
 
   @OneToMany(() => S3ObjectReport, (report) => report.s3Object)
   reports: S3ObjectReport[];
+
+  // 계산된 필드 (가상 컬럼)
+  /**
+   * 파일 타입 (image, video, audio, document, archive, unknown)
+   * originalName의 확장자를 기반으로 자동 계산
+   */
+  get fileType(): FileType {
+    return getFileType(this.originalName);
+  }
+
+  /**
+   * 이미지 파일 여부
+   */
+  get isImage(): boolean {
+    return this.fileType === FileType.IMAGE;
+  }
+
+  /**
+   * 비디오 파일 여부
+   */
+  get isVideo(): boolean {
+    return this.fileType === FileType.VIDEO;
+  }
+
+  /**
+   * 오디오 파일 여부
+   */
+  get isAudio(): boolean {
+    return this.fileType === FileType.AUDIO;
+  }
+
+  /**
+   * 문서 파일 여부
+   */
+  get isDocument(): boolean {
+    return this.fileType === FileType.DOCUMENT;
+  }
+
+  /**
+   * 압축 파일 여부
+   */
+  get isArchive(): boolean {
+    return this.fileType === FileType.ARCHIVE;
+  }
 }
