@@ -91,6 +91,7 @@ export class AwsS3Service {
     options: UploadFileOptions = {
       desableUploadCreatedEvent: false,
       desableCreateDateTag: false,
+      destination: S3ObjectDestinationType.UPLOAD,
     } as UploadFileOptions,
   ): Promise<S3Object> {
     // 파일의 생성 날짜 가져오기
