@@ -10,5 +10,6 @@ export enum TagType {
   CATEGORY = 'category',
   TAG = 'tag',
   LABEL = 'label',
+  EMOTION = 'emotion',
   DEFAULT = 'default',
 }

@@ -21,6 +21,9 @@ import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventName } from 'src/enums/event-name.enum';
 import { S3CreatedEvent } from './events/s3-created.event';
+import { UploadFileOptions } from './interfaces/upload-file-options.interface';
+import { getMimetypeFromFilename } from 'src/utils/file-type.util';
+import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
 
 @Injectable()
 export class AwsS3Service {
@@ -85,18 +88,24 @@ export class AwsS3Service {
     file: Express.Multer.File,
     appName: AwsS3AppNames,
     user: User,
+    options: UploadFileOptions = {
+      desableUploadCreatedEvent: false,
+      desableCreateDateTag: false,
+    } as UploadFileOptions,
   ): Promise<S3Object> {
     // 파일의 생성 날짜 가져오기
     const s3Object = await this.s3ObjectRepository.save(
       this.s3ObjectRepository.create({
         originalName: file.originalname,
         size: file.size,
-        mimetype: file.mimetype,
+        mimetype: getMimetypeFromFilename(file.originalname),
         user: user,
       }),
     );
     try {
-      s3Object.tags = await this.createDateTag(s3Object);
+      if (options.desableCreateDateTag !== true) {
+        s3Object.tags = await this.createDateTag(s3Object);
+      }
 
       // 파일 크기 추가 예시
       await this.userStorageLimitService.addFileSize(
@@ -138,10 +147,13 @@ export class AwsS3Service {
       s3Object.key = key;
       await this.s3ObjectRepository.save(s3Object);
 
-      this.eventEmitter.emit(
-        EventName.S3_OBJECT_CREATED,
-        new S3CreatedEvent(s3Object),
-      );
+      if (options.desableUploadCreatedEvent !== true) {
+        this.eventEmitter.emit(
+          EventName.S3_OBJECT_CREATED,
+          new S3CreatedEvent(appName, s3Object),
+        );
+      }
+
       return s3Object;
     } catch (error) {
       await this.s3ObjectRepository.softDelete(s3Object.id);
@@ -197,6 +209,7 @@ export class AwsS3Service {
     const result = await this.s3ObjectRepository.find({
       where: {
         user: { id: In(users.filter((user) => user).map((user) => user.id)) }, // 관계를 통한 조회
+        destination: S3ObjectDestinationType.UPLOAD,
       },
       order: { createdAt: 'DESC' },
       ...options,
@@ -207,8 +220,16 @@ export class AwsS3Service {
 
   async findOneOrFail(id: string): Promise<S3Object> {
     return await this.s3ObjectRepository.findOneOrFail({
-      where: { id },
-      relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+      where: { id, destination: S3ObjectDestinationType.UPLOAD },
+      relations: [
+        'tags',
+        'likes',
+        'replies',
+        'replies.user',
+        'user',
+        'thumbnail',
+        'videoSource',
+      ],
       order: {
         replies: {
           createdAt: 'DESC',
@@ -221,6 +242,7 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.count({
       where: {
         user: { id: In(users.filter((user) => user).map((user) => user.id)) },
+        destination: S3ObjectDestinationType.UPLOAD,
         // deletedAt IS NULL 조건이 자동으로 적용됨
       },
     });
@@ -230,7 +252,7 @@ export class AwsS3Service {
     return await this.s3ObjectRepository
       .createQueryBuilder('s3')
       .select('SUM(s3.size)', 'totalSize')
-      .where('s3.userId = :userId', {
+      .andWhere('s3.userId = :userId', {
         userId: In(users.filter((user) => user).map((user) => user.id)),
       })
       .getRawOne()
@@ -264,6 +286,7 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.find({
       where: {
         user: { id: In(users.filter((user) => user).map((user) => user.id)) },
+        destination: S3ObjectDestinationType.UPLOAD,
         createdAt: Between(startDate, endDate),
       },
       order: { createdAt: 'DESC' },
@@ -294,8 +317,16 @@ export class AwsS3Service {
     // 기준 객체와 전체 개수를 한 번에 조회
     const [currentObject] = await Promise.all([
       this.s3ObjectRepository.findOneOrFail({
-        where: { id: currentId },
-        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+        where: { id: currentId, destination: S3ObjectDestinationType.UPLOAD },
+        relations: [
+          'tags',
+          'likes',
+          'replies',
+          'replies.user',
+          'user',
+          'thumbnail',
+          'videoSource',
+        ],
       }),
     ]);
 
@@ -307,7 +338,15 @@ export class AwsS3Service {
           ...userFilter,
           createdAt: Between(new Date('1970-01-01'), currentObject.createdAt),
         },
-        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+        relations: [
+          'tags',
+          'likes',
+          'replies',
+          'replies.user',
+          'user',
+          'thumbnail',
+          'videoSource',
+        ],
         order: { createdAt: 'DESC' },
         take: take + 1, // 기준 객체 포함해서 3개 가져온 후 필터링
       }),
@@ -317,7 +356,15 @@ export class AwsS3Service {
           ...userFilter,
           createdAt: Between(currentObject.createdAt, new Date('2099-12-31')),
         },
-        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+        relations: [
+          'tags',
+          'likes',
+          'replies',
+          'replies.user',
+          'user',
+          'thumbnail',
+          'videoSource',
+        ],
         order: { createdAt: 'ASC' },
         take: take + 1, // 기준 객체 포함해서 3개 가져온 후 필터링
       }),
@@ -486,5 +533,9 @@ export class AwsS3Service {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  async update(s3Object: S3Object): Promise<S3Object> {
+    return await this.s3ObjectRepository.save(s3Object);
   }
 }

@@ -10,7 +10,6 @@ import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { UpdateS3ObjectTagDto } from './dto/update-s3-object-tag.dto';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { ExistingException } from 'src/core/exceptions/existing.exception';
-import { S3Object } from './entities/s3-object.entity';
 
 @Injectable()
 export class S3ObjectTagService {
@@ -94,7 +93,6 @@ export class S3ObjectTagService {
     const normalizedName = name.toLowerCase();
     const tag = await this.s3ObjectTagRepository.findOne({
       where: { name: normalizedName },
-      relations: ['s3Objects'],
     });
 
     if (tag) {

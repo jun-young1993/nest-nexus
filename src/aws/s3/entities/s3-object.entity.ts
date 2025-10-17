@@ -10,12 +10,15 @@ import {
   JoinTable,
   OneToMany,
   DeleteDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
 import { S3ObjectReply } from './s3-object-reply.entity';
 import { S3ObjectReport } from './s3-object-report.entity';
 import { FileType, getFileType } from 'src/utils/file-type.util';
+import { Exclude } from 'class-transformer';
+import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 
 @Entity()
 export class S3Object {
@@ -40,11 +43,32 @@ export class S3Object {
   @Column({ nullable: false, default: true })
   active: boolean;
 
+  @Column({ nullable: false, default: S3ObjectDestinationType.UPLOAD })
+  destination: S3ObjectDestinationType;
+
   @CreateDateColumn()
   createdAt: Date; // 데이터베이스 저장 날짜
 
   @DeleteDateColumn()
   deletedAt?: Date; // Soft Delete를 위한 삭제 날짜
+
+  // ✨ 썸네일 관계 (양방향)
+  @OneToOne(() => S3Object, (s3Object) => s3Object.videoSource, {
+    nullable: true,
+    cascade: true, // 비디오 삭제시 썸네일도 삭제
+  })
+  @JoinColumn({ name: 'thumbnailId' })
+  thumbnail?: S3Object;
+
+  // ✨ 순환 참조 방지: videoSource는 JSON 응답에서 제외
+  // ✨ ClassSerializerInterceptor 추가
+  // app.useGlobalInterceptors(
+  //   new ClassSerializerInterceptor(app.get(Reflector))
+  // );
+
+  @Exclude()
+  @OneToOne(() => S3Object, (s3Object) => s3Object.thumbnail)
+  videoSource?: S3Object;
 
   @ManyToOne(() => User, (user) => user.s3Objects)
   @JoinColumn({ name: 'userId' })
@@ -105,5 +129,21 @@ export class S3Object {
    */
   get isArchive(): boolean {
     return this.fileType === FileType.ARCHIVE;
+  }
+
+  /**
+   * 썸네일 이미지 여부
+   * videoSource가 있으면 이 객체는 썸네일
+   */
+  get isThumbnail(): boolean {
+    return !!this.videoSource;
+  }
+
+  /**
+   * 썸네일 보유 여부
+   * 비디오 파일이 썸네일을 가지고 있는지 확인
+   */
+  get hasThumbnail(): boolean {
+    return !!this.thumbnail;
   }
 }
