@@ -199,7 +199,7 @@ export class AwsS3Controller {
     return await this.awsS3Service.getObjects([user, groupAdminUser], {
       skip: skip || 0,
       take: take || 10,
-      relations: ['thumbnail', 'videoSource'],
+      relations: ['thumbnail', 'videoSource', 'tags'],
     });
   }
 
