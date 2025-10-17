@@ -67,6 +67,7 @@ export class CloudRunEmotionService {
 
   async analyzeByImageUrl(imageUrl: string): Promise<EmotionAnalysisResponse> {
     try {
+      this.logger.info(`[EMOTION ANALYSIS START] ${imageUrl}`);
       const baseUrl = this.configService.get('cloudRun.emotion.base_url', {
         infer: true,
       });
@@ -85,8 +86,13 @@ export class CloudRunEmotionService {
         ),
       );
 
+      this.logger.info(
+        `[EMOTION ANALYSIS RESULT] ${JSON.stringify(response.data.emotions)}`,
+      );
+
       return response.data;
     } catch (error) {
+      this.logger.error(`[EMOTION ANALYSIS ERROR] ${error}`);
       if (error instanceof AxiosError) {
         const status =
           error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
