@@ -311,12 +311,16 @@ export class AwsS3Controller {
     @Param('year') year: string,
     @Param('month') month: string,
     @Param('day') day: string,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
   ) {
     return await this.awsS3Service.getObjectsByDate(
       [user, groupAdminUser],
       year,
       month,
       day,
+      skip,
+      take,
     );
   }
 

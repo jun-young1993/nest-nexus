@@ -265,6 +265,8 @@ export class AwsS3Service {
     year: string,
     month: string,
     day: string,
+    skip?: number,
+    take?: number,
   ): Promise<S3Object[]> {
     // 해당 날짜의 시작과 끝 시간 계산
     const startDate = new Date(
@@ -291,6 +293,8 @@ export class AwsS3Service {
         createdAt: Between(startDate, endDate),
       },
       order: { createdAt: 'DESC' },
+      skip: skip,
+      take: take,
     });
   }
 
