@@ -338,6 +338,7 @@ export class AwsS3Service {
         where: {
           ...userFilter,
           createdAt: Between(new Date('1970-01-01'), currentObject.createdAt),
+          destination: S3ObjectDestinationType.UPLOAD,
         },
         relations: [
           'tags',
@@ -356,6 +357,7 @@ export class AwsS3Service {
         where: {
           ...userFilter,
           createdAt: Between(currentObject.createdAt, new Date('2099-12-31')),
+          destination: S3ObjectDestinationType.UPLOAD,
         },
         relations: [
           'tags',
