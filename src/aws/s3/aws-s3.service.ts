@@ -415,6 +415,7 @@ export class AwsS3Service {
     dates: string[],
     users: User[],
   ): Promise<Record<string, boolean>> {
+    console.log(dates);
     // 최고 성능: createdAt 범위 조건 사용 (인덱스 활용)
     const existenceChecks = await Promise.all(
       dates.map(async (date) => {
@@ -432,7 +433,7 @@ export class AwsS3Service {
           .andWhere('s3.createdAt <= :endDate', { endDate })
           .limit(1)
           .getRawOne();
-
+        console.log(date, exists);
         return {
           date,
           exists: !!exists,
