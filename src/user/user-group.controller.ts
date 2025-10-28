@@ -381,10 +381,9 @@ export class UserGroupController {
       );
     }
 
-    await this.userGroupService.addUsersToGroup({
+    return await this.userGroupService.addUsersToGroup({
       groupId: userGroup.id,
       userIds: [user.id],
     });
-    return userGroup;
   }
 }

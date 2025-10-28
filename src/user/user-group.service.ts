@@ -213,8 +213,11 @@ export class UserGroupService {
    * 사용자가 속한 그룹들 조회
    */
   async findGroupsByUserId(userId: string): Promise<UserGroup | null> {
-    return await this.userGroupRepository.findOne({
+    const group = await this.userGroupRepository.findOne({
       where: { users: { id: userId }, isActive: true },
+    });
+    return await this.userGroupRepository.findOne({
+      where: { id: group.id, isActive: true },
       relations: ['users'],
     });
   }
