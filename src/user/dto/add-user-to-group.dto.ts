@@ -14,7 +14,10 @@ export class AddUserToGroupDto {
 
   @ApiProperty({
     description: 'Array of user IDs to add to the group',
-    example: ['123e4567-e89b-12d3-a456-426614174001', '123e4567-e89b-12d3-a456-426614174002'],
+    example: [
+      '123e4567-e89b-12d3-a456-426614174001',
+      '123e4567-e89b-12d3-a456-426614174002',
+    ],
     type: [String],
   })
   @Field(() => [String])

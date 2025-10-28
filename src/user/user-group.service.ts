@@ -216,6 +216,9 @@ export class UserGroupService {
     const group = await this.userGroupRepository.findOne({
       where: { users: { id: userId }, isActive: true },
     });
+    if (!group) {
+      return null;
+    }
     return await this.userGroupRepository.findOne({
       where: { id: group.id, isActive: true },
       relations: ['users'],
