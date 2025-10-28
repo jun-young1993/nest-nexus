@@ -250,12 +250,14 @@ export class AwsS3Service {
   }
 
   async filesize(users: User[]): Promise<number> {
+    const userIds = users.filter((user) => user).map((user) => user.id);
+    if (userIds.length === 0) {
+      return 0;
+    }
     return await this.s3ObjectRepository
       .createQueryBuilder('s3')
       .select('SUM(s3.size)', 'totalSize')
-      .andWhere('s3.userId = :userId', {
-        userId: In(users.filter((user) => user).map((user) => user.id)),
-      })
+      .where('s3.userId IN (:...userIds)', { userIds })
       .getRawOne()
       .then((result) => parseFloat(result.totalSize) || 0);
   }
@@ -415,8 +417,17 @@ export class AwsS3Service {
     dates: string[],
     users: User[],
   ): Promise<Record<string, boolean>> {
-    console.log(dates);
     // 최고 성능: createdAt 범위 조건 사용 (인덱스 활용)
+    const userIds = users.filter((user) => user).map((user) => user.id);
+    if (userIds.length === 0) {
+      return dates.reduce(
+        (acc, date) => {
+          acc[date] = false;
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
+    }
     const existenceChecks = await Promise.all(
       dates.map(async (date) => {
         // 날짜 범위 계산 (2025-09-24 00:00:00 ~ 2025-09-24 23:59:59)
@@ -426,14 +437,11 @@ export class AwsS3Service {
         const exists = await this.s3ObjectRepository
           .createQueryBuilder('s3')
           .select('1')
-          .where('s3.userId = :userId', {
-            userId: In(users.filter((user) => user).map((user) => user.id)),
-          })
+          .where('s3.userId IN (:...userIds)', { userIds })
           .andWhere('s3.createdAt >= :startDate', { startDate })
           .andWhere('s3.createdAt <= :endDate', { endDate })
           .limit(1)
           .getRawOne();
-        console.log(date, exists);
         return {
           date,
           exists: !!exists,

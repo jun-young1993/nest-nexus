@@ -29,6 +29,12 @@ export class AppConfig {
   @Column()
   packageName: string;
 
+  @Column({ nullable: true })
+  appStoreUrl?: string;
+
+  @Column({ nullable: true })
+  googlePlayUrl?: string;
+
   @Column()
   @CreateDateColumn()
   createdAt: Date;
