@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Query,
   UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -365,5 +366,25 @@ export class UserGroupController {
   })
   async remove(@Param('id') id: string): Promise<void> {
     await this.userGroupService.remove(id);
+  }
+
+  @Post('add-user/number/:groupNumber')
+  async addUserByGroupNumber(
+    @CurrentUser() user: User,
+    @Param('groupNumber') groupNumber: string,
+  ): Promise<UserGroup> {
+    const userGroup =
+      await this.userGroupService.findGroupByNumber(groupNumber);
+    if (!userGroup) {
+      throw new NotFoundException(
+        `User group with number '${groupNumber}' not found`,
+      );
+    }
+
+    await this.userGroupService.addUsersToGroup({
+      groupId: userGroup.id,
+      userIds: [user.id],
+    });
+    return userGroup;
   }
 }

@@ -250,4 +250,10 @@ export class UserGroupService {
     }
     return userGroup.users.find((user) => user.isAdmin) ?? null;
   }
+
+  async findGroupByNumber(number: string): Promise<UserGroup | null> {
+    return await this.userGroupRepository.findOne({
+      where: { number },
+    });
+  }
 }
