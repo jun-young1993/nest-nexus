@@ -35,6 +35,9 @@ export class AppConfig {
   @Column({ nullable: true })
   googlePlayUrl?: string;
 
+  @Column({ nullable: true })
+  appImageUrl?: string;
+
   @Column()
   @CreateDateColumn()
   createdAt: Date;

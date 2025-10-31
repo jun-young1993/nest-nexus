@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { HttpModule } from './http/http.module';
 import { AlieModule } from './alie/alie.module';
 import { ConfigModule } from '@nestjs/config';
@@ -47,8 +48,12 @@ import awsS3CredentialsConfig from './config/s3-credentials.config';
 import { AwsS3Module } from './aws/s3/aws-s3.module';
 import cloudRunConfig from './config/cloud-run.config';
 import { CloudRunEmotionModule } from './cloud-run/emotion/cloud-run-emotion.module';
+import { join } from 'path';
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public/static'),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [
