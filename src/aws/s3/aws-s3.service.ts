@@ -138,7 +138,7 @@ export class AwsS3Service {
         Bucket: bucket,
         Key: key,
         Body: file.buffer,
-        ContentType: file.mimetype,
+        ContentType: getMimetypeFromFilename(file.originalname),
         ACL: 'public-read',
       });
 
