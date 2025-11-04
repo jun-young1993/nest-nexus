@@ -10,6 +10,10 @@ import {
   Delete,
   BadRequestException,
   InternalServerErrorException,
+  ParseFilePipe,
+  FileTypeValidator,
+  MaxFileSizeValidator,
+  FileValidator,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -31,6 +35,36 @@ import { AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
 import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-user.decorator';
 import { createNestLogger } from 'src/factories/logger.factory';
+
+/**
+ * 파일 정보를 로그로 출력하는 커스텀 validator
+ */
+class FileLoggerValidator extends FileValidator<Record<string, unknown>> {
+  private readonly logger = createNestLogger('FileLoggerValidator');
+
+  constructor() {
+    super({});
+  }
+
+  isValid(file: Express.Multer.File): boolean {
+    this.logger.log('파일 객체 정보:', {
+      fieldname: file.fieldname,
+      originalname: file.originalname,
+      encoding: file.encoding,
+      mimetype: file.mimetype,
+      size: file.size,
+      buffer: file.buffer ? `Buffer(${file.buffer.length} bytes)` : null,
+      destination: file.destination,
+      filename: file.filename,
+      path: file.path,
+    });
+    return true;
+  }
+
+  buildErrorMessage(): string {
+    return '파일 로깅 중';
+  }
+}
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -129,7 +163,19 @@ export class AwsS3Controller {
   async uploadFiles(
     @CurrentUser() user: User,
     @Param('appName') appName: AwsS3AppNames,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new FileLoggerValidator(),
+          new FileTypeValidator({
+            fileType:
+              /(image\/(jpeg|jpg|png|gif)|video\/(mp4|quicktime|x-msvideo|x-matroska|webm))$/,
+          }),
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }), // 10MB
+        ],
+      }),
+    )
+    files: Express.Multer.File[],
   ) {
     try {
       this.logger.log('파일 업로드 시작:', { user, appName });
