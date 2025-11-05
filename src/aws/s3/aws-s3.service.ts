@@ -122,7 +122,7 @@ export class AwsS3Service {
         infer: true,
       });
       const bucket = this.getBucket(appName);
-      const region = this.getRegion(appName);
+      // const region = this.getRegion(appName);
 
       const nodeEnv = appConfig.node_env;
       if (!nodeEnv) {
@@ -142,7 +142,7 @@ export class AwsS3Service {
         Key: key,
         Body: file.buffer,
         ContentType: getMimetypeFromFilename(file.originalname),
-        ACL: 'public-read',
+        ACL: 'private',
       });
 
       await this.s3Client.send(command);
