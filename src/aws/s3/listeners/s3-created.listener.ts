@@ -142,7 +142,18 @@ export class S3CreatedListener {
 
       // 7. 저장
       await this.s3ObjectRepository.save([thumbnailObject, videoObject]);
-
+      const object = await this.awsS3Service.findOneOrFail(videoObject.id);
+      object.tags = [
+        ...object.tags,
+        await this.s3ObjectTagService.createOrFind(
+          CreateS3ObjectTagDto.fromJson({
+            name: thumbnailResponse.emotion,
+            type: TagType.EMOTION,
+            color: '#FFFFFF',
+          }),
+        ),
+      ];
+      await this.awsS3Service.update(object);
       this.logger.info(
         `[THUMBNAIL CREATED] Video: ${videoObject.id}, Thumbnail: ${thumbnailObject.id}, URL: ${thumbnailObject.url}, Emotion: ${thumbnailResponse.emotion}`,
       );
