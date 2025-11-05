@@ -13,8 +13,6 @@ import { S3Object } from '../entities/s3-object.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AwsS3AppNames } from 'src/config/config.type';
-import { UploadFileOptions } from '../interfaces/upload-file-options.interface';
-import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 
 @Injectable()
 export class S3CreatedListener {

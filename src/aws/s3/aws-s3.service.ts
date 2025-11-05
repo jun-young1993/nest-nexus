@@ -38,6 +38,13 @@ export class AwsS3Service {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
+  async createListener(s3Object: S3Object): Promise<void> {
+    this.eventEmitter.emit(
+      EventName.S3_OBJECT_CREATED,
+      new S3CreatedEvent(s3Object),
+    );
+  }
+
   async createDateTag(s3Object: S3Object): Promise<S3ObjectTag[]> {
     const tags = [
       CreateS3ObjectTagDto.fromJson({
