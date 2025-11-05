@@ -146,7 +146,7 @@ export class AwsS3Service {
       });
 
       await this.s3Client.send(command);
-      s3Object.url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+      // s3Object.url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
       // Soft Delete를 사용하므로 active 필드 제거
       s3Object.key = key;
       await this.s3ObjectRepository.save(s3Object);
