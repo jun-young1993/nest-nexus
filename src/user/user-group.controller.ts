@@ -84,6 +84,38 @@ export class UserGroupController {
     return await this.userGroupService.create(user, createUserGroupDto, number);
   }
 
+  @Patch('/user-number/generate/:id')
+  @ApiOperation({
+    summary: 'Update user group number',
+    description: 'Updates the number of a user group',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User group unique identifier (UUID)',
+    type: String,
+  })
+  @ApiOkResponse({
+    description: 'User group number updated successfully',
+    type: UserGroup,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request - validation error or duplicate group name',
+  })
+  @ApiNotFoundResponse({
+    description: 'User group not found',
+  })
+  @ApiConflictResponse({
+    description: 'Conflict - group name already exists',
+  })
+  async generateUserNumber(@Param('id') id: string): Promise<UserGroup> {
+    const number = await this.sequenceService.generateNextSequence(
+      SequenceName.USER_GROUP_NUMBER,
+    );
+    const userGroup = await this.userGroupService.findOne(id);
+    userGroup.number = number;
+    return await this.userGroupService.update(id, userGroup);
+  }
+
   /**
    * 모든 사용자 그룹 조회
    * GET /user-groups
