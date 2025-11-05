@@ -15,6 +15,7 @@ import {
   MaxFileSizeValidator,
   FileValidator,
   Put,
+  Patch,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -491,5 +492,17 @@ export class AwsS3Controller {
   async createListener(@Param('id') id: string) {
     const s3Object = await this.awsS3Service.findOneOrFail(id);
     return await this.awsS3Service.createListener(s3Object);
+  }
+
+  @Patch('objects/:id/toggle/hidden')
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체의 숨김 상태 토글' })
+  @ApiResponse({ status: 200, description: 'S3 객체의 숨김 상태 토글 성공' })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async toggleHidden(@Param('id') id: string) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    s3Object.isHidden = !s3Object.isHidden;
+    return await this.awsS3Service.update(s3Object);
   }
 }
