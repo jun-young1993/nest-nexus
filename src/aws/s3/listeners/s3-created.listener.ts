@@ -34,18 +34,21 @@ export class S3CreatedListener {
    */
   @OnEvent(EventName.S3_OBJECT_CREATED)
   async handleS3Created(event: S3CreatedEvent) {
-    const { s3Object, appName } = event;
+    const { s3Object } = event;
     this.logger.info(`[HANDLE S3 CREATED] ${s3Object.id}`);
     this.logger.info(`[HANDLE S3 FILE TYPE] ${s3Object.fileType}`);
 
+    if (s3Object.isThumbnail) {
+      return;
+    }
     // 썸네일이 아닌 일반 이미지만 분석
-    if (s3Object.isImage && !s3Object.isThumbnail) {
+    if (s3Object.isImage) {
       await this.analyzeImage(s3Object);
     }
 
     // 비디오 파일 처리 (썸네일 생성)
     if (s3Object.isVideo) {
-      await this.processVideo(appName, s3Object);
+      await this.processVideo(s3Object.appName, s3Object);
     }
   }
 
@@ -131,11 +134,6 @@ export class S3CreatedListener {
         thumbnailFile,
         appName,
         videoObject.user,
-        {
-          desableUploadCreatedEvent: true,
-          desableCreateDateTag: true,
-          destination: S3ObjectDestinationType.THUMBNAIL,
-        } as UploadFileOptions,
       );
 
       // 비디오와 썸네일 관계 설정

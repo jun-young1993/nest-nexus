@@ -22,7 +22,6 @@ import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventName } from 'src/enums/event-name.enum';
 import { S3CreatedEvent } from './events/s3-created.event';
-import { UploadFileOptions } from './interfaces/upload-file-options.interface';
 import { getMimetypeFromFilename } from 'src/utils/file-type.util';
 import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -90,11 +89,6 @@ export class AwsS3Service {
     file: Express.Multer.File,
     appName: AwsS3AppNames,
     user: User,
-    options: UploadFileOptions = {
-      desableUploadCreatedEvent: false,
-      desableCreateDateTag: false,
-      destination: S3ObjectDestinationType.UPLOAD,
-    } as UploadFileOptions,
   ): Promise<S3Object> {
     // 파일의 생성 날짜 가져오기
     const s3Object = await this.s3ObjectRepository.save(
@@ -107,9 +101,7 @@ export class AwsS3Service {
       }),
     );
     try {
-      if (options.desableCreateDateTag !== true) {
-        s3Object.tags = await this.createDateTag(s3Object);
-      }
+      s3Object.tags = await this.createDateTag(s3Object);
 
       // 파일 크기 추가 예시
       await this.userStorageLimitService.addFileSize(
@@ -152,12 +144,10 @@ export class AwsS3Service {
       await this.s3ObjectRepository.save(s3Object);
       await this.generateGetObjectPresignedUrl(s3Object);
 
-      if (options.desableUploadCreatedEvent !== true) {
-        this.eventEmitter.emit(
-          EventName.S3_OBJECT_CREATED,
-          new S3CreatedEvent(appName, s3Object),
-        );
-      }
+      this.eventEmitter.emit(
+        EventName.S3_OBJECT_CREATED,
+        new S3CreatedEvent(s3Object),
+      );
 
       return s3Object;
     } catch (error) {
