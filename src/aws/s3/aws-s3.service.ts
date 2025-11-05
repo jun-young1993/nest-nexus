@@ -96,6 +96,7 @@ export class AwsS3Service {
     file: Express.Multer.File,
     appName: AwsS3AppNames,
     user: User,
+    destination: S3ObjectDestinationType = S3ObjectDestinationType.UPLOAD,
   ): Promise<S3Object> {
     // 파일의 생성 날짜 가져오기
     const s3Object = await this.s3ObjectRepository.save(
@@ -105,6 +106,7 @@ export class AwsS3Service {
         mimetype: getMimetypeFromFilename(file.originalname),
         user: user,
         appName: appName,
+        destination: destination,
       }),
     );
     try {

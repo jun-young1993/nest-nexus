@@ -13,6 +13,7 @@ import { S3Object } from '../entities/s3-object.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AwsS3AppNames } from 'src/config/config.type';
+import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 
 @Injectable()
 export class S3CreatedListener {
@@ -132,6 +133,7 @@ export class S3CreatedListener {
         thumbnailFile,
         appName,
         videoObject.user,
+        S3ObjectDestinationType.THUMBNAIL,
       );
 
       // 비디오와 썸네일 관계 설정
