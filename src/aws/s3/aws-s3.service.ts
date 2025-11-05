@@ -150,6 +150,7 @@ export class AwsS3Service {
       // Soft Delete를 사용하므로 active 필드 제거
       s3Object.key = key;
       await this.s3ObjectRepository.save(s3Object);
+      await this.generateGetObjectPresignedUrl(s3Object);
 
       if (options.desableUploadCreatedEvent !== true) {
         this.eventEmitter.emit(
