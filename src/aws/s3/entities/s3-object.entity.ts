@@ -19,6 +19,7 @@ import { S3ObjectReport } from './s3-object-report.entity';
 import { FileType, getFileType } from 'src/utils/file-type.util';
 import { Exclude } from 'class-transformer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
+import { AwsS3AppNames } from 'src/config/config.type';
 
 @Entity()
 export class S3Object {
@@ -28,7 +29,7 @@ export class S3Object {
   @Column({ nullable: true })
   key?: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   url?: string;
 
   @Column({ nullable: false })
@@ -43,8 +44,17 @@ export class S3Object {
   @Column({ nullable: false, default: true })
   active: boolean;
 
+  @Column({ default: false })
+  isHidden: boolean;
+
+  @Column({ nullable: true, type: 'datetime', precision: 6 })
+  presignedUrlExpiresAt?: Date;
+
   @Column({ nullable: false, default: S3ObjectDestinationType.UPLOAD })
   destination: S3ObjectDestinationType;
+
+  @Column({ nullable: false })
+  appName: AwsS3AppNames;
 
   @CreateDateColumn()
   createdAt: Date; // 데이터베이스 저장 날짜

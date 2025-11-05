@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -24,6 +25,7 @@ import { S3CreatedEvent } from './events/s3-created.event';
 import { UploadFileOptions } from './interfaces/upload-file-options.interface';
 import { getMimetypeFromFilename } from 'src/utils/file-type.util';
 import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
 export class AwsS3Service {
@@ -101,6 +103,7 @@ export class AwsS3Service {
         size: file.size,
         mimetype: getMimetypeFromFilename(file.originalname),
         user: user,
+        appName: appName,
       }),
     );
     try {
@@ -216,11 +219,11 @@ export class AwsS3Service {
       ...options,
     });
 
-    return result;
+    return await this.generateGetObjectPresigendUrls(result);
   }
 
   async findOneOrFail(id: string): Promise<S3Object> {
-    return await this.s3ObjectRepository.findOneOrFail({
+    const results = await this.s3ObjectRepository.findOneOrFail({
       where: { id, destination: S3ObjectDestinationType.UPLOAD },
       relations: [
         'tags',
@@ -237,6 +240,7 @@ export class AwsS3Service {
         },
       },
     });
+    return await this.generateGetObjectPresignedUrl(results);
   }
 
   async count(users: User[]): Promise<number> {
@@ -288,7 +292,7 @@ export class AwsS3Service {
       59,
     );
 
-    return await this.s3ObjectRepository.find({
+    const results = await this.s3ObjectRepository.find({
       where: {
         user: { id: In(users.filter((user) => user).map((user) => user.id)) },
         destination: S3ObjectDestinationType.UPLOAD,
@@ -298,6 +302,7 @@ export class AwsS3Service {
       skip: skip,
       take: take,
     });
+    return await this.generateGetObjectPresigendUrls(results);
   }
 
   /**
@@ -389,9 +394,9 @@ export class AwsS3Service {
       .slice(0, 2);
 
     return {
-      previous: filteredPrevious,
-      current: currentObject,
-      next: filteredNext,
+      previous: await this.generateGetObjectPresigendUrls(filteredPrevious),
+      current: await this.generateGetObjectPresignedUrl(currentObject),
+      next: await this.generateGetObjectPresigendUrls(filteredNext),
     };
   }
 
@@ -553,5 +558,39 @@ export class AwsS3Service {
 
   async update(s3Object: S3Object): Promise<S3Object> {
     return await this.s3ObjectRepository.save(s3Object);
+  }
+
+  async generateGetObjectPresignedUrl(s3Object: S3Object): Promise<S3Object> {
+    if (
+      s3Object.presignedUrlExpiresAt === null ||
+      s3Object.presignedUrlExpiresAt < new Date()
+    ) {
+      const command = new GetObjectCommand({
+        Bucket: this.getBucket(s3Object.appName),
+        Key: s3Object.key,
+      });
+
+      const expiresIn = 7 * 24 * 60 * 60;
+      const url = await getSignedUrl(this.s3Client, command, {
+        expiresIn: expiresIn,
+      });
+
+      s3Object.url = url;
+      s3Object.presignedUrlExpiresAt = new Date(Date.now() + expiresIn * 1000);
+      await this.s3ObjectRepository.save(s3Object);
+      return s3Object;
+    }
+
+    return s3Object;
+  }
+
+  async generateGetObjectPresigendUrls(
+    s3Objects: S3Object[],
+  ): Promise<S3Object[]> {
+    return await Promise.all(
+      s3Objects.map(async (s3Object) => {
+        return await this.generateGetObjectPresignedUrl(s3Object);
+      }),
+    );
   }
 }

@@ -467,4 +467,18 @@ export class AwsS3Controller {
       groupAdminUser,
     ]);
   }
+
+  @Get('objects/:id/presigned-url')
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체의 사전 서명된 URL 조회' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체의 사전 서명된 URL 조회 성공',
+  })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getPresignedUrl(@Param('id') id: string) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    return await this.awsS3Service.generateGetObjectPresignedUrl(s3Object);
+  }
 }
