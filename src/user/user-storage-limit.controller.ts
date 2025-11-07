@@ -9,6 +9,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,6 +30,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
 import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-user.decorator';
+import { UserGroupService } from './user-group.service';
 
 @ApiTags('User Storage Limits')
 @ApiBearerAuth()
@@ -37,6 +39,7 @@ import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-u
 export class UserStorageLimitController {
   constructor(
     private readonly userStorageLimitService: UserStorageLimitService,
+    private readonly userGroupService: UserGroupService,
   ) {}
 
   @Post()
@@ -304,6 +307,41 @@ export class UserStorageLimitController {
       limitValue: 314748364, // 200MB
       description: '기본 S3 스토리지 용량 제한',
     });
+  }
+
+  @Get('group-admin/default/:limitType')
+  @ApiOperation({ summary: '관리자의 모든 스토리지 제한 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '스토리지 제한 목록 조회 성공',
+    type: [UserStorageLimit],
+  })
+  async findByGroupAdminUserId(
+    @CurrentUser() user: User,
+    @Param('limitType') limitType: StorageLimitType,
+  ): Promise<UserStorageLimit> {
+    const groupAdminUser =
+      await this.userGroupService.findGroupAdminByUser(user);
+    if (!groupAdminUser) {
+      throw new NotFoundException('관리자를 찾을 수 없음');
+    }
+    const storageLimit = await this.userStorageLimitService.findByUserIdAndType(
+      [groupAdminUser],
+      limitType,
+    );
+
+    if (storageLimit) {
+      return storageLimit;
+    }
+
+    return await this.userStorageLimitService.createDefaultLimits(
+      groupAdminUser,
+      {
+        limitType: limitType,
+        limitValue: 314748364, // 200MB
+        description: `기본 ${limitType} 스토리지 용량 제한`,
+      },
+    );
   }
 
   @Delete(':id')
