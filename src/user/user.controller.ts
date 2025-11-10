@@ -47,6 +47,16 @@ export class UserController {
       createUserDto.username = `user ${count}`;
     }
     createUserDto.registrationIp = createUserDto.registrationIp || ip;
+    const users = await this.userService.findByRegistrationIp(
+      createUserDto.registrationIp,
+      createUserDto.type,
+    );
+    if (users.length > 5) {
+      throw new HttpException(
+        `Too many users : total count => ${users.length}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return this.userService.createUser(createUserDto);
   }
 

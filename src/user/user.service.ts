@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserType } from './enum/user.type';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,13 @@ export class UserService {
     });
 
     return this.userRepository.save(newUser);
+  }
+
+  async findByRegistrationIp(
+    registrationIp: string,
+    type: UserType,
+  ): Promise<User[]> {
+    return this.userRepository.find({ where: { registrationIp, type } });
   }
 
   async findAll(): Promise<User[]> {
