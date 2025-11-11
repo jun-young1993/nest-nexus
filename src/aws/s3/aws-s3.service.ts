@@ -88,10 +88,6 @@ export class AwsS3Service {
     return this.getConfig(appName).awsS3AppConfig[appName].bucket;
   }
 
-  getRegion(appName: AwsS3AppNames) {
-    return this.getConfig(appName).awsS3AppConfig[appName].region;
-  }
-
   async uploadFile(
     file: Express.Multer.File,
     appName: AwsS3AppNames,
@@ -123,7 +119,6 @@ export class AwsS3Service {
         infer: true,
       });
       const bucket = this.getBucket(appName);
-      // const region = this.getRegion(appName);
 
       const nodeEnv = appConfig.node_env;
       if (!nodeEnv) {

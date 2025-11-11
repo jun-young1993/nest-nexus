@@ -71,7 +71,7 @@ export class S3ObjectTagController {
     return this.s3ObjectTagService.getAvailableTypes();
   }
 
-  @Get('by-type/:type')
+  @Get('type/:type')
   @ApiOperation({ summary: 'Get S3ObjectTags by type' })
   @ApiResponse({
     status: 200,

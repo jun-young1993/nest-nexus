@@ -88,11 +88,11 @@ export class S3ObjectTagService {
   /**
    * 이름으로 S3ObjectTag 조회
    */
-  async findByName(name: string): Promise<S3ObjectTag | null> {
+  async findByName(name: string, type?: string): Promise<S3ObjectTag | null> {
     this.logger.log(`Finding S3ObjectTag with name: ${name}`);
     const normalizedName = name.toLowerCase();
     const tag = await this.s3ObjectTagRepository.findOne({
-      where: { name: normalizedName },
+      where: { name: normalizedName, type },
     });
 
     if (tag) {
@@ -111,7 +111,6 @@ export class S3ObjectTagService {
     this.logger.log(`Finding S3ObjectTags with type: ${type}`);
     const tags = await this.s3ObjectTagRepository.find({
       where: { type },
-      relations: ['s3Objects'],
       order: {
         name: 'ASC',
       },
@@ -239,7 +238,7 @@ export class S3ObjectTagService {
       name: tagData.name.toLowerCase(),
     };
 
-    let tag = await this.findByName(normalizedTagData.name);
+    let tag = await this.findByName(normalizedTagData.name, tagData.type);
 
     if (!tag) {
       tag = await this.create(normalizedTagData);
