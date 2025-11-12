@@ -15,6 +15,7 @@ import {
   MaxFileSizeValidator,
   Put,
   Patch,
+  ParseArrayPipe,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -34,9 +35,13 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
-import { CurrentGroupAdminUser } from 'src/auth/decorators/current-group-admin-user.decorator';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { FileLoggerValidator } from 'src/utils/pipes/file/file-logger-validator';
+import {
+  CurrentUserAndGroupAdminUser,
+  CurrentUserAndGroupAdminUserResponse,
+} from 'src/auth/decorators/current-user-and-group-admin-user.decorator';
+import { In } from 'typeorm';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -199,6 +204,13 @@ export class AwsS3Controller {
   @ApiOperation({ summary: 'S3 객체 목록 조회' })
   @ApiQuery({ name: 'skip', description: '건너뛸 개수', required: false })
   @ApiQuery({ name: 'take', description: '조회할 개수', required: false })
+  @ApiQuery({
+    name: 'tagIds',
+    description: '태그 ID 목록',
+    required: false,
+    type: String,
+    isArray: true,
+  })
   @ApiHeader({
     name: 'X-Include-User-Group-Admin',
     description: '관리자 권한 포함 여부',
@@ -211,16 +223,31 @@ export class AwsS3Controller {
   })
   @Get('objects')
   async getObjects(
-    @CurrentUser() user: User,
-    @CurrentGroupAdminUser() groupAdminUser: User,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
     @Query('skip') skip: number,
     @Query('take') take: number,
+    @Query(
+      'tagIds',
+      new ParseArrayPipe({ items: String, optional: true, separator: ',' }),
+    )
+    tagIds?: string[],
   ) {
-    return await this.awsS3Service.getObjects([user, groupAdminUser], {
-      skip: skip || 0,
-      take: take || 10,
-      relations: ['thumbnail', 'videoSource', 'tags'],
-    });
+    return await this.awsS3Service.getObjects(
+      currentUserAndGroupAdminUser.toArray(),
+      {
+        skip: skip || 0,
+        take: take || 10,
+        relations: ['thumbnail', 'videoSource', 'tags'],
+        where: {
+          ...(tagIds
+            ? {
+                tags: { id: In(tagIds) },
+              }
+            : {}),
+        },
+      },
+    );
   }
 
   @Get('objects/count')
@@ -240,10 +267,12 @@ export class AwsS3Controller {
   })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getObjectCount(
-    @CurrentUser() user: User,
-    @CurrentGroupAdminUser() groupAdminUser: User,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
   ) {
-    const count = await this.awsS3Service.count([user, groupAdminUser]);
+    const count = await this.awsS3Service.count(
+      currentUserAndGroupAdminUser.toArray(),
+    );
     return count;
   }
 
@@ -261,10 +290,12 @@ export class AwsS3Controller {
   })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getObjectFileSize(
-    @CurrentUser() user: User,
-    @CurrentGroupAdminUser() groupAdminUser: User,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
   ) {
-    const size = await this.awsS3Service.filesize([user, groupAdminUser]);
+    const size = await this.awsS3Service.filesize(
+      currentUserAndGroupAdminUser.toArray(),
+    );
     return size;
   }
 
@@ -326,8 +357,8 @@ export class AwsS3Controller {
     type: [S3Object],
   })
   async getObjectsByDate(
-    @CurrentUser() user: User,
-    @CurrentGroupAdminUser() groupAdminUser: User,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
     @Param('year') year: string,
     @Param('month') month: string,
     @Param('day') day: string,
@@ -335,7 +366,7 @@ export class AwsS3Controller {
     @Query('take') take?: number,
   ) {
     return await this.awsS3Service.getObjectsByDate(
-      [user, groupAdminUser],
+      currentUserAndGroupAdminUser.toArray(),
       year,
       month,
       day,
@@ -380,13 +411,13 @@ export class AwsS3Controller {
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getSurroundingObjects(
     @Param('id') id: string,
-    @CurrentUser() user: User,
-    @CurrentGroupAdminUser() groupAdminUser: User,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
     @Query('take') take?: number,
   ) {
     return await this.awsS3Service.getSurroundingObjects(
       id,
-      [user, groupAdminUser],
+      currentUserAndGroupAdminUser.toArray(),
       take || 2,
     );
   }
@@ -417,8 +448,8 @@ export class AwsS3Controller {
   @ApiResponse({ status: 400, description: '잘못된 년도/월 형식' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async checkObjectsExistenceByMonth(
-    @CurrentUser() user: User,
-    @CurrentGroupAdminUser() groupAdminUser: User,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
     @Param('year') year: string,
     @Param('month') month: string,
   ) {
@@ -436,10 +467,11 @@ export class AwsS3Controller {
       throw new Error('잘못된 월 형식입니다. MM 형식(01-12)을 사용해주세요.');
     }
 
-    return await this.awsS3Service.checkObjectsExistenceByMonth(year, month, [
-      user,
-      groupAdminUser,
-    ]);
+    return await this.awsS3Service.checkObjectsExistenceByMonth(
+      year,
+      month,
+      currentUserAndGroupAdminUser.toArray(),
+    );
   }
 
   @Get('objects/:id/presigned-url')

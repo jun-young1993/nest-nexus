@@ -24,6 +24,10 @@ import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { UpdateS3ObjectTagDto } from './dto/update-s3-object-tag.dto';
 import { S3ObjectTag } from './entities/s3-object-tag.entity';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import {
+  CurrentUserAndGroupAdminUser,
+  CurrentUserAndGroupAdminUserResponse,
+} from 'src/auth/decorators/current-user-and-group-admin-user.decorator';
 
 @ApiTags('S3ObjectTag')
 @ApiBearerAuth()
@@ -80,6 +84,25 @@ export class S3ObjectTagController {
   })
   async findByType(@Param('type') type: string): Promise<S3ObjectTag[]> {
     return this.s3ObjectTagService.findByType(type);
+  }
+
+  @Get('me/type/:type')
+  @ApiOperation({ summary: 'Get current user S3ObjectTags by type' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'List of S3ObjectTags with specified type associated with current user',
+    type: [S3ObjectTag],
+  })
+  async findByTypeForCurrentUser(
+    @Param('type') type: string,
+    @CurrentUserAndGroupAdminUser()
+    currentUserAndGroupAdminUser: CurrentUserAndGroupAdminUserResponse,
+  ): Promise<S3ObjectTag[]> {
+    return this.s3ObjectTagService.findByTypeAndUsers(
+      type,
+      currentUserAndGroupAdminUser.toArray(),
+    );
   }
 
   @Get('by-ids')

@@ -10,6 +10,7 @@ import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { UpdateS3ObjectTagDto } from './dto/update-s3-object-tag.dto';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { ExistingException } from 'src/core/exceptions/existing.exception';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class S3ObjectTagService {
@@ -116,6 +117,33 @@ export class S3ObjectTagService {
       },
     });
     this.logger.log(`Found ${tags.length} S3ObjectTags with type: ${type}`);
+    return tags;
+  }
+
+  /**
+   * 타입과 사용자 기준 S3ObjectTag 조회
+   */
+  async findByTypeAndUsers(
+    type: string,
+    users: User[],
+  ): Promise<S3ObjectTag[]> {
+    this.logger.log(
+      `Finding S3ObjectTags with type: ${type} for users: ${users.map((user) => user.id).join(', ') || 'all users'}`,
+    );
+    const tags = await this.s3ObjectTagRepository
+      .createQueryBuilder('tag')
+      .innerJoin('tag.s3Objects', 's3Object')
+      .where('tag.type = :type', { type })
+      .andWhere('s3Object.userId IN (:...userIds)', {
+        userIds: users.map((user) => user.id),
+      })
+      .andWhere('s3Object.deletedAt IS NULL')
+      .orderBy('tag.name', 'ASC')
+      .distinct(true)
+      .getMany();
+    this.logger.log(
+      `Found ${tags.length} S3ObjectTags with type: ${type} for users: ${users.map((user) => user.id).join(', ') || 'all users'}`,
+    );
     return tags;
   }
 

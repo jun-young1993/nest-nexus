@@ -204,12 +204,16 @@ export class AwsS3Service {
     users: User[],
     options: FindManyOptions<S3Object>,
   ): Promise<S3Object[]> {
+    const where = {
+      ...options.where,
+      user: { id: In(users.filter((user) => user).map((user) => user.id)) },
+      destination: S3ObjectDestinationType.UPLOAD,
+    };
+    delete options.where;
+
     // 방법 1: userId로 조회
     const result = await this.s3ObjectRepository.find({
-      where: {
-        user: { id: In(users.filter((user) => user).map((user) => user.id)) }, // 관계를 통한 조회
-        destination: S3ObjectDestinationType.UPLOAD,
-      },
+      where: where,
       order: { createdAt: 'DESC' },
       ...options,
     });
