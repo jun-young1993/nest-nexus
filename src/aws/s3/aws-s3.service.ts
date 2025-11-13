@@ -559,7 +559,16 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.save(s3Object);
   }
 
-  async generateGetObjectPresignedUrl(s3Object: S3Object): Promise<S3Object> {
+  async generateGetObjectPresignedUrl(
+    s3Object: S3Object,
+    reverse: boolean = true,
+  ): Promise<S3Object> {
+    if (s3Object.hasThumbnail && reverse) {
+      return await this.generateGetObjectPresignedUrl(
+        s3Object.thumbnail,
+        false,
+      );
+    }
     if (
       s3Object.presignedUrlExpiresAt === null ||
       s3Object.presignedUrlExpiresAt < new Date()
