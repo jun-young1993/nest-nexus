@@ -297,6 +297,7 @@ export class AwsS3Service {
         destination: S3ObjectDestinationType.UPLOAD,
         createdAt: Between(startDate, endDate),
       },
+      relations: ['thumbnail', 'videoSource'],
       order: { createdAt: 'DESC' },
       skip: skip,
       take: take,
