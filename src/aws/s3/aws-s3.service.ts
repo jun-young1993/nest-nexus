@@ -25,6 +25,14 @@ import { S3CreatedEvent } from './events/s3-created.event';
 import { getMimetypeFromFilename } from 'src/utils/file-type.util';
 import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Readable } from 'stream';
+import * as sharp from 'sharp';
+
+interface S3ObjectBinaryResponse {
+  data: Buffer;
+  contentType: string;
+  contentLength: number;
+}
 
 @Injectable()
 export class AwsS3Service {
@@ -222,7 +230,7 @@ export class AwsS3Service {
   }
 
   async findOneOrFail(id: string): Promise<S3Object> {
-    const results = await this.s3ObjectRepository.findOneOrFail({
+    const result = await this.s3ObjectRepository.findOneOrFail({
       where: { id, destination: S3ObjectDestinationType.UPLOAD },
       relations: [
         'tags',
@@ -239,7 +247,8 @@ export class AwsS3Service {
         },
       },
     });
-    return await this.generateGetObjectPresignedUrl(results);
+
+    return await this.generateGetObjectPresignedUrl(result);
   }
 
   async count(users: User[]): Promise<number> {
@@ -560,6 +569,28 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.save(s3Object);
   }
 
+  async getObjectBinary(s3Object: S3Object): Promise<S3ObjectBinaryResponse> {
+    if (!s3Object.key) {
+      throw new Error('S3 객체에 키가 없습니다.');
+    }
+    const command = new GetObjectCommand({
+      Bucket: this.getBucket(s3Object.appName),
+      Key: s3Object.key,
+    });
+    const response = await this.s3Client.send(command);
+    if (!response.Body) {
+      throw new Error('S3 객체 데이터를 불러오지 못했습니다.');
+    }
+    const buffer = await this.streamToBuffer(response.Body as Readable);
+    const resizedBuffer = await sharp(buffer).resize(100, 100).toBuffer();
+    return {
+      data: resizedBuffer,
+      contentType:
+        response.ContentType || s3Object.mimetype || 'application/octet-stream',
+      contentLength: Number(response.ContentLength ?? buffer.length),
+    };
+  }
+
   async generateGetObjectPresignedUrl(
     s3Object: S3Object,
     reverse: boolean = true,
@@ -601,5 +632,21 @@ export class AwsS3Service {
         return await this.generateGetObjectPresignedUrl(s3Object);
       }),
     );
+  }
+
+  private async streamToBuffer(stream: Readable): Promise<Buffer> {
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of stream) {
+      if (typeof chunk === 'string') {
+        chunks.push(Uint8Array.from(Buffer.from(chunk)));
+        continue;
+      }
+      if (Buffer.isBuffer(chunk)) {
+        chunks.push(Uint8Array.from(chunk));
+        continue;
+      }
+      chunks.push(Uint8Array.from(chunk as Uint8Array));
+    }
+    return Buffer.concat(chunks);
   }
 }

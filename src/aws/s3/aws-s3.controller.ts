@@ -16,6 +16,8 @@ import {
   Put,
   Patch,
   ParseArrayPipe,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -42,6 +44,8 @@ import {
   CurrentUserAndGroupAdminUserResponse,
 } from 'src/auth/decorators/current-user-and-group-admin-user.decorator';
 import { In } from 'typeorm';
+import { Response } from 'express';
+import { Readable } from 'stream';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -508,5 +512,43 @@ export class AwsS3Controller {
     const s3Object = await this.awsS3Service.findOneOrFail(id);
     s3Object.isHidden = !s3Object.isHidden;
     return await this.awsS3Service.update(s3Object);
+  }
+
+  @Get('objects/:id/thumbnail')
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체의 썸네일 조회' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체의 썸네일 바이너리 응답',
+    content: {
+      'image/*': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getThumbnail(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    const thumbnailObject: S3Object = s3Object.thumbnail ?? s3Object;
+    if (!thumbnailObject.key || !thumbnailObject.isImage) {
+      throw new BadRequestException('썸네일 객체에 접근할 수 없습니다.');
+    }
+    const downloadResult =
+      await this.awsS3Service.getObjectBinary(thumbnailObject);
+
+    const safeFilename = encodeURIComponent(
+      thumbnailObject.originalName ?? 'thumbnail',
+    );
+    res.setHeader('Content-Type', downloadResult.contentType);
+    res.setHeader('Content-Length', downloadResult.contentLength.toString());
+    res.setHeader('Content-Disposition', `inline; filename="${safeFilename}"`);
+    return new StreamableFile(Readable.from(downloadResult.data));
   }
 }

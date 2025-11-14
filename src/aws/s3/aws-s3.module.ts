@@ -28,6 +28,8 @@ import { S3ObjectQueryService } from './s3-object-query.service';
 import { CloudRunEmotionModule } from 'src/cloud-run/emotion/cloud-run-emotion.module';
 import { CloudRunEmotionService } from 'src/cloud-run/emotion/cloud-run-emotion.service';
 import { S3CreatedListener } from './listeners/s3-created.listener';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { S3_OBJECT_CACHE_KEY } from './aws-s3.constants';
 
 @Module({})
 export class AwsS3Module {
@@ -50,6 +52,7 @@ export class AwsS3Module {
           S3ObjectReplyReport,
         ]),
         CloudRunEmotionModule,
+        CacheModule.register({ ttl: 1000 * 60 * 60 * 24 }),
       ],
       controllers: [
         AwsS3Controller,
@@ -70,6 +73,10 @@ export class AwsS3Module {
         S3ObjectQueryService,
         CloudRunEmotionService,
         S3CreatedListener,
+        {
+          provide: S3_OBJECT_CACHE_KEY,
+          useClass: CacheInterceptor,
+        },
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {

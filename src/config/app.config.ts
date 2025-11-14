@@ -25,6 +25,9 @@ class EnvironmentVariablesValidator {
 
   @IsString()
   APP_SECRET_KEY: AppConfig['secret_key'];
+
+  @IsString()
+  APP_DOMAIN: AppConfig['domain'];
 }
 
 export default registerAs<AppConfig>('app', () => {
@@ -41,5 +44,6 @@ export default registerAs<AppConfig>('app', () => {
     node_env: process.env.NODE_ENV as AppConfig['node_env'],
     is_dev: process.env.NODE_ENV === 'development',
     secret_key: process.env.APP_SECRET_KEY,
+    domain: process.env.APP_DOMAIN,
   };
 });

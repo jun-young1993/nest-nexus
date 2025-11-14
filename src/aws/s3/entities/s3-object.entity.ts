@@ -11,6 +11,7 @@ import {
   OneToMany,
   DeleteDateColumn,
   OneToOne,
+  AfterLoad,
 } from 'typeorm';
 import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
@@ -155,5 +156,18 @@ export class S3Object {
    */
   get hasThumbnail(): boolean {
     return !!this.thumbnail;
+  }
+
+  @AfterLoad()
+  assignSelfAsThumbnailWhenImage(): void {
+    if (!this.thumbnail && this.isImage) {
+      const clone = Object.assign(new S3Object(), this, {
+        destination: S3ObjectDestinationType.THUMBNAIL,
+        thumbnail: undefined,
+        videoSource: undefined,
+      });
+      this.thumbnail = clone;
+    }
+    this.thumbnail.url = `${process.env.APP_DOMAIN}/aws/s3/objects/${this.thumbnail.id}/thumbnail`;
   }
 }

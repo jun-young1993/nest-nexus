@@ -6,6 +6,7 @@ export type AppConfig = {
   node_env: 'development' | 'production';
   is_dev: boolean;
   secret_key: string;
+  domain: string;
 };
 export type AlieConfig = {
   url: string;
