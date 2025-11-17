@@ -219,8 +219,6 @@ export class AwsS3Service {
       user: { id: In(users.filter((user) => user).map((user) => user.id)) },
       destination: S3ObjectDestinationType.UPLOAD,
     };
-    delete options.where;
-
     // 방법 1: userId로 조회
     const result = await this.s3ObjectRepository.find({
       where: where,
