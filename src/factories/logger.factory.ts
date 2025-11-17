@@ -1,6 +1,22 @@
 import * as winston from 'winston';
+import 'winston-daily-rotate-file';
 
 const { combine, timestamp, printf, colorize } = winston.format;
+
+// error 레벨을 제외하는 custom transport
+class ExcludeErrorTransport extends winston.transports.DailyRotateFile {
+  log(info: any, callback?: () => void) {
+    if (info.level === 'error') {
+      // error 레벨은 건너뛰기
+      if (callback) {
+        callback();
+      }
+      return;
+    }
+    // error가 아닌 경우에만 부모 클래스의 log 호출
+    super.log(info, callback);
+  }
+}
 
 const logFormat = printf(({ level, message, timestamp, ...metadata }) => {
   let msg = `${timestamp} [${level}]: ${message}`;
@@ -28,11 +44,23 @@ export function createServiceLogger(
   const logger = winston.createLogger({
     format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), logFormat),
     transports: [
-      new winston.transports.DailyRotateFile({
+      new ExcludeErrorTransport({
         filename: `storage/logs/${serviceName}-%DATE%.log`,
         datePattern: 'YYYY-MM-DD',
         maxSize,
         maxFiles,
+        level: 'silly', // 모든 레벨을 받지만 error는 제외
+        format: combine(
+          timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+          logFormat,
+        ),
+      }),
+      new winston.transports.DailyRotateFile({
+        filename: `storage/logs/${serviceName}-error-%DATE%.log`,
+        datePattern: 'YYYY-MM-DD',
+        maxSize,
+        maxFiles,
+        level: 'error', // error 레벨만 별도 파일에 저장
       }),
     ],
   });

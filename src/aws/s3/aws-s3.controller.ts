@@ -18,6 +18,7 @@ import {
   ParseArrayPipe,
   Res,
   StreamableFile,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -30,7 +31,7 @@ import {
   ApiOperation,
   ApiHeader,
 } from '@nestjs/swagger';
-import { AwsS3Service } from './aws-s3.service';
+import { AwsS3Service, S3ObjectBinaryResponse } from './aws-s3.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -46,6 +47,7 @@ import {
 import { In } from 'typeorm';
 import { Response } from 'express';
 import { Readable } from 'stream';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -53,7 +55,11 @@ import { Readable } from 'stream';
 @Controller('aws/s3')
 export class AwsS3Controller {
   private readonly logger = createNestLogger(AwsS3Controller.name);
-  constructor(private readonly awsS3Service: AwsS3Service) {}
+  constructor(
+    private readonly awsS3Service: AwsS3Service,
+    @Inject(CACHE_MANAGER)
+    private readonly s3ObjectCache: Cache,
+  ) {}
 
   @Post(':appName/upload')
   @ApiParam({
@@ -535,17 +541,34 @@ export class AwsS3Controller {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ) {
+    const cacheKey = `s3-object-thumbnail-${id}`;
+
     const s3Object = await this.awsS3Service.findOneOrFail(id);
     const thumbnailObject: S3Object = s3Object.thumbnail ?? s3Object;
     if (!thumbnailObject.key || !thumbnailObject.isImage) {
       throw new BadRequestException('썸네일 객체에 접근할 수 없습니다.');
     }
-    const downloadResult =
-      await this.awsS3Service.getObjectBinary(thumbnailObject);
-
     const safeFilename = encodeURIComponent(
       thumbnailObject.originalName ?? 'thumbnail',
     );
+
+    const cachedResult =
+      await this.s3ObjectCache.get<S3ObjectBinaryResponse['data']>(cacheKey);
+    if (cachedResult) {
+      this.logger.log('썸네일 캐시 적용', { cacheKey });
+      res.setHeader('Content-Type', s3Object.mimetype);
+      res.setHeader('Content-Length', cachedResult.length.toString());
+      res.setHeader(
+        'Content-Disposition',
+        `inline; filename="${safeFilename}"`,
+      );
+      return new StreamableFile(Readable.from(cachedResult));
+    }
+    const downloadResult =
+      await this.awsS3Service.getObjectResizeBinary(thumbnailObject);
+
+    await this.s3ObjectCache.set(cacheKey, downloadResult.data);
+
     res.setHeader('Content-Type', downloadResult.contentType);
     res.setHeader('Content-Length', downloadResult.contentLength.toString());
     res.setHeader('Content-Disposition', `inline; filename="${safeFilename}"`);

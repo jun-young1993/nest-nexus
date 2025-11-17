@@ -26,9 +26,10 @@ import { getMimetypeFromFilename } from 'src/utils/file-type.util';
 import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
-import * as sharp from 'sharp';
+import { createNestLogger } from 'src/factories/logger.factory';
+import { streamToBufferResize } from 'src/utils/sharp';
 
-interface S3ObjectBinaryResponse {
+export interface S3ObjectBinaryResponse {
   data: Buffer;
   contentType: string;
   contentLength: number;
@@ -36,6 +37,7 @@ interface S3ObjectBinaryResponse {
 
 @Injectable()
 export class AwsS3Service {
+  private readonly logger = createNestLogger(AwsS3Service.name);
   constructor(
     @Inject('S3_CLIENT') private readonly s3Client: S3Client,
     private readonly configService: ConfigService<AllConfigType>,
@@ -569,7 +571,10 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.save(s3Object);
   }
 
-  async getObjectBinary(s3Object: S3Object): Promise<S3ObjectBinaryResponse> {
+  async getObjectResizeBinary(
+    s3Object: S3Object,
+    size: number = 200,
+  ): Promise<S3ObjectBinaryResponse> {
     if (!s3Object.key) {
       throw new Error('S3 객체에 키가 없습니다.');
     }
@@ -581,13 +586,12 @@ export class AwsS3Service {
     if (!response.Body) {
       throw new Error('S3 객체 데이터를 불러오지 못했습니다.');
     }
-    const buffer = await this.streamToBuffer(response.Body as Readable);
-    const resizedBuffer = await sharp(buffer).resize(100, 100).toBuffer();
+    const buffer = await streamToBufferResize(response.Body as Readable, size);
+
     return {
-      data: resizedBuffer,
-      contentType:
-        response.ContentType || s3Object.mimetype || 'application/octet-stream',
-      contentLength: Number(response.ContentLength ?? buffer.length),
+      data: buffer,
+      contentType: s3Object.mimetype || 'application/octet-stream',
+      contentLength: Number(buffer.length),
     };
   }
 
@@ -632,21 +636,5 @@ export class AwsS3Service {
         return await this.generateGetObjectPresignedUrl(s3Object);
       }),
     );
-  }
-
-  private async streamToBuffer(stream: Readable): Promise<Buffer> {
-    const chunks: Uint8Array[] = [];
-    for await (const chunk of stream) {
-      if (typeof chunk === 'string') {
-        chunks.push(Uint8Array.from(Buffer.from(chunk)));
-        continue;
-      }
-      if (Buffer.isBuffer(chunk)) {
-        chunks.push(Uint8Array.from(chunk));
-        continue;
-      }
-      chunks.push(Uint8Array.from(chunk as Uint8Array));
-    }
-    return Buffer.concat(chunks);
   }
 }

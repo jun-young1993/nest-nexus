@@ -52,7 +52,7 @@ export class AwsS3Module {
           S3ObjectReplyReport,
         ]),
         CloudRunEmotionModule,
-        CacheModule.register({ ttl: 1000 * 60 * 60 * 24 }),
+        CacheModule.register({ ttl: 7 * 24 * 60 * 60 }),
       ],
       controllers: [
         AwsS3Controller,
@@ -73,10 +73,6 @@ export class AwsS3Module {
         S3ObjectQueryService,
         CloudRunEmotionService,
         S3CreatedListener,
-        {
-          provide: S3_OBJECT_CACHE_KEY,
-          useClass: CacheInterceptor,
-        },
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
