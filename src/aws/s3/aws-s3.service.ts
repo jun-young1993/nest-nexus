@@ -219,7 +219,15 @@ export class AwsS3Service {
   async findOneOrFail(id: string): Promise<S3Object> {
     const result = await this.s3ObjectRepository.findOneOrFail({
       where: { id, destination: S3ObjectDestinationType.UPLOAD },
-      relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
+      relations: [
+        'tags',
+        'likes',
+        'replies',
+        'replies.user',
+        'user',
+        'thumbnail',
+        'videoSource',
+      ],
       order: {
         replies: {
           createdAt: 'DESC',
