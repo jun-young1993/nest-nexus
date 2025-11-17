@@ -18,7 +18,7 @@ import {
   ParseArrayPipe,
   Res,
   StreamableFile,
-  Inject
+  Inject,
 } from '@nestjs/common';
 import {
   ApiBody,
