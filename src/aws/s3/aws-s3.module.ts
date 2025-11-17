@@ -28,8 +28,7 @@ import { S3ObjectQueryService } from './s3-object-query.service';
 import { CloudRunEmotionModule } from 'src/cloud-run/emotion/cloud-run-emotion.module';
 import { CloudRunEmotionService } from 'src/cloud-run/emotion/cloud-run-emotion.service';
 import { S3CreatedListener } from './listeners/s3-created.listener';
-import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
-import { S3_OBJECT_CACHE_KEY } from './aws-s3.constants';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({})
 export class AwsS3Module {
