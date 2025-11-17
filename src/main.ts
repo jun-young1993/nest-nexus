@@ -35,6 +35,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe());
   app.useWebSocketAdapter(new IoAdapter(app));
+
   const allowedOrigins = process.env.ALLOW_ORIGINS.split(',');
   app.enableCors({
     origin: allowedOrigins,

@@ -11,14 +11,13 @@ import {
   OneToMany,
   DeleteDateColumn,
   OneToOne,
-  AfterLoad,
 } from 'typeorm';
 import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
 import { S3ObjectReply } from './s3-object-reply.entity';
 import { S3ObjectReport } from './s3-object-report.entity';
 import { FileType, getFileType } from 'src/utils/file-type.util';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 import { AwsS3AppNames } from 'src/config/config.type';
 
@@ -103,6 +102,7 @@ export class S3Object {
    * 파일 타입 (image, video, audio, document, archive, unknown)
    * originalName의 확장자를 기반으로 자동 계산
    */
+  @Expose()
   get fileType(): FileType {
     return getFileType(this.originalName);
   }
@@ -110,6 +110,7 @@ export class S3Object {
   /**
    * 이미지 파일 여부
    */
+  @Expose()
   get isImage(): boolean {
     return this.fileType === FileType.IMAGE;
   }
@@ -117,6 +118,7 @@ export class S3Object {
   /**
    * 비디오 파일 여부
    */
+  @Expose()
   get isVideo(): boolean {
     return this.fileType === FileType.VIDEO;
   }
@@ -124,6 +126,7 @@ export class S3Object {
   /**
    * 오디오 파일 여부
    */
+  @Expose()
   get isAudio(): boolean {
     return this.fileType === FileType.AUDIO;
   }
@@ -131,6 +134,7 @@ export class S3Object {
   /**
    * 문서 파일 여부
    */
+  @Expose()
   get isDocument(): boolean {
     return this.fileType === FileType.DOCUMENT;
   }
@@ -138,6 +142,7 @@ export class S3Object {
   /**
    * 압축 파일 여부
    */
+  @Expose()
   get isArchive(): boolean {
     return this.fileType === FileType.ARCHIVE;
   }
@@ -146,28 +151,25 @@ export class S3Object {
    * 썸네일 이미지 여부
    * videoSource가 있으면 이 객체는 썸네일
    */
+  @Expose()
   get isThumbnail(): boolean {
-    return !!this.videoSource;
+    return (
+      !!this.videoSource ||
+      this.destination === S3ObjectDestinationType.THUMBNAIL
+    );
   }
 
   /**
    * 썸네일 보유 여부
    * 비디오 파일이 썸네일을 가지고 있는지 확인
    */
+  @Expose()
   get hasThumbnail(): boolean {
     return !!this.thumbnail;
   }
 
-  @AfterLoad()
-  assignSelfAsThumbnailWhenImage(): void {
-    if (!this.thumbnail && this.isImage) {
-      const clone = Object.assign(new S3Object(), this, {
-        destination: S3ObjectDestinationType.THUMBNAIL,
-        thumbnail: undefined,
-        videoSource: undefined,
-      });
-      this.thumbnail = clone;
-    }
-    this.thumbnail.url = `${process.env.APP_DOMAIN}/aws/s3/objects/${this.thumbnail.id}/thumbnail`;
+  @Expose()
+  get thumbnailUrl(): string | null {
+    return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
   }
 }

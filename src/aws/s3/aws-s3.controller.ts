@@ -18,7 +18,7 @@ import {
   ParseArrayPipe,
   Res,
   StreamableFile,
-  Inject,
+  Inject
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -243,7 +243,7 @@ export class AwsS3Controller {
     )
     tagIds?: string[],
   ) {
-    return await this.awsS3Service.getObjects(
+    const result = await this.awsS3Service.getObjects(
       currentUserAndGroupAdminUser.toArray(),
       {
         skip: skip || 0,
@@ -258,6 +258,8 @@ export class AwsS3Controller {
         },
       },
     );
+    console.log('result', result);
+    return result;
   }
 
   @Get('objects/count')
