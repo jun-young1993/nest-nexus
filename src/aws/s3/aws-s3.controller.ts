@@ -35,6 +35,7 @@ import { AwsS3Service, S3ObjectBinaryResponse } from './aws-s3.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
@@ -258,7 +259,6 @@ export class AwsS3Controller {
         },
       },
     );
-    console.log('result', result);
     return result;
   }
 
@@ -523,6 +523,7 @@ export class AwsS3Controller {
   }
 
   @Get('objects/:id/thumbnail')
+  @Public()
   @ApiParam({ name: 'id', description: 'S3 객체 ID' })
   @ApiOperation({ summary: 'S3 객체의 썸네일 조회' })
   @ApiResponse({
@@ -538,7 +539,6 @@ export class AwsS3Controller {
     },
   })
   @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
-  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
   async getThumbnail(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
