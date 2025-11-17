@@ -211,10 +211,7 @@ export class AwsS3Service {
   }
 
   async getObjects(options: FindManyOptions<S3Object>): Promise<S3Object[]> {
-    const result = await this.s3ObjectRepository.find({
-      order: { createdAt: 'DESC' },
-      ...options,
-    });
+    const result = await this.s3ObjectRepository.find(options);
 
     return await this.generateGetObjectPresigendUrls(result);
   }
@@ -222,15 +219,7 @@ export class AwsS3Service {
   async findOneOrFail(id: string): Promise<S3Object> {
     const result = await this.s3ObjectRepository.findOneOrFail({
       where: { id, destination: S3ObjectDestinationType.UPLOAD },
-      relations: [
-        'tags',
-        'likes',
-        'replies',
-        'replies.user',
-        'user',
-        'thumbnail',
-        'videoSource',
-      ],
+      relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
       order: {
         replies: {
           createdAt: 'DESC',
@@ -296,7 +285,6 @@ export class AwsS3Service {
         destination: S3ObjectDestinationType.UPLOAD,
         createdAt: Between(startDate, endDate),
       },
-      relations: ['thumbnail', 'videoSource'],
       order: { createdAt: 'DESC' },
       skip: skip,
       take: take,
@@ -329,15 +317,7 @@ export class AwsS3Service {
     const [currentObject] = await Promise.all([
       this.s3ObjectRepository.findOneOrFail({
         where: { id: currentId, destination: S3ObjectDestinationType.UPLOAD },
-        relations: [
-          'tags',
-          'likes',
-          'replies',
-          'replies.user',
-          'user',
-          'thumbnail',
-          'videoSource',
-        ],
+        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
       }),
     ]);
 
@@ -350,15 +330,7 @@ export class AwsS3Service {
           createdAt: Between(new Date('1970-01-01'), currentObject.createdAt),
           destination: S3ObjectDestinationType.UPLOAD,
         },
-        relations: [
-          'tags',
-          'likes',
-          'replies',
-          'replies.user',
-          'user',
-          'thumbnail',
-          'videoSource',
-        ],
+        relations: ['tags', 'likes', 'replies', 'replies.user', 'user'],
         order: { createdAt: 'DESC' },
         take: take + 1, // 기준 객체 포함해서 3개 가져온 후 필터링
       }),

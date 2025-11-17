@@ -248,7 +248,8 @@ export class AwsS3Controller {
     const result = await this.awsS3Service.getObjects({
       skip: skip || 0,
       take: take || 10,
-      relations: ['thumbnail', 'videoSource', 'tags'],
+      relations: ['tags'],
+      order: { createdAt: 'DESC' },
       where: {
         user: {
           id: In(
