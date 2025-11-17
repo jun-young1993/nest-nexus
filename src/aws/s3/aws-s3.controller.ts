@@ -49,6 +49,7 @@ import { In } from 'typeorm';
 import { Response } from 'express';
 import { Readable } from 'stream';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -244,21 +245,27 @@ export class AwsS3Controller {
     )
     tagIds?: string[],
   ) {
-    const result = await this.awsS3Service.getObjects(
-      currentUserAndGroupAdminUser.toArray(),
-      {
-        skip: skip || 0,
-        take: take || 10,
-        relations: ['thumbnail', 'videoSource', 'tags'],
-        where: {
-          ...(tagIds
-            ? {
-                tags: { id: In(tagIds) },
-              }
-            : {}),
+    const result = await this.awsS3Service.getObjects({
+      skip: skip || 0,
+      take: take || 10,
+      relations: ['thumbnail', 'videoSource', 'tags'],
+      where: {
+        user: {
+          id: In(
+            currentUserAndGroupAdminUser
+              .toArray()
+              .filter((user) => user)
+              .map((user) => user.id),
+          ),
         },
+        destination: S3ObjectDestinationType.UPLOAD,
+        ...(tagIds
+          ? {
+              tags: { id: In(tagIds) },
+            }
+          : {}),
       },
-    );
+    });
     return result;
   }
 
