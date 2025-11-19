@@ -8,6 +8,7 @@ import { AllConfigType } from 'src/config/config.type';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { EmotionAnalysisResponse } from './interfaces/emotion-analysis-response.interface';
 import { VideoThumbnailResponse } from './interfaces/video-thumbnail-response.interface';
+import { ImageToCaptionResponse } from './interfaces/image-to-caption-response.interface';
 
 @Injectable()
 export class CloudRunEmotionService {
@@ -32,7 +33,6 @@ export class CloudRunEmotionService {
     });
     const client = await this.googleAuth.getIdTokenClient(baseUrl);
     const idToken = await client.idTokenProvider.fetchIdToken(baseUrl);
-    this.logger.info(`[GET ACCESS TOKEN] ${idToken}`);
     return idToken;
   }
 
@@ -97,6 +97,51 @@ export class CloudRunEmotionService {
         const status =
           error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
         const message = error.message || 'Cloud Run Emotion API Error';
+
+        throw new HttpException(message, status);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * 이미지 URL로부터 텍스트 캡션 생성
+   * @param imageUrl - 이미지 URL
+   * @returns 텍스트 캡션 응답
+   */
+  async imageToCaption(imageUrl: string): Promise<ImageToCaptionResponse> {
+    try {
+      this.logger.info(`[IMAGE TO CAPTION START] ${imageUrl}`);
+      const baseUrl = this.configService.get('cloudRun.emotion.base_url', {
+        infer: true,
+      });
+      const idToken = await this.getAccessToken();
+
+      // Make request to Cloud Run service with ID token
+      const response = await lastValueFrom(
+        this.httpService.post<ImageToCaptionResponse>(
+          `${baseUrl}/image-to-text-captioning`,
+          { url: imageUrl },
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          },
+        ),
+      );
+
+      this.logger.info(
+        `[IMAGE TO CAPTION RESULT] ${JSON.stringify(response.data.text)}`,
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(`[IMAGE TO CAPTION ERROR] ${error}`);
+      if (error instanceof AxiosError) {
+        const status =
+          error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
+        const message =
+          error.message || 'Cloud Run Image to Text Captioning API Error';
 
         throw new HttpException(message, status);
       }

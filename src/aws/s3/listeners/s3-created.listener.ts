@@ -14,6 +14,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
+import { CreateS3MetadataDto } from '../dto/create-s3-metadata.dto';
+import { S3ObjectMetadataService } from '../s3-object-metadata.service';
 
 @Injectable()
 export class S3CreatedListener {
@@ -23,6 +25,7 @@ export class S3CreatedListener {
     private readonly cloudRunEmotionService: CloudRunEmotionService,
     private readonly s3ObjectTagService: S3ObjectTagService,
     private readonly awsS3Service: AwsS3Service,
+    private readonly s3ObjectMetadataService: S3ObjectMetadataService,
     @InjectRepository(S3Object)
     private readonly s3ObjectRepository: Repository<S3Object>,
   ) {}
@@ -43,11 +46,39 @@ export class S3CreatedListener {
     // 썸네일이 아닌 일반 이미지만 분석
     if (s3Object.isImage) {
       await this.analyzeImage(s3Object);
+      await this.imageToCaption(s3Object, s3Object.url);
     }
 
     // 비디오 파일 처리 (썸네일 생성)
     if (s3Object.isVideo) {
       await this.processVideo(s3Object.appName, s3Object);
+      const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
+      if (!videoObject.isThumbnail) {
+        this.logger.warn(`[VIDEO OBJECT IS NOT THUMBNAIL] ${videoObject.id}`);
+        return false;
+      }
+
+      const videoThumbnailUrl = videoObject.thumbnail.url;
+      await this.imageToCaption(videoObject, videoThumbnailUrl);
+    }
+  }
+
+  async imageToCaption(s3Object: S3Object, url: string): Promise<void> {
+    try {
+      this.logger.info(`[IMAGE TO CAPTION START] ${s3Object.id}`);
+      const result = await this.cloudRunEmotionService.imageToCaption(url);
+      const metadata = await this.s3ObjectMetadataService.create(
+        CreateS3MetadataDto.fromJson({
+          s3Object: s3Object,
+          caption: result.text,
+        }),
+      );
+      this.logger.info(`[IMAGE TO CAPTION RESULT] ${metadata.id}`);
+    } catch (error) {
+      this.logger.error(
+        `[IMAGE TO CAPTION ERROR] ${s3Object.id}: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
