@@ -20,6 +20,7 @@ import { FileType, getFileType } from 'src/utils/file-type.util';
 import { Exclude, Expose } from 'class-transformer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 import { AwsS3AppNames } from 'src/config/config.type';
+import { S3ObjectMetadata } from './s3-object-metadata.entity';
 
 @Entity()
 export class S3Object {
@@ -96,6 +97,10 @@ export class S3Object {
 
   @OneToMany(() => S3ObjectReport, (report) => report.s3Object)
   reports: S3ObjectReport[];
+
+  @OneToOne(() => S3ObjectMetadata, (metadata) => metadata.s3Object)
+  @JoinColumn({ name: 'metadataId' })
+  metadata: S3ObjectMetadata;
 
   // 계산된 필드 (가상 컬럼)
   /**

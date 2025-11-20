@@ -29,6 +29,8 @@ import { CloudRunEmotionModule } from 'src/cloud-run/emotion/cloud-run-emotion.m
 import { CloudRunEmotionService } from 'src/cloud-run/emotion/cloud-run-emotion.service';
 import { S3CreatedListener } from './listeners/s3-created.listener';
 import { CacheModule } from '@nestjs/cache-manager';
+import { S3ObjectMetadata } from './entities/s3-object-metadata.entity';
+import { S3ObjectMetadataService } from './s3-object-metadata.service';
 
 @Module({})
 export class AwsS3Module {
@@ -49,6 +51,7 @@ export class AwsS3Module {
           S3ObjectLike,
           S3ObjectReport,
           S3ObjectReplyReport,
+          S3ObjectMetadata,
         ]),
         CloudRunEmotionModule,
         CacheModule.register({ ttl: 7 * 24 * 60 * 60 }),
@@ -72,6 +75,7 @@ export class AwsS3Module {
         S3ObjectQueryService,
         CloudRunEmotionService,
         S3CreatedListener,
+        S3ObjectMetadataService,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -104,6 +108,7 @@ export class AwsS3Module {
         S3ObjectQueryService,
         CloudRunEmotionService,
         S3CreatedListener,
+        S3ObjectMetadataService,
       ],
     };
   }

@@ -225,6 +225,7 @@ export class AwsS3Service {
         'replies',
         'replies.user',
         'user',
+        'metadata',
         'thumbnail',
         'videoSource',
       ],
