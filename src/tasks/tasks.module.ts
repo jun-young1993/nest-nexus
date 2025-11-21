@@ -9,6 +9,9 @@ import { GeminiModule } from 'src/gemini/gemini.module';
 import { ParkingLocationModule } from 'src/parking-location/parking-location.module';
 import { AppRewardModule } from 'src/app-reward/app-reward.module';
 import { NoticeModule } from 'src/notice/notice.module';
+import { AiModule } from 'src/ai/ai.module';
+import { AwsS3Module } from 'src/aws/s3/aws-s3.module';
+import { AwsS3CaptionTranslateJobService } from './jobs/aws-s3-caption-translate-job.service';
 
 @Module({
   imports: [
@@ -19,8 +22,10 @@ import { NoticeModule } from 'src/notice/notice.module';
     ParkingLocationModule,
     AppRewardModule,
     NoticeModule,
+    AiModule,
+    AwsS3Module.forRoot(),
   ],
   controllers: [TasksController],
-  providers: [TasksService, ScheduleModule],
+  providers: [TasksService, ScheduleModule, AwsS3CaptionTranslateJobService],
 })
 export class TasksModule {}

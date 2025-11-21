@@ -1,3 +1,27 @@
+# TEST
+
+1. npm 스크립트로 실행:
+```shell
+npm run test
+```
+
+2. 직접 jest 명령어로 실행:
+```shell
+npm test -- --testNamePattern="LibreService"
+# 또는 짧게
+npm test -- -t "LibreService"
+```
+
+3. 특정 파일만 실행하면서 패턴 적용
+```shell
+npm test -- libre.service.spec.ts --testNamePattern="LibreService"
+```
+
+
+
+
+
+
 [
 ![test](https://www.aliexpress.com/item/3256804532174985.html?pdp_npi=4%40dis%21USD%213.24%213.09%21%21%2123.46%2122.36%21%4021012d6717202756272647854d28fe%2112000030220993931%21affd%21%21%21)](https://s.click.aliexpress.com/s/NdpwztbAIgDMmxGbP8fFks7yUFfsHjzlImSYmA68h7xlMRgzueFsRgokQ9f9hcpVKttxtQE2VzIoqkXJXrpOr6uR3zv7mP4CDO9CddoFf4t0QE5DXPy8Pgjhz4irfQSEjEGUmy5yF3A5gJ9h3NYjLMgqIMqa3zcpq5E2BC3W5EbV40Dm9buQxWpZzw1lbX8Zm2kZtNIa4KyDieNjsH7IU6Yv8StELKVvT9r4eFAaXPGhwHsgaDqdNcmY116r3GC2YvsOopeiiZPhJrV0cwgOQDSkW93v7gVkNdlFeQuoIZcqEZIhXMmUzyCIjxfAZRU6xy9OcZCz4Q6otufoTKsIO6I9CxdbvQuADJ0dLdsfoJPd6OmrS2EPqJNnaekkqsh9rMG6kApyFQalGafnAT7PsilUkhGfv4ciFiz4RyydiSQuQhBWFkFiVLfqpDOXnzCjaLNFGpkEFOt1HsfQ5o8gKwZif3F8aaXzO2yxBTtPexSpvcSIrP4WBLuYHGqiXecp41LVuQmKcssDY9suRemdtgadCc05nJ2uu4mmgLeZBmBZiVN2hH0Nn4vmWwlRWjJufI3a1cp1fKZjd9U6V9UtNymBv9VxBEqiHG2csDLDsRE0oTxvjLy2IG6qQFF0LwaXSO48wJmZ3bqdJJLdOSGBDXsNKIiNArMprOwpeHeFmV5btXQpv4CBHruhYrYVdSADIpkDPQaMZZb2cSNNKr8UKoC6cfZcwFtqi32qqhTy0wmzB1AsjvyuDxwzHwDiKT81PsqiS83UPcBh4nR7w69gJSXT57GtjEH3paw2BXRHAT2r078NuxAdf8ZtHBjaVtyPnodCRh2FaL4qUz4DEnQLM0TRfYRMVDDlLLRO156Bdjl4kdfm6r0qwV4Q7xGqJoxM1G1r0l6IEJBBIdlk2h8ev0XCsPA2m1pAlcbGGAAffK6A5dqnM8IIbcJBXo6S0xWKQQJKh4cWDFztnA2vEHlwEhPHGdI7NRijFCd2wCOuoMotV)
 

@@ -174,8 +174,8 @@ export class S3CreatedListener {
       // 7. 저장
       await this.s3ObjectRepository.save([thumbnailObject, videoObject]);
       const object = await this.awsS3Service.findOneOrFail(videoObject.id);
-      object.tags = [
-        ...object.tags,
+      await this.awsS3Service.addTag(
+        object,
         await this.s3ObjectTagService.createOrFind(
           CreateS3ObjectTagDto.fromJson({
             name: thumbnailResponse.emotion,
@@ -183,15 +183,13 @@ export class S3CreatedListener {
             color: '#FFFFFF',
           }),
         ),
-      ];
-      await this.awsS3Service.update(object);
+      );
       this.logger.info(
         `[THUMBNAIL CREATED] Video: ${videoObject.id}, Thumbnail: ${thumbnailObject.id}, URL: ${thumbnailObject.url}, Emotion: ${thumbnailResponse.emotion}`,
       );
     } catch (error) {
       this.logger.error(
-        `[PROCESS VIDEO ERROR] ${videoObject.id}: ${error.message}`,
-        error.stack,
+        `[PROCESS VIDEO ERROR] ${videoObject.id}: ${error.toString()}`,
       );
       // 에러가 발생해도 원본 비디오는 유지
     }

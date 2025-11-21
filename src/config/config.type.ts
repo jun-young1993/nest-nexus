@@ -98,6 +98,17 @@ export type CloudRunConfig = {
   emotion: CloudRunEmotionConfig;
 };
 
+export type LibreTranslateConfig = {
+  ip: string;
+  port: number;
+  languages: string;
+  use: boolean;
+};
+
+export type AiConfig = {
+  libreTranslate: LibreTranslateConfig;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   alie: AlieConfig;
@@ -110,4 +121,5 @@ export type AllConfigType = {
   loanScheduleFcm: LoanScheduleFcmConfig;
   awsS3Credentials: AwsS3CredentialsConfig;
   cloudRun: CloudRunConfig;
+  ai: AiConfig;
 };

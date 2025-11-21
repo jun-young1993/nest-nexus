@@ -606,4 +606,10 @@ export class AwsS3Service {
       }),
     );
   }
+
+  async addTag(s3Object: S3Object, tag: S3ObjectTag): Promise<S3Object> {
+    const newTags = [...s3Object.tags, tag];
+    s3Object.tags = newTags;
+    return await this.s3ObjectRepository.save(s3Object);
+  }
 }

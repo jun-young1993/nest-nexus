@@ -49,6 +49,9 @@ import { AwsS3Module } from './aws/s3/aws-s3.module';
 import cloudRunConfig from './config/cloud-run.config';
 import { CloudRunEmotionModule } from './cloud-run/emotion/cloud-run-emotion.module';
 import { join } from 'path';
+import { AiModule } from './ai/ai.module';
+import aiConfig from './config/ai.config';
+
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -69,6 +72,7 @@ import { join } from 'path';
         mailConfig,
         awsS3CredentialsConfig,
         cloudRunConfig,
+        aiConfig,
       ],
       envFilePath: ['.env'],
     }),
@@ -106,6 +110,7 @@ import { join } from 'path';
     SequenceModule,
     AwsS3Module.forRoot(),
     CloudRunEmotionModule,
+    AiModule,
   ],
   controllers: [],
   providers: [],

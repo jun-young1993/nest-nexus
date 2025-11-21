@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { S3ObjectMetadata } from './entities/s3-object-metadata.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
@@ -23,5 +23,19 @@ export class S3ObjectMetadataService {
     createS3MetadataDto.s3Object.metadata = metadata;
     await this.s3ObjectRepository.save(createS3MetadataDto.s3Object);
     return metadata;
+  }
+
+  async findCaptionKoIsNull() {
+    const metadataList = await this.s3ObjectMetadataRepository.find({
+      where: {
+        caption: Not(IsNull()),
+        caption_ko: IsNull(),
+      },
+    });
+    return metadataList;
+  }
+
+  async update(metadata: S3ObjectMetadata): Promise<S3ObjectMetadata> {
+    return await this.s3ObjectMetadataRepository.save(metadata);
   }
 }

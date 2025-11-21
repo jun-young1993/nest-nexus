@@ -1,9 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import { Logger } from 'winston';
-import { AlieAffiliateService } from '../alie/alie-affiliate.service';
-import { GithubContentService } from '../github/github-content.service';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/config/config.type';
 import { MyCarService } from 'src/parking-location/my-car.service';
@@ -16,18 +12,17 @@ import {
 } from 'src/app-reward/entities/point-transaction.entity';
 import { RewardName } from 'src/app-reward/entities/reward-config.entity';
 import { ProcessRewardDto } from 'src/app-reward/dto/process-reward.dto';
+import { createNestLogger } from 'src/factories/logger.factory';
 
 @Injectable()
 export class TasksService {
+  private readonly logger = createNestLogger(TasksService.name);
   constructor(
-    private readonly alieAffiliateService: AlieAffiliateService,
-    private readonly githubContentService: GithubContentService,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly myCarService: MyCarService,
     private readonly noticeViewService: NoticeViewService,
     private readonly noticeService: NoticeService,
     private readonly appRewardService: AppRewardService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
   @Cron('0 */2 * * * *')
@@ -38,9 +33,9 @@ export class TasksService {
     if (isDev) {
       return;
     }
-    this.logger.task('[CHECK EXPECTED TIME CAR NUMBERS][START]');
+    this.logger.info('[CHECK EXPECTED TIME CAR NUMBERS][START]');
     const carNumbers = await this.myCarService.findCarNumbersWithExpiredTime(5);
-    this.logger.task(
+    this.logger.info(
       `[CHECK EXPECTED TIME CAR NUMBERS][END] ${carNumbers.length}`,
     );
 
@@ -57,7 +52,7 @@ export class TasksService {
 
   @Cron('0 0 8 * * *')
   async getNoticeBonus() {
-    this.logger.task('[GET NOTICE BONUS][START]');
+    this.logger.info('[GET NOTICE BONUS][START]');
     const noticeViews = await this.noticeViewService.findInactiveNoticeViews();
     for (const noticeView of noticeViews) {
       const notice = await this.noticeService.findOneBase({
