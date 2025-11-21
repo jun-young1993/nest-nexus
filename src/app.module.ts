@@ -51,6 +51,7 @@ import { CloudRunEmotionModule } from './cloud-run/emotion/cloud-run-emotion.mod
 import { join } from 'path';
 import { AiModule } from './ai/ai.module';
 import aiConfig from './config/ai.config';
+import transcoderConfig from './config/transcoder.config';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import aiConfig from './config/ai.config';
         awsS3CredentialsConfig,
         cloudRunConfig,
         aiConfig,
+        transcoderConfig,
       ],
       envFilePath: ['.env'],
     }),

@@ -109,6 +109,11 @@ export type AiConfig = {
   libreTranslate: LibreTranslateConfig;
 };
 
+export type TranscoderConfig = {
+  ffmpeg_path: string;
+  ffprobe_path: string;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   alie: AlieConfig;
@@ -122,4 +127,5 @@ export type AllConfigType = {
   awsS3Credentials: AwsS3CredentialsConfig;
   cloudRun: CloudRunConfig;
   ai: AiConfig;
+  transcoder: TranscoderConfig;
 };
