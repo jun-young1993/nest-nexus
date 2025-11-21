@@ -10,7 +10,7 @@ export class S3ObjectMetadata {
   caption?: string;
 
   @Column({ nullable: true, type: 'text' })
-  caption_ko?: string;
+  captionKo?: string;
 
   @OneToOne(() => S3Object, (s3Object) => s3Object.metadata)
   s3Object: S3Object;

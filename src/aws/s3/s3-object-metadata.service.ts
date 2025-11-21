@@ -29,7 +29,7 @@ export class S3ObjectMetadataService {
     const metadataList = await this.s3ObjectMetadataRepository.find({
       where: {
         caption: Not(IsNull()),
-        caption_ko: IsNull(),
+        captionKo: IsNull(),
       },
     });
     return metadataList;

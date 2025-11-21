@@ -41,7 +41,7 @@ export class AwsS3CaptionTranslateJobService {
           'en',
           'ko',
         );
-        metadata.caption_ko = caption.translatedText;
+        metadata.captionKo = caption.translatedText;
         await this.s3ObjectMetadataService.update(metadata);
         this.logger.info(`[CAPTION KO TRANSLATE][TASK COUNT] ${metadata.id}`);
       }
