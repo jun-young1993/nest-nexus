@@ -569,10 +569,7 @@ export class AwsS3Service {
     reverse: boolean = true,
   ): Promise<S3Object> {
     if (s3Object.hasThumbnail && reverse) {
-      return await this.generateGetObjectPresignedUrl(
-        s3Object.thumbnail,
-        false,
-      );
+      await this.generateGetObjectPresignedUrl(s3Object.thumbnail, false);
     }
     if (
       s3Object.presignedUrlExpiresAt === null ||
