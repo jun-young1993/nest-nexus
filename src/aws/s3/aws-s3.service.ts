@@ -540,13 +540,7 @@ export class AwsS3Service {
     return await this.s3ObjectRepository.save(s3Object);
   }
 
-  async getObjectResizeBinary(
-    s3Object: S3Object,
-    size: number = 200,
-  ): Promise<S3ObjectBinaryResponse> {
-    if (!s3Object.key) {
-      throw new Error('S3 객체에 키가 없습니다.');
-    }
+  async getObjectCommand(s3Object: S3Object): Promise<Readable> {
     const command = new GetObjectCommand({
       Bucket: this.getBucket(s3Object.appName),
       Key: s3Object.key,
@@ -555,7 +549,18 @@ export class AwsS3Service {
     if (!response.Body) {
       throw new Error('S3 객체 데이터를 불러오지 못했습니다.');
     }
-    const buffer = await streamToBufferResize(response.Body as Readable, size);
+    return response.Body as Readable;
+  }
+
+  async getObjectResizeBinary(
+    s3Object: S3Object,
+    size: number = 200,
+  ): Promise<S3ObjectBinaryResponse> {
+    if (!s3Object.key) {
+      throw new Error('S3 객체에 키가 없습니다.');
+    }
+    const readable = await this.getObjectCommand(s3Object);
+    const buffer = await streamToBufferResize(readable, size);
 
     return {
       data: buffer,

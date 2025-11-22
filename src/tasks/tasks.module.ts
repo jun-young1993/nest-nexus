@@ -10,8 +10,8 @@ import { ParkingLocationModule } from 'src/parking-location/parking-location.mod
 import { AppRewardModule } from 'src/app-reward/app-reward.module';
 import { NoticeModule } from 'src/notice/notice.module';
 import { AiModule } from 'src/ai/ai.module';
-import { AwsS3Module } from 'src/aws/s3/aws-s3.module';
 import { AwsS3CaptionTranslateJobService } from './jobs/aws-s3-caption-translate-job.service';
+import { AwsS3Module } from 'src/aws/s3/aws-s3.module';
 
 @Module({
   imports: [

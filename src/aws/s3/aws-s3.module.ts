@@ -31,18 +31,22 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { S3ObjectMetadata } from './entities/s3-object-metadata.entity';
 import { S3ObjectMetadataService } from './s3-object-metadata.service';
 
+interface AwsS3ModuleConfig {
+  region?: string;
+}
 @Module({})
 export class AwsS3Module {
   /**
    * 동적으로 S3 설정을 받아서 모듈을 생성합니다.
    */
-  static forRoot(config?: { region?: string }): DynamicModule {
+  static forRoot(config?: AwsS3ModuleConfig): DynamicModule {
     return {
       module: AwsS3Module,
       imports: [
         ConfigModule,
         AuthModule,
         UserModule,
+
         TypeOrmModule.forFeature([
           S3Object,
           S3ObjectTag,

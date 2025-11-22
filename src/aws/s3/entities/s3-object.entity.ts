@@ -16,7 +16,11 @@ import { S3ObjectTag } from './s3-object-tag.entity';
 import { S3ObjectLike } from './s3-object-like.entity';
 import { S3ObjectReply } from './s3-object-reply.entity';
 import { S3ObjectReport } from './s3-object-report.entity';
-import { FileType, getFileType } from 'src/utils/file-type.util';
+import {
+  FileType,
+  getFileExtension,
+  getFileType,
+} from 'src/utils/file-type.util';
 import { Exclude, Expose } from 'class-transformer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 import { AwsS3AppNames } from 'src/config/config.type';
@@ -110,6 +114,11 @@ export class S3Object {
   @Expose()
   get fileType(): FileType {
     return getFileType(this.originalName);
+  }
+
+  @Expose()
+  get extension(): string {
+    return getFileExtension(this.originalName);
   }
 
   /**
