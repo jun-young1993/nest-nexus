@@ -50,6 +50,8 @@ export class S3CreatedListener {
     }
     // 썸네일이 아닌 일반 이미지만 분석
     if (s3Object.isImage) {
+      await this.awsS3Service.createImageThumbnail(s3Object, 200);
+      await this.awsS3Service.generateImageRowres(s3Object);
       await this.analyzeImage(s3Object);
       await this.imageToCaption(s3Object, s3Object.url);
     }
@@ -149,34 +151,12 @@ export class S3CreatedListener {
         `[THUMBNAIL RESPONSE] Size: ${thumbnailResponse.buffer.length} bytes, MimeType: ${thumbnailResponse.mimetype}, Emotion: ${thumbnailResponse.emotion}, Confidence: ${thumbnailResponse.confidence}, Filename: ${thumbnailResponse.filename}`,
       );
 
-      // Buffer를 Express.Multer.File 형식으로 변환
-      const thumbnailFile: Express.Multer.File = {
-        buffer: thumbnailResponse.buffer,
-        originalname: thumbnailResponse.filename || 'thumbnail.jpg',
-        mimetype: thumbnailResponse.mimetype,
-        size: thumbnailResponse.buffer.length,
-        fieldname: 'file',
-        encoding: '7bit',
-        destination: '',
-        filename: thumbnailResponse.filename || 'thumbnail.jpg',
-        path: '',
-        stream: null,
-      };
-
-      // 2. 썸네일 업로드 (uploadFile 사용, 이벤트 비활성화)
-      const thumbnailObject = await this.awsS3Service.uploadFile(
-        thumbnailFile,
-        appName,
-        videoObject.user,
-        S3ObjectDestinationType.THUMBNAIL,
+      const thumbnailObject = await this.awsS3Service.createThumbnailByBuffer(
+        videoObject,
+        thumbnailResponse.buffer,
+        thumbnailResponse.mimetype,
+        thumbnailResponse.filename,
       );
-
-      // 비디오와 썸네일 관계 설정
-      videoObject.thumbnail = thumbnailObject;
-      thumbnailObject.videoSource = videoObject;
-
-      // 7. 저장
-      await this.s3ObjectRepository.save([thumbnailObject, videoObject]);
       const object = await this.awsS3Service.findOneOrFail(videoObject.id);
       await this.awsS3Service.addTag(
         object,

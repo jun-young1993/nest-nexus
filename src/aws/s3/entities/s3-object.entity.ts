@@ -68,7 +68,7 @@ export class S3Object {
   deletedAt?: Date; // Soft Delete를 위한 삭제 날짜
 
   // ✨ 썸네일 관계 (양방향)
-  @OneToOne(() => S3Object, (s3Object) => s3Object.videoSource, {
+  @OneToOne(() => S3Object, (s3Object) => s3Object.thumbnailSource, {
     nullable: true,
     cascade: true, // 비디오 삭제시 썸네일도 삭제
   })
@@ -83,17 +83,17 @@ export class S3Object {
   @JoinColumn({ name: 'lowResId' })
   lowRes?: S3Object;
 
-  // ✨ 순환 참조 방지: videoSource는 JSON 응답에서 제외
+  // ✨ 순환 참조 방지: thumbnailSource는 JSON 응답에서 제외
   // ✨ ClassSerializerInterceptor 추가
   // app.useGlobalInterceptors(
   //   new ClassSerializerInterceptor(app.get(Reflector))
   // );
-  // videoSource는 thumbnail과 lowRes 모두에서 원본 비디오를 참조하는 공통 관계
+  // thumbnailSource는 thumbnail과 lowRes 모두에서 원본 비디오를 참조하는 공통 관계
   // TypeORM 제약으로 인해 하나의 역방향만 정의 가능하므로, thumbnail의 역방향으로 정의
-  // lowRes에서도 동일한 videoSource를 사용 (실제 사용 시에는 문제 없음)
+  // lowRes에서도 동일한 thumbnailSource를 사용 (실제 사용 시에는 문제 없음)
   @Exclude()
   @OneToOne(() => S3Object, (s3Object) => s3Object.thumbnail)
-  videoSource?: S3Object;
+  thumbnailSource?: S3Object;
 
   @Exclude()
   @OneToOne(() => S3Object, (s3Object) => s3Object.lowRes)
@@ -177,12 +177,12 @@ export class S3Object {
 
   /**
    * 썸네일 이미지 여부
-   * videoSource가 있으면 이 객체는 썸네일
+   * thumbnailSource가 있으면 이 객체는 썸네일
    */
   @Expose()
   get isThumbnail(): boolean {
     return (
-      !!this.videoSource ||
+      !!this.thumbnailSource ||
       this.destination === S3ObjectDestinationType.THUMBNAIL
     );
   }
@@ -207,6 +207,9 @@ export class S3Object {
 
   @Expose()
   get thumbnailUrl(): string | null {
+    if (!this.thumbnail) {
+      return null;
+    }
     return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
   }
 
@@ -215,6 +218,6 @@ export class S3Object {
     if (!this.lowRes) {
       return null;
     }
-    return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.lowRes.id}/low-res`;
+    return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/low-res`;
   }
 }

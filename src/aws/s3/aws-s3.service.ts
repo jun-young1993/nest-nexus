@@ -4,7 +4,12 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { AllConfigType, AwsS3AppNames } from 'src/config/config.type';
@@ -227,7 +232,7 @@ export class AwsS3Service {
         'user',
         'metadata',
         'thumbnail',
-        'videoSource',
+        'thumbnailSource',
         'lowRes',
         'lowResSource',
       ],
@@ -359,7 +364,7 @@ export class AwsS3Service {
           'replies.user',
           'user',
           'thumbnail',
-          'videoSource',
+          'thumbnailSource',
         ],
         order: { createdAt: 'ASC' },
         take: take + 1, // 기준 객체 포함해서 3개 가져온 후 필터링
@@ -552,6 +557,87 @@ export class AwsS3Service {
       throw new Error('S3 객체 데이터를 불러오지 못했습니다.');
     }
     return response.Body as Readable;
+  }
+
+  async createThumbnailByBuffer(
+    thumbnailSource: S3Object,
+    buffer: Buffer,
+    mimeType: string,
+    filename: string,
+  ): Promise<S3Object> {
+    const s3Object = thumbnailSource;
+    const thumbnailFile: Express.Multer.File = {
+      buffer: buffer,
+      originalname: filename,
+      mimetype: mimeType,
+      size: buffer.length,
+      fieldname: 'file',
+      encoding: '7bit',
+      destination: '',
+      filename: filename,
+      path: '',
+      stream: null,
+    };
+    const thumbnailObject = await this.uploadFile(
+      thumbnailFile,
+      s3Object.appName,
+      s3Object.user,
+      S3ObjectDestinationType.THUMBNAIL,
+    );
+    s3Object.thumbnail = thumbnailObject;
+    thumbnailObject.thumbnailSource = s3Object;
+    await this.s3ObjectRepository.save([s3Object, thumbnailObject]);
+    return thumbnailObject;
+  }
+
+  async createImageThumbnail(
+    s3Object: S3Object,
+    size: number = 200,
+  ): Promise<S3Object> {
+    if (!s3Object.isImage) {
+      throw new BadRequestException('썸네일 생성 불가능한 파일 형식입니다.');
+    }
+    const readable = await this.getObjectCommand(s3Object);
+    const buffer = await streamToBufferResize(readable, size);
+
+    const thumbnailName = 'thumbnail.' + s3Object.extension;
+    return await this.createThumbnailByBuffer(
+      s3Object,
+      buffer,
+      s3Object.mimetype,
+      thumbnailName,
+    );
+  }
+
+  async generateImageRowres(s3Object: S3Object) {
+    if (!s3Object.isImage) {
+      throw new BadRequestException('썸네일 생성 불가능한 파일 형식입니다.');
+    }
+    const rowResName = 'rowres.' + s3Object.extension;
+    const readable = await this.getObjectCommand(s3Object);
+    const buffer = await streamToBufferResize(readable, 1200);
+    const thumbnailFile: Express.Multer.File = {
+      buffer: buffer,
+      originalname: rowResName,
+      mimetype: s3Object.mimetype,
+      size: buffer.length,
+      fieldname: 'file',
+      encoding: '7bit',
+      destination: '',
+      filename: rowResName,
+      path: '',
+      stream: null,
+    };
+    const lowResObject = await this.uploadFile(
+      thumbnailFile,
+      s3Object.appName,
+      s3Object.user,
+      S3ObjectDestinationType.LOW_RES,
+    );
+    s3Object.lowRes = lowResObject;
+    lowResObject.lowResSource = s3Object;
+    await this.s3ObjectRepository.save([s3Object, lowResObject]);
+    return lowResObject;
   }
 
   async getObjectResizeBinary(
