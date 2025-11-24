@@ -181,6 +181,10 @@ export class AwsTranscoderService {
                 unlinkSync(tempInputPath);
                 this.logger.debug(`Temp file deleted: ${tempInputPath}`);
               }
+              if (existsSync(lowResPath)) {
+                unlinkSync(lowResPath);
+                this.logger.debug(`Low res file deleted: ${lowResPath}`);
+              }
             } catch (error) {
               this.logger.warn(
                 `Failed to delete temp file: ${error.toString()}`,
@@ -196,9 +200,11 @@ export class AwsTranscoderService {
             try {
               if (existsSync(tempInputPath)) {
                 unlinkSync(tempInputPath);
+                this.logger.debug(`Temp file deleted: ${tempInputPath}`);
               }
               if (existsSync(lowResPath)) {
                 unlinkSync(lowResPath);
+                this.logger.debug(`Low res file deleted: ${lowResPath}`);
               }
             } catch (deleteError) {
               // 무시
