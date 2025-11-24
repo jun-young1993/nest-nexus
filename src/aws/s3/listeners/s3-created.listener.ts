@@ -61,9 +61,9 @@ export class S3CreatedListener {
       const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
       const videoThumbnailUrl = videoObject.thumbnail.url;
       await this.imageToCaption(videoObject, videoThumbnailUrl);
-      await this.awsTranscoderService.generateLowRes({
-        s3Object: videoObject,
-      });
+      // await this.awsTranscoderService.generateLowRes({
+      //   s3Object: videoObject,
+      // });
     }
   }
 
