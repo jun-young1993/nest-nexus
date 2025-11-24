@@ -228,6 +228,8 @@ export class AwsS3Service {
         'metadata',
         'thumbnail',
         'videoSource',
+        'lowRes',
+        'lowResSource',
       ],
       order: {
         replies: {

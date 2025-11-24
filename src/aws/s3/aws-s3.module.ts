@@ -30,6 +30,7 @@ import { S3CreatedListener } from './listeners/s3-created.listener';
 import { CacheModule } from '@nestjs/cache-manager';
 import { S3ObjectMetadata } from './entities/s3-object-metadata.entity';
 import { S3ObjectMetadataService } from './s3-object-metadata.service';
+import { AwsTranscoderService } from './processor/aws-transcoder.service';
 
 interface AwsS3ModuleConfig {
   region?: string;
@@ -78,6 +79,7 @@ export class AwsS3Module {
         CloudRunEmotionService,
         S3CreatedListener,
         S3ObjectMetadataService,
+        AwsTranscoderService,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -110,6 +112,7 @@ export class AwsS3Module {
         CloudRunEmotionService,
         S3CreatedListener,
         S3ObjectMetadataService,
+        AwsTranscoderService,
       ],
     };
   }

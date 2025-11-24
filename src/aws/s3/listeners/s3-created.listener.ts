@@ -16,6 +16,7 @@ import { AwsS3AppNames } from 'src/config/config.type';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 import { CreateS3MetadataDto } from '../dto/create-s3-metadata.dto';
 import { S3ObjectMetadataService } from '../s3-object-metadata.service';
+import { AwsTranscoderService } from '../processor/aws-transcoder.service';
 
 @Injectable()
 export class S3CreatedListener {
@@ -28,6 +29,7 @@ export class S3CreatedListener {
     private readonly s3ObjectMetadataService: S3ObjectMetadataService,
     @InjectRepository(S3Object)
     private readonly s3ObjectRepository: Repository<S3Object>,
+    private readonly awsTranscoderService: AwsTranscoderService,
   ) {}
 
   /**
@@ -40,7 +42,10 @@ export class S3CreatedListener {
     this.logger.info(`[HANDLE S3 CREATED] ${s3Object.id}`);
     this.logger.info(`[HANDLE S3 FILE TYPE] ${s3Object.fileType}`);
 
-    if (s3Object.isThumbnail) {
+    if (
+      s3Object.isThumbnail ||
+      s3Object.destination != S3ObjectDestinationType.UPLOAD
+    ) {
       return;
     }
     // 썸네일이 아닌 일반 이미지만 분석
@@ -52,14 +57,13 @@ export class S3CreatedListener {
     // 비디오 파일 처리 (썸네일 생성)
     if (s3Object.isVideo) {
       await this.processVideo(s3Object.appName, s3Object);
-      const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
-      if (!videoObject.isThumbnail) {
-        this.logger.warn(`[VIDEO OBJECT IS NOT THUMBNAIL] ${videoObject.id}`);
-        return false;
-      }
 
+      const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
       const videoThumbnailUrl = videoObject.thumbnail.url;
       await this.imageToCaption(videoObject, videoThumbnailUrl);
+      await this.awsTranscoderService.generateLowRes({
+        s3Object: videoObject,
+      });
     }
   }
 

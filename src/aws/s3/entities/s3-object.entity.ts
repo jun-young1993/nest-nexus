@@ -75,15 +75,29 @@ export class S3Object {
   @JoinColumn({ name: 'thumbnailId' })
   thumbnail?: S3Object;
 
+  // ✨ 저해상도 비디오 관계 (양방향)
+  @OneToOne(() => S3Object, (s3Object) => s3Object.lowResSource, {
+    nullable: true,
+    cascade: true, // 원본 비디오 삭제시 저해상도 비디오도 삭제
+  })
+  @JoinColumn({ name: 'lowResId' })
+  lowRes?: S3Object;
+
   // ✨ 순환 참조 방지: videoSource는 JSON 응답에서 제외
   // ✨ ClassSerializerInterceptor 추가
   // app.useGlobalInterceptors(
   //   new ClassSerializerInterceptor(app.get(Reflector))
   // );
-
+  // videoSource는 thumbnail과 lowRes 모두에서 원본 비디오를 참조하는 공통 관계
+  // TypeORM 제약으로 인해 하나의 역방향만 정의 가능하므로, thumbnail의 역방향으로 정의
+  // lowRes에서도 동일한 videoSource를 사용 (실제 사용 시에는 문제 없음)
   @Exclude()
   @OneToOne(() => S3Object, (s3Object) => s3Object.thumbnail)
   videoSource?: S3Object;
+
+  @Exclude()
+  @OneToOne(() => S3Object, (s3Object) => s3Object.lowRes)
+  lowResSource?: S3Object;
 
   @ManyToOne(() => User, (user) => user.s3Objects)
   @JoinColumn({ name: 'userId' })
@@ -182,8 +196,25 @@ export class S3Object {
     return !!this.thumbnail;
   }
 
+  /**
+   * 저해상도 비디오 보유 여부
+   * 원본 비디오가 저해상도 버전을 가지고 있는지 확인
+   */
+  @Expose()
+  get hasLowRes(): boolean {
+    return !!this.lowRes;
+  }
+
   @Expose()
   get thumbnailUrl(): string | null {
     return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
+  }
+
+  @Expose()
+  get lowResUrl(): string | null {
+    if (!this.lowRes) {
+      return null;
+    }
+    return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.lowRes.id}/low-res`;
   }
 }

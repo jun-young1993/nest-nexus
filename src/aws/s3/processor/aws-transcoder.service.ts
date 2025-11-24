@@ -1,24 +1,31 @@
 import { Injectable } from '@nestjs/common';
 
 import { S3LowResProcessorInterface } from '../interfaces/s3-low-res-processor.interface';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/config/config.type';
 import * as ffmpeg from 'fluent-ffmpeg';
-import { AwsS3QueueName } from '../enum/job-name';
+
 import { AwsS3Service } from '../aws-s3.service';
-import { existsSync, mkdirSync, createWriteStream, unlinkSync } from 'fs';
+import {
+  existsSync,
+  mkdirSync,
+  createWriteStream,
+  unlinkSync,
+  createReadStream,
+} from 'fs';
 import * as path from 'path';
 import { FileType } from 'src/utils/file-type.util';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { pipeline } from 'stream/promises';
+import { streamToBuffer } from 'src/utils/stremes/strem-to-buffer';
+import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 
 @Injectable()
 export class AwsTranscoderService {
   private readonly logger = createNestLogger(AwsTranscoderService.name);
   constructor(
-    @InjectQueue(AwsS3QueueName.AWS_TRANSCORDER) private transcoderQueue: Queue,
+    // @InjectQueue(AwsS3QueueName.AWS_TRANSCORDER) private transcoderQueue: Queue,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly awsS3Service: AwsS3Service,
   ) {
@@ -140,10 +147,34 @@ export class AwsTranscoderService {
               `Processing: ${progress.percent}% done (${progress.timemark})`,
             );
           })
-          .on('end', () => {
+          .on('end', async () => {
             this.logger.info(
               `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} END PROCESS`,
             );
+            const readable = createReadStream(lowResPath);
+            const buffer = await streamToBuffer(readable);
+            const thumbnailFile: Express.Multer.File = {
+              buffer: buffer,
+              originalname: `${s3Object.id}-low-res.mp4`,
+              mimetype: 'video/mp4',
+              size: buffer.length,
+              fieldname: 'file',
+              encoding: '7bit',
+              destination: '',
+              filename: `${s3Object.id}-low-res.mp4`,
+              path: '',
+              stream: null,
+            };
+            const lowResObject = await this.awsS3Service.uploadFile(
+              thumbnailFile,
+              s3Object.appName,
+              s3Object.user,
+              S3ObjectDestinationType.LOW_RES,
+            );
+            s3Object.lowRes = lowResObject;
+            lowResObject.lowResSource = s3Object;
+            await this.awsS3Service.update(lowResObject);
+            await this.awsS3Service.update(s3Object);
             // 임시 파일 삭제
             try {
               if (existsSync(tempInputPath)) {
@@ -166,6 +197,9 @@ export class AwsTranscoderService {
               if (existsSync(tempInputPath)) {
                 unlinkSync(tempInputPath);
               }
+              if (existsSync(lowResPath)) {
+                unlinkSync(lowResPath);
+              }
             } catch (deleteError) {
               // 무시
             }
@@ -179,6 +213,9 @@ export class AwsTranscoderService {
       try {
         if (existsSync(tempInputPath)) {
           unlinkSync(tempInputPath);
+        }
+        if (existsSync(lowResPath)) {
+          unlinkSync(lowResPath);
         }
       } catch (deleteError) {
         // 무시
