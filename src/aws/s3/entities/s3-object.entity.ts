@@ -207,17 +207,11 @@ export class S3Object {
 
   @Expose()
   get thumbnailUrl(): string | null {
-    if (!this.thumbnail) {
-      return null;
-    }
     return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
   }
 
   @Expose()
   get lowResUrl(): string | null {
-    if (!this.lowRes) {
-      return null;
-    }
     return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/low-res`;
   }
 }
