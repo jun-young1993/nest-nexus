@@ -36,7 +36,10 @@ export class UserService {
   }
 
   async findOne(id: string): Promise<User> {
-    return this.userRepository.findOne({ where: { id, isActive: true } });
+    return this.userRepository.findOne({
+      where: { id, isActive: true },
+      relations: ['userGroups'],
+    });
   }
 
   async findOneOrFail(id: string): Promise<User> {

@@ -84,8 +84,6 @@ export class UserController {
   @Get(':id')
   async getUser(@Param('id') id: string): Promise<User> {
     const user = await this.userService.findOne(id);
-    console.log('user');
-    console.log(user);
     if (user === null) {
       throw new HttpException('User not found', HttpStatus.NO_CONTENT);
     }
