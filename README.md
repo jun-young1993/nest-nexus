@@ -18,6 +18,11 @@ npm test -- libre.service.spec.ts --testNamePattern="LibreService"
 ```
 
 
+# 한글 Translattion 
+- 준영 로컬에서만 실행가능
+```
+libretranslate --load-only ko,en --host 0.0.0.0 --port 5000
+```
 
 
 
