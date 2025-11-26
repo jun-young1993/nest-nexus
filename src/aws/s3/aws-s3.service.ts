@@ -660,13 +660,15 @@ export class AwsS3Service {
   async generateGetObjectPresignedUrl(
     s3Object: S3Object,
     reverse: boolean = true,
+    force: boolean = false,
   ): Promise<S3Object> {
     if (s3Object.hasThumbnail && reverse) {
       await this.generateGetObjectPresignedUrl(s3Object.thumbnail, false);
     }
     if (
       s3Object.presignedUrlExpiresAt === null ||
-      s3Object.presignedUrlExpiresAt < new Date()
+      s3Object.presignedUrlExpiresAt < new Date() ||
+      force
     ) {
       const command = new GetObjectCommand({
         Bucket: this.getBucket(s3Object.appName),
@@ -689,10 +691,11 @@ export class AwsS3Service {
 
   async generateGetObjectPresigendUrls(
     s3Objects: S3Object[],
+    force: boolean = false,
   ): Promise<S3Object[]> {
     return await Promise.all(
       s3Objects.map(async (s3Object) => {
-        return await this.generateGetObjectPresignedUrl(s3Object);
+        return await this.generateGetObjectPresignedUrl(s3Object, false, force);
       }),
     );
   }
