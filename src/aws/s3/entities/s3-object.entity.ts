@@ -25,6 +25,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 import { AwsS3AppNames } from 'src/config/config.type';
 import { S3ObjectMetadata } from './s3-object-metadata.entity';
+import { S3ObjectShare } from './s3-object-share.entity';
 
 @Entity()
 export class S3Object {
@@ -119,6 +120,9 @@ export class S3Object {
   @OneToOne(() => S3ObjectMetadata, (metadata) => metadata.s3Object)
   @JoinColumn({ name: 'metadataId' })
   metadata: S3ObjectMetadata;
+
+  @ManyToMany(() => S3ObjectShare, (share) => share.s3Object)
+  shares: S3ObjectShare[];
 
   // 계산된 필드 (가상 컬럼)
   /**

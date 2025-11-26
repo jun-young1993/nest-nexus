@@ -31,6 +31,9 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { S3ObjectMetadata } from './entities/s3-object-metadata.entity';
 import { S3ObjectMetadataService } from './s3-object-metadata.service';
 import { AwsTranscoderService } from './processor/aws-transcoder.service';
+import { S3ObjectShare } from './entities/s3-object-share.entity';
+import { S3ObjectShareController } from './s3-object-share.controller';
+import { S3ObjectShareService } from './s3-object-share.service';
 
 interface AwsS3ModuleConfig {
   region?: string;
@@ -47,7 +50,6 @@ export class AwsS3Module {
         ConfigModule,
         AuthModule,
         UserModule,
-
         TypeOrmModule.forFeature([
           S3Object,
           S3ObjectTag,
@@ -56,6 +58,7 @@ export class AwsS3Module {
           S3ObjectReport,
           S3ObjectReplyReport,
           S3ObjectMetadata,
+          S3ObjectShare,
         ]),
         CloudRunEmotionModule,
         CacheModule.register({ ttl: 7 * 24 * 60 * 60 }),
@@ -67,6 +70,7 @@ export class AwsS3Module {
         S3ObjectReplyController,
         S3ObjectReportController,
         S3ObjectReplyReportController,
+        S3ObjectShareController,
       ],
       providers: [
         AwsS3Service,
@@ -80,6 +84,7 @@ export class AwsS3Module {
         S3CreatedListener,
         S3ObjectMetadataService,
         AwsTranscoderService,
+        S3ObjectShareService,
         {
           provide: 'S3_CLIENT',
           useFactory: (configService: ConfigService<AllConfigType>) => {
@@ -113,6 +118,7 @@ export class AwsS3Module {
         S3CreatedListener,
         S3ObjectMetadataService,
         AwsTranscoderService,
+        S3ObjectShareService,
       ],
     };
   }

@@ -61,7 +61,6 @@
     "ioredis": "^5.8.2",
     "multer-s3": "^3.0.1",
     "mysql2": "^3.11.0",
-    "nest-admin-page": "^1.0.8",
     "nest-winston": "^1.10.0",
     "nestjs-real-ip": "^3.0.1",
     "nodemailer": "^7.0.3",
