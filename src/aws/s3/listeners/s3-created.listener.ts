@@ -39,8 +39,9 @@ export class S3CreatedListener {
   @OnEvent(EventName.S3_OBJECT_CREATED)
   async handleS3Created(event: S3CreatedEvent) {
     const { s3Object } = event;
-    this.logger.info(`[HANDLE S3 CREATED] ${s3Object.id}`);
-    this.logger.info(`[HANDLE S3 FILE TYPE] ${s3Object.fileType}`);
+    this.logger.info(
+      `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType}`,
+    );
 
     if (
       s3Object.isThumbnail ||
