@@ -211,11 +211,17 @@ export class S3Object {
 
   @Expose()
   get thumbnailUrl(): string | null {
-    return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
+    if(this.destination === S3ObjectDestinationType.UPLOAD) {
+      return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
+    }
+    return null;
   }
 
   @Expose()
   get lowResUrl(): string | null {
-    return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/low-res`;
+    if(this.destination === S3ObjectDestinationType.UPLOAD) {
+      return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/low-res`;
+    }
+    return null;
   }
 }

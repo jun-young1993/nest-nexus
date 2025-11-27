@@ -44,27 +44,34 @@ export class AwsTranscoderService {
 
   async generateLowRes(jobOption: S3LowResProcessorInterface) {
     const { s3Object } = jobOption;
-    this.logger.info(
-      `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} START PROCESS`,
-    );
-    if (!s3Object.extension) {
-      this.logger.error(
-        `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} HAS NO EXTENSION`,
+    try {
+      this.logger.info(
+        `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} START PROCESS`,
       );
-      throw new Error('S3 객체에 확장자를 찾을 수 없습니다.');
-    }
-    if (s3Object.fileType !== FileType.VIDEO) {
-      this.logger.error(
-        `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} IS NOT A VIDEO FILE`,
-      );
-      throw new Error('S3 객체는 비디오 파일이 아닙니다.');
-    }
+      if (!s3Object.extension) {
+        this.logger.error(
+          `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} HAS NO EXTENSION`,
+        );
+        throw new Error('S3 객체에 확장자를 찾을 수 없습니다.');
+      }
+      if (s3Object.fileType !== FileType.VIDEO) {
+        this.logger.error(
+          `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} IS NOT A VIDEO FILE`,
+        );
+        throw new Error('S3 객체는 비디오 파일이 아닙니다.');
+      }
 
-    // const job = await this.transcoderQueue.add(
-    //   AwsS3JobName.GENERATE_LOW_RES,
-    //   jobOption,
-    // );
-    this.generateLowResProcess(jobOption);
+      // const job = await this.transcoderQueue.add(
+      //   AwsS3JobName.GENERATE_LOW_RES,
+      //   jobOption,
+      // );
+      this.generateLowResProcess(jobOption);
+    } catch (error) {
+      this.logger.error(
+        `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} ERROR: ${error.toString()}`,
+      );
+      throw error;
+    }
   }
 
   async generateLowResProcess(jobOption: S3LowResProcessorInterface) {

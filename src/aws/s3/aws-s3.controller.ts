@@ -530,6 +530,34 @@ export class AwsS3Controller {
     return await this.awsS3Service.update(s3Object);
   }
 
+  @Get('objects/:id/low-res')
+  @Public()
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체의 로우 리소스 조회' })
+  @ApiResponse({ status: 200, description: 'S3 객체의 로우 리소스 조회 성공' })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async getLowRes(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    if (!s3Object.hasLowRes) {
+      throw new BadRequestException(
+        'S3 객체의 로우 리소스가 존재하지 않습니다.',
+      );
+    }
+    const lowResObject = s3Object.lowRes;
+    const readable = await this.awsS3Service.getObjectCommand(lowResObject);
+    res.setHeader('Content-Type', lowResObject.mimetype);
+    res.setHeader('Content-Length', lowResObject.size.toString());
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${lowResObject.originalName}"`,
+    );
+    return new StreamableFile(readable);
+  }
+
   @Get('objects/:id/thumbnail')
   @Public()
   @ApiParam({ name: 'id', description: 'S3 객체 ID' })
