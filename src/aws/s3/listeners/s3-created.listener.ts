@@ -85,7 +85,8 @@ export class S3CreatedListener {
       this.logger.info(`[IMAGE TO CAPTION RESULT] ${metadata.id}`);
     } catch (error) {
       this.logger.error(
-        `[IMAGE TO CAPTION ERROR] ${s3Object.id}: ${error.message}`);
+        `[IMAGE TO CAPTION ERROR] ${s3Object.id}: ${error.message}`,
+      );
       this.logger.error(error.stack);
     }
   }
