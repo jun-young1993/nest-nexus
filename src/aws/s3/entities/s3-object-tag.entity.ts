@@ -15,7 +15,7 @@ export class S3ObjectTag {
   })
   name: string;
 
-  @Column({ default: '#FFFFFF' })
+  @Column({ default: '#9CA3AF' })
   color: string;
 
   @Column({

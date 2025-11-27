@@ -30,12 +30,12 @@ export class CreateS3ObjectShareDto {
   })
   expiredAt?: Date;
 
-  @IsString()
+  @IsOptional()
   @ApiProperty({
     description: '공유 코드',
     example: '1234567890',
   })
-  shareCode: string;
+  shareCode?: string;
 
   @IsString()
   @ApiProperty({

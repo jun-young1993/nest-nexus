@@ -22,8 +22,8 @@ export class S3ObjectShare {
   @Column({ type: 'datetime', precision: 6 })
   expiredAt: Date;
 
-  @Column()
-  shareCode: string;
+  @Column({ nullable: true })
+  shareCode?: string;
 
   @Column({ nullable: true })
   title?: string;
