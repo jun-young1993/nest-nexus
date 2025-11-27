@@ -160,7 +160,7 @@ export class AwsS3Controller {
             fileType:
               /(image\/(jpeg|jpg|png|gif)|video\/(mp4|quicktime|x-msvideo|x-matroska|webm))$/,
           }),
-          new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 }), // 10MB
+          new MaxFileSizeValidator({ maxSize: 100 * 1024 * 1024 }), // 10MB
         ],
       }),
     )
