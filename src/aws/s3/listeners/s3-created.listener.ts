@@ -145,6 +145,7 @@ export class S3CreatedListener {
       this.logger.info(`[PROCESS VIDEO START] ${videoObject.id} ${appName}`);
 
       // 1. Cloud Run을 통해 썸네일 이미지 버퍼 및 감정 분석 결과 받기
+      // TODO:ffmpeg 로 이미지 추출 후 감정 분석 결과로 가야할듯...
       const thumbnailResponse =
         await this.cloudRunEmotionService.createThumbnailAndAnalyzeByVideoUrl(
           videoObject.url,
