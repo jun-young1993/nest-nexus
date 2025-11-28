@@ -48,6 +48,9 @@ export class S3CreatedListener {
         s3Object.isThumbnail ||
         s3Object.destination != S3ObjectDestinationType.UPLOAD
       ) {
+        this.logger.info(
+          `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} IS THUMBNAIL OR NOT UPLOAD`,
+        );
         return;
       }
       // 썸네일이 아닌 일반 이미지만 분석
@@ -63,13 +66,19 @@ export class S3CreatedListener {
         await this.awsTranscoderService.generateLowRes({
           s3Object: s3Object,
         });
+        this.logger.info(
+          `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} GENERATE LOW RES PROCESS END`,
+        );
         const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
         const videoThumbnailUrl = videoObject.thumbnail.url;
+        this.logger.info(
+          `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} VIDEO THUMBNAIL URL: ${videoThumbnailUrl}`,
+        );
         await this.analyzeImage(videoObject.thumbnail);
         await this.imageToCaption(videoObject, videoThumbnailUrl);
-        // await this.awsTranscoderService.generateLowRes({
-        //   s3Object: videoObject,
-        // });
+        this.logger.info(
+          `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} IMAGE TO CAPTION END`,
+        );
       }
     } catch (error) {
       this.logger.error(
