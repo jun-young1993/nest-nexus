@@ -12,7 +12,6 @@ import {
   InternalServerErrorException,
   ParseFilePipe,
   FileTypeValidator,
-  MaxFileSizeValidator,
   Put,
   Patch,
   ParseArrayPipe,
@@ -50,6 +49,9 @@ import { Response } from 'express';
 import { Readable } from 'stream';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
+import { UserStorageLimitService } from 'src/user/user-storage-limit.service';
+import { StorageLimitType } from 'src/user/entities/user-storage-limit.entity';
+import { formatBytes } from 'src/utils/formats/file-size-format';
 
 @ApiTags('AWS S3')
 @ApiBearerAuth()
@@ -59,6 +61,7 @@ export class AwsS3Controller {
   private readonly logger = createNestLogger(AwsS3Controller.name);
   constructor(
     private readonly awsS3Service: AwsS3Service,
+    private readonly userStorageLimitService: UserStorageLimitService,
     @Inject(CACHE_MANAGER)
     private readonly s3ObjectCache: Cache,
   ) {}
@@ -160,7 +163,6 @@ export class AwsS3Controller {
             fileType:
               /(image\/(jpeg|jpg|png|gif)|video\/(mp4|quicktime|x-msvideo|x-matroska|webm))$/,
           }),
-          new MaxFileSizeValidator({ maxSize: 100 * 1024 * 1024 }), // 10MB
         ],
       }),
     )
@@ -168,7 +170,17 @@ export class AwsS3Controller {
   ) {
     try {
       this.logger.log('파일 업로드 시작:', { user, appName });
-
+      const limitCheck = await this.userStorageLimitService.isOverLimit(
+        [user],
+        StorageLimitType.S3_STORAGE,
+        files.reduce((acc, file) => acc + file.size, 0),
+      );
+      if (limitCheck.isOverLimit) {
+        throw new BadRequestException({
+          message: `스토리지 용량을 초과합니다. 남은 용량: ${formatBytes(limitCheck.remainingSpace)}. 현재 사용량: ${formatBytes(limitCheck.currentUsage)}. 제한 값: ${formatBytes(limitCheck.limitValue)}`,
+          limitInfo: limitCheck,
+        });
+      }
       const result = await this.awsS3Service.uploaFiles(files, appName, user);
 
       result.forEach((r) => {

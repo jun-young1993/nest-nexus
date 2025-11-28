@@ -90,7 +90,14 @@ export class AwsTranscoderService {
       'low-res',
       `${s3Object.id}-${sanitizedSize}.mp4`,
     );
+    const thumbnailContainer = 'jpg';
+    const thumbnailPath = path.join(
+      assetsDir,
+      'thumbnail',
+      `${s3Object.id}-${sanitizedSize}-thumbnail.${thumbnailContainer}`,
+    );
     const lowResDir = path.dirname(lowResPath);
+    const thumbnailDir = path.dirname(thumbnailPath);
     const tempDir = path.join(assetsDir, 'temp');
     const tempInputPath = path.join(
       tempDir,
@@ -103,6 +110,9 @@ export class AwsTranscoderService {
     }
     if (!existsSync(tempDir)) {
       mkdirSync(tempDir, { recursive: true });
+    }
+    if (!existsSync(thumbnailDir)) {
+      mkdirSync(thumbnailDir, { recursive: true });
     }
 
     const extension = s3Object.extension;
@@ -158,6 +168,68 @@ export class AwsTranscoderService {
             this.logger.info(
               `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} END PROCESS`,
             );
+            ffmpeg(lowResPath)
+              .screenshot({
+                count: 1,
+                timestamps: ['25%'],
+                size: '360x?',
+                folder: thumbnailDir,
+                filename: path.basename(thumbnailPath),
+              })
+              .on('error', async (commandLine) => {
+                this.logger.error(`FFmpeg Thumbnail error: ${commandLine}`);
+              })
+              .on('end', async () => {
+                this.logger.info(
+                  `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} THUMBNAIL CREATED`,
+                );
+                const thumbnailReadable = createReadStream(thumbnailPath);
+                const buffer = await streamToBuffer(thumbnailReadable);
+                const thumbnailFile: Express.Multer.File = {
+                  buffer: buffer,
+                  originalname: path.basename(thumbnailPath),
+                  mimetype: `image/${thumbnailContainer}`,
+                  size: buffer.length,
+                  fieldname: 'file',
+                  encoding: '7bit',
+                  destination: '',
+                  filename: path.basename(thumbnailPath),
+                  path: '',
+                  stream: null,
+                };
+                const thumbnailObject = await this.awsS3Service.uploadFile(
+                  thumbnailFile,
+                  s3Object.appName,
+                  s3Object.user,
+                  S3ObjectDestinationType.THUMBNAIL,
+                );
+                s3Object.thumbnail = thumbnailObject;
+                thumbnailObject.thumbnailSource = s3Object;
+                await this.awsS3Service.update(s3Object);
+                await this.awsS3Service.update(thumbnailObject);
+                // 임시 파일 삭제
+                try {
+                  if (existsSync(tempInputPath)) {
+                    unlinkSync(tempInputPath);
+                    this.logger.debug(`Temp file deleted: ${tempInputPath}`);
+                  }
+                  if (existsSync(lowResPath)) {
+                    unlinkSync(lowResPath);
+                    this.logger.debug(`Low res file deleted: ${lowResPath}`);
+                  }
+                  if (existsSync(thumbnailPath)) {
+                    unlinkSync(thumbnailPath);
+                    this.logger.debug(
+                      `Thumbnail file deleted: ${thumbnailPath}`,
+                    );
+                  }
+                } catch (error) {
+                  this.logger.warn(
+                    `Failed to delete temp file: ${error.toString()}`,
+                  );
+                }
+                resolve();
+              });
             const readable = createReadStream(lowResPath);
             const buffer = await streamToBuffer(readable);
             const thumbnailFile: Express.Multer.File = {
@@ -182,22 +254,6 @@ export class AwsTranscoderService {
             lowResObject.lowResSource = s3Object;
             await this.awsS3Service.update(lowResObject);
             await this.awsS3Service.update(s3Object);
-            // 임시 파일 삭제
-            try {
-              if (existsSync(tempInputPath)) {
-                unlinkSync(tempInputPath);
-                this.logger.debug(`Temp file deleted: ${tempInputPath}`);
-              }
-              if (existsSync(lowResPath)) {
-                unlinkSync(lowResPath);
-                this.logger.debug(`Low res file deleted: ${lowResPath}`);
-              }
-            } catch (error) {
-              this.logger.warn(
-                `Failed to delete temp file: ${error.toString()}`,
-              );
-            }
-            resolve();
           })
           .on('error', (error) => {
             this.logger.error(

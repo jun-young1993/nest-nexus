@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { S3Object } from './s3-object.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Expose } from 'class-transformer';
 
 @Entity('s3_object_shares')
 export class S3ObjectShare {
@@ -51,4 +52,9 @@ export class S3ObjectShare {
     inverseJoinColumn: { name: 's3ObjectId', referencedColumnName: 'id' },
   })
   s3Object: S3Object[];
+
+  @Expose()
+  get getShareUrl(): string {
+    return `${process.env.APP_DOMAIN}/media/share/object/${this.id}`;
+  }
 }

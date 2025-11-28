@@ -211,7 +211,7 @@ export class S3Object {
 
   @Expose()
   get thumbnailUrl(): string | null {
-    if(this.destination === S3ObjectDestinationType.UPLOAD) {
+    if (this.destination === S3ObjectDestinationType.UPLOAD) {
       return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/thumbnail`;
     }
     return null;
@@ -219,7 +219,7 @@ export class S3Object {
 
   @Expose()
   get lowResUrl(): string | null {
-    if(this.destination === S3ObjectDestinationType.UPLOAD) {
+    if (this.destination === S3ObjectDestinationType.UPLOAD) {
       return `${process.env.APP_DOMAIN}/aws/s3/objects/${this.id}/low-res`;
     }
     return null;

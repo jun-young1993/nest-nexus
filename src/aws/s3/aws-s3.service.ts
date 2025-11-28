@@ -33,6 +33,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Readable } from 'stream';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { streamToBufferResize } from 'src/utils/sharp';
+import { formatBytes } from 'src/utils/formats/file-size-format';
 
 export interface S3ObjectBinaryResponse {
   data: Buffer;
@@ -534,13 +535,7 @@ export class AwsS3Service {
    * 바이트를 읽기 쉬운 형태로 변환
    */
   private formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return formatBytes(bytes);
   }
 
   async update(s3Object: S3Object): Promise<S3Object> {

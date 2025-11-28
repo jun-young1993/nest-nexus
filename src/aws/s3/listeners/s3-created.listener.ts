@@ -59,12 +59,12 @@ export class S3CreatedListener {
 
     // 비디오 파일 처리 (썸네일 생성)
     if (s3Object.isVideo) {
-      await this.processVideo(s3Object.appName, s3Object);
       await this.awsTranscoderService.generateLowRes({
         s3Object: s3Object,
       });
       const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
       const videoThumbnailUrl = videoObject.thumbnail.url;
+      await this.analyzeImage(videoObject.thumbnail);
       await this.imageToCaption(videoObject, videoThumbnailUrl);
       // await this.awsTranscoderService.generateLowRes({
       //   s3Object: videoObject,
