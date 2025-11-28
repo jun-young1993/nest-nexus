@@ -250,12 +250,7 @@ export class AwsTranscoderService {
                     );
                   }
                   resolve();
-                } catch (error) {
-                  this.logger.warn(
-                    `Failed to delete temp file: ${error.toString()}`,
-                  );
-                }
-                reject(new Error('Thumbnail creation failed'));
+                } catch (error) {}
               });
           })
           .on('error', (error) => {
@@ -293,9 +288,16 @@ export class AwsTranscoderService {
         if (existsSync(lowResPath)) {
           unlinkSync(lowResPath);
         }
+        if (existsSync(thumbnailPath)) {
+          unlinkSync(thumbnailPath);
+        }
       } catch (deleteError) {
         // 무시
       }
+      this.logger.error(
+        `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} ERROR: ${error.toString()}`,
+      );
+      this.logger.error(error.stack);
       throw error;
     }
   }
