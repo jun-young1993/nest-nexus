@@ -63,14 +63,14 @@ export class S3CreatedListener {
 
       // 비디오 파일 처리 (썸네일 생성)
       if (s3Object.isVideo) {
-        await this.awsTranscoderService.generateLowRes({
+        const videoObject = await this.awsTranscoderService.generateLowRes({
           s3Object: s3Object,
         });
         this.logger.info(
           `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} GENERATE LOW RES PROCESS END`,
         );
-        const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
-        const videoThumbnailUrl = videoObject.thumbnail.url;
+
+        const videoThumbnailUrl = videoObject.thumbnail?.url;
         this.logger.info(
           `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} VIDEO THUMBNAIL URL: ${videoThumbnailUrl}`,
         );

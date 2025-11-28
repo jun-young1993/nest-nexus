@@ -20,6 +20,7 @@ import { createNestLogger } from 'src/factories/logger.factory';
 import { pipeline } from 'stream/promises';
 import { streamToBuffer } from 'src/utils/stremes/strem-to-buffer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
+import { S3Object } from '../entities/s3-object.entity';
 
 @Injectable()
 export class AwsTranscoderService {
@@ -42,7 +43,9 @@ export class AwsTranscoderService {
     ffmpeg.setFfprobePath(ffprobePath);
   }
 
-  async generateLowRes(jobOption: S3LowResProcessorInterface) {
+  async generateLowRes(
+    jobOption: S3LowResProcessorInterface,
+  ): Promise<S3Object> {
     const { s3Object } = jobOption;
     try {
       this.logger.info(
@@ -65,7 +68,7 @@ export class AwsTranscoderService {
       //   AwsS3JobName.GENERATE_LOW_RES,
       //   jobOption,
       // );
-      this.generateLowResProcess(jobOption);
+      return await this.generateLowResProcess(jobOption);
     } catch (error) {
       this.logger.error(
         `GENERATELOWRES S3 OBJECT ID: ${s3Object.id} ERROR: ${error.toString()}`,
@@ -74,7 +77,9 @@ export class AwsTranscoderService {
     }
   }
 
-  async generateLowResProcess(jobOption: S3LowResProcessorInterface) {
+  async generateLowResProcess(
+    jobOption: S3LowResProcessorInterface,
+  ): Promise<S3Object> {
     const { s3Object } = jobOption;
     const size = '360x?';
     const readable = await this.awsS3Service.getObjectCommand(s3Object);
@@ -129,7 +134,7 @@ export class AwsTranscoderService {
       );
 
       // 임시 파일로부터 인코딩
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<S3Object>((resolve, reject) => {
         this.logger.info(
           `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} START ENCODING`,
         );
@@ -249,8 +254,15 @@ export class AwsTranscoderService {
                       `Thumbnail file deleted: ${thumbnailPath}`,
                     );
                   }
-                  resolve();
-                } catch (error) {}
+                  resolve(s3Object);
+                } catch (error) {
+                  reject(new Error('Thumbnail creation failed'));
+                  this.logger.error(
+                    `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} ERROR: ${error.toString()}`,
+                  );
+                  this.logger.error(error.stack);
+                  throw error;
+                }
               });
           })
           .on('error', (error) => {
