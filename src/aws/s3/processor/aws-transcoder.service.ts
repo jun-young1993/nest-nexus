@@ -168,6 +168,32 @@ export class AwsTranscoderService {
             this.logger.info(
               `GENERATELOWRESPROCESS S3 OBJECT ID: ${s3Object.id} END PROCESS`,
             );
+
+            const readable = createReadStream(lowResPath);
+            const buffer = await streamToBuffer(readable);
+            const thumbnailFile: Express.Multer.File = {
+              buffer: buffer,
+              originalname: `${s3Object.id}-low-res.mp4`,
+              mimetype: 'video/mp4',
+              size: buffer.length,
+              fieldname: 'file',
+              encoding: '7bit',
+              destination: '',
+              filename: `${s3Object.id}-low-res.mp4`,
+              path: '',
+              stream: null,
+            };
+            const lowResObject = await this.awsS3Service.uploadFile(
+              thumbnailFile,
+              s3Object.appName,
+              s3Object.user,
+              S3ObjectDestinationType.LOW_RES,
+            );
+            s3Object.lowRes = lowResObject;
+            lowResObject.lowResSource = s3Object;
+            await this.awsS3Service.update(lowResObject);
+            await this.awsS3Service.update(s3Object);
+
             ffmpeg(lowResPath)
               .screenshot({
                 count: 1,
@@ -223,37 +249,14 @@ export class AwsTranscoderService {
                       `Thumbnail file deleted: ${thumbnailPath}`,
                     );
                   }
+                  resolve();
                 } catch (error) {
                   this.logger.warn(
                     `Failed to delete temp file: ${error.toString()}`,
                   );
                 }
-                resolve();
+                reject(new Error('Thumbnail creation failed'));
               });
-            const readable = createReadStream(lowResPath);
-            const buffer = await streamToBuffer(readable);
-            const thumbnailFile: Express.Multer.File = {
-              buffer: buffer,
-              originalname: `${s3Object.id}-low-res.mp4`,
-              mimetype: 'video/mp4',
-              size: buffer.length,
-              fieldname: 'file',
-              encoding: '7bit',
-              destination: '',
-              filename: `${s3Object.id}-low-res.mp4`,
-              path: '',
-              stream: null,
-            };
-            const lowResObject = await this.awsS3Service.uploadFile(
-              thumbnailFile,
-              s3Object.appName,
-              s3Object.user,
-              S3ObjectDestinationType.LOW_RES,
-            );
-            s3Object.lowRes = lowResObject;
-            lowResObject.lowResSource = s3Object;
-            await this.awsS3Service.update(lowResObject);
-            await this.awsS3Service.update(s3Object);
           })
           .on('error', (error) => {
             this.logger.error(
@@ -268,6 +271,10 @@ export class AwsTranscoderService {
               if (existsSync(lowResPath)) {
                 unlinkSync(lowResPath);
                 this.logger.debug(`Low res file deleted: ${lowResPath}`);
+              }
+              if (existsSync(thumbnailPath)) {
+                unlinkSync(thumbnailPath);
+                this.logger.debug(`Thumbnail file deleted: ${thumbnailPath}`);
               }
             } catch (deleteError) {
               // 무시
