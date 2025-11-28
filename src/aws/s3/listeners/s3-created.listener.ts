@@ -39,36 +39,44 @@ export class S3CreatedListener {
   @OnEvent(EventName.S3_OBJECT_CREATED)
   async handleS3Created(event: S3CreatedEvent) {
     const { s3Object } = event;
-    this.logger.info(
-      `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType}`,
-    );
+    try {
+      this.logger.info(
+        `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType}`,
+      );
 
-    if (
-      s3Object.isThumbnail ||
-      s3Object.destination != S3ObjectDestinationType.UPLOAD
-    ) {
-      return;
-    }
-    // 썸네일이 아닌 일반 이미지만 분석
-    if (s3Object.isImage) {
-      await this.awsS3Service.createImageThumbnail(s3Object, 200);
-      await this.awsS3Service.generateImageRowres(s3Object);
-      await this.analyzeImage(s3Object);
-      await this.imageToCaption(s3Object, s3Object.url);
-    }
+      if (
+        s3Object.isThumbnail ||
+        s3Object.destination != S3ObjectDestinationType.UPLOAD
+      ) {
+        return;
+      }
+      // 썸네일이 아닌 일반 이미지만 분석
+      if (s3Object.isImage) {
+        await this.awsS3Service.createImageThumbnail(s3Object, 200);
+        await this.awsS3Service.generateImageRowres(s3Object);
+        await this.analyzeImage(s3Object);
+        await this.imageToCaption(s3Object, s3Object.url);
+      }
 
-    // 비디오 파일 처리 (썸네일 생성)
-    if (s3Object.isVideo) {
-      await this.awsTranscoderService.generateLowRes({
-        s3Object: s3Object,
-      });
-      const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
-      const videoThumbnailUrl = videoObject.thumbnail.url;
-      await this.analyzeImage(videoObject.thumbnail);
-      await this.imageToCaption(videoObject, videoThumbnailUrl);
-      // await this.awsTranscoderService.generateLowRes({
-      //   s3Object: videoObject,
-      // });
+      // 비디오 파일 처리 (썸네일 생성)
+      if (s3Object.isVideo) {
+        await this.awsTranscoderService.generateLowRes({
+          s3Object: s3Object,
+        });
+        const videoObject = await this.awsS3Service.findOneOrFail(s3Object.id);
+        const videoThumbnailUrl = videoObject.thumbnail.url;
+        await this.analyzeImage(videoObject.thumbnail);
+        await this.imageToCaption(videoObject, videoThumbnailUrl);
+        // await this.awsTranscoderService.generateLowRes({
+        //   s3Object: videoObject,
+        // });
+      }
+    } catch (error) {
+      this.logger.error(
+        `[HANDLE S3 CREATED ERROR] ${s3Object.id}: ${error.message}`,
+      );
+      this.logger.error(error.stack);
+      throw error;
     }
   }
 
