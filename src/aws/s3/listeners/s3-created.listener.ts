@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EventName } from 'src/enums/event-name.enum';
-import { S3CreatedEvent } from '../events/s3-created.event';
+import {
+  S3CreatedEvent,
+  S3VideoMetadataCreatedEvent,
+} from '../events/s3-created.event';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { CloudRunEmotionService } from 'src/cloud-run/emotion/cloud-run-emotion.service';
 import { getEmotionsAboveThreshold } from 'src/cloud-run/emotion/interfaces/emotion-analysis-response.interface';
@@ -57,11 +60,10 @@ export class S3CreatedListener {
       if (s3Object.isImage) {
         await this.awsS3Service.createImageThumbnail(s3Object, 200);
         await this.awsS3Service.generateImageRowres(s3Object);
-        await this.analyzeImage(s3Object);
-        await this.imageToCaption(s3Object, s3Object.url);
+        await this.handleS3VideoMetadataCreated(
+          new S3VideoMetadataCreatedEvent(s3Object),
+        );
       }
-
-      // 비디오 파일 처리 (썸네일 생성)
       if (s3Object.isVideo) {
         const videoObject = await this.awsTranscoderService.generateLowRes({
           s3Object: s3Object,
@@ -69,20 +71,51 @@ export class S3CreatedListener {
         this.logger.info(
           `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} GENERATE LOW RES PROCESS END`,
         );
-
-        const videoThumbnailUrl = videoObject.thumbnail?.url;
-        this.logger.info(
-          `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} VIDEO THUMBNAIL URL: ${videoThumbnailUrl}`,
-        );
-        await this.analyzeImage(videoObject.thumbnail);
-        await this.imageToCaption(videoObject, videoThumbnailUrl);
-        this.logger.info(
-          `[HANDLE S3 CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} IMAGE TO CAPTION END`,
+        await this.handleS3VideoMetadataCreated(
+          new S3VideoMetadataCreatedEvent(videoObject),
         );
       }
     } catch (error) {
       this.logger.error(
         `[HANDLE S3 CREATED ERROR] ${s3Object.id}: ${error.message}`,
+      );
+      this.logger.error(error.stack);
+      throw error;
+    }
+  }
+
+  @OnEvent(EventName.S3_VIDEO_METADATA_CREATED)
+  async handleS3VideoMetadataCreated(event: S3VideoMetadataCreatedEvent) {
+    const { s3Object } = event;
+    try {
+      this.logger.info(`[HANDLE S3 VIDEO METADATA CREATED] ${s3Object.id}`);
+      if (s3Object.isImage) {
+        await this.analyzeImage(s3Object);
+        this.logger.info(
+          `[HANDLE S3 VIDEO METADATA CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} ANALYSIS IMAGE END`,
+        );
+        await this.imageToCaption(s3Object, s3Object.url);
+        this.logger.info(
+          `[HANDLE S3 VIDEO METADATA CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} IMAGE TO CAPTION END`,
+        );
+      } else if (s3Object.isVideo) {
+        await this.analyzeImage(s3Object.thumbnail);
+        this.logger.info(
+          `[HANDLE S3 VIDEO METADATA CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} ANALYSIS IMAGE END`,
+        );
+        await this.imageToCaption(s3Object, s3Object.thumbnailUrl);
+        this.logger.info(
+          `[HANDLE S3 VIDEO METADATA CREATED] ${s3Object.id} [HANDLE S3 FILE TYPE] ${s3Object.fileType} IMAGE TO CAPTION END`,
+        );
+      } else {
+        this.logger.error(
+          `[HANDLE S3 VIDEO METADATA CREATED ERROR] ${s3Object.id}: ${s3Object.fileType} IS NOT IMAGE OR VIDEO`,
+        );
+        throw new Error(`${s3Object.fileType} IS NOT IMAGE OR VIDEO`);
+      }
+    } catch (error) {
+      this.logger.error(
+        `[HANDLE S3 VIDEO METADATA CREATED ERROR] ${s3Object.id}: ${error.message}`,
       );
       this.logger.error(error.stack);
       throw error;

@@ -530,6 +530,19 @@ export class AwsS3Controller {
     return await this.awsS3Service.createListener(s3Object);
   }
 
+  @Put('objects/create-video-metadata-listener/:id')
+  @ApiOperation({ summary: 'S3 객체의 비디오 메타데이터 생성' })
+  @ApiResponse({
+    status: 200,
+    description: 'S3 객체의 비디오 메타데이터 생성 성공',
+  })
+  @ApiResponse({ status: 404, description: 'S3 객체를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async createVideoMetadataListener(@Param('id') id: string) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    return await this.awsS3Service.createVideoMetadataListener(s3Object);
+  }
+
   @Patch('objects/:id/toggle/hidden')
   @ApiParam({ name: 'id', description: 'S3 객체 ID' })
   @ApiOperation({ summary: 'S3 객체의 숨김 상태 토글' })

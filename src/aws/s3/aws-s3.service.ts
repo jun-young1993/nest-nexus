@@ -26,7 +26,10 @@ import { TagType } from './enum/tag.type';
 import { CreateS3ObjectTagDto } from './dto/create-s3-object-tag.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventName } from 'src/enums/event-name.enum';
-import { S3CreatedEvent } from './events/s3-created.event';
+import {
+  S3CreatedEvent,
+  S3VideoMetadataCreatedEvent,
+} from './events/s3-created.event';
 import { getMimetypeFromFilename } from 'src/utils/file-type.util';
 import { S3ObjectDestinationType } from './enum/s3-object-destination.type';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -58,6 +61,13 @@ export class AwsS3Service {
     this.eventEmitter.emit(
       EventName.S3_OBJECT_CREATED,
       new S3CreatedEvent(s3Object),
+    );
+  }
+
+  async createVideoMetadataListener(s3Object: S3Object): Promise<void> {
+    this.eventEmitter.emit(
+      EventName.S3_VIDEO_METADATA_CREATED,
+      new S3VideoMetadataCreatedEvent(s3Object),
     );
   }
 
