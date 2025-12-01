@@ -37,6 +37,9 @@ import { Readable } from 'stream';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { streamToBufferResize } from 'src/utils/sharp';
 import { formatBytes } from 'src/utils/formats/file-size-format';
+import { bufferToStream } from 'src/utils/stremes/buffer-to-stream';
+import { calculateChecksum } from 'src/utils/stremes/check-sum';
+import { S3ObjectMetadataService } from './s3-object-metadata.service';
 
 export interface S3ObjectBinaryResponse {
   data: Buffer;
@@ -54,6 +57,7 @@ export class AwsS3Service {
     private readonly s3ObjectRepository: Repository<S3Object>,
     private readonly userStorageLimitService: UserStorageLimitService,
     private readonly s3ObjectTagService: S3ObjectTagService,
+    private readonly s3ObjectMetadataService: S3ObjectMetadataService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -158,28 +162,42 @@ export class AwsS3Service {
       const day = String(date.getDate()).padStart(2, '0');
       // 파일명 생성 개선
       const key = `${nodeEnv}/${user.id}/${year}/${month}/${day}/${s3Object.id}.${extension}`;
-
-      const command = new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: file.buffer,
-        ContentType: getMimetypeFromFilename(file.originalname),
-        ACL: 'private',
+      const checksum = await calculateChecksum(bufferToStream(file.buffer));
+      const existsObject = await this.s3ObjectRepository.findOne({
+        where: {
+          metadata: {
+            checksum: checksum,
+          },
+        },
+        relations: ['metadata'],
       });
+      if (!existsObject) {
+        const command = new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: file.buffer,
+          ContentType: getMimetypeFromFilename(file.originalname),
+          ACL: 'private',
+        });
 
-      await this.s3Client.send(command);
-      // s3Object.url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-      // Soft Delete를 사용하므로 active 필드 제거
-      s3Object.key = key;
-      await this.s3ObjectRepository.save(s3Object);
-      await this.generateGetObjectPresignedUrl(s3Object);
+        await this.s3Client.send(command);
+        // s3Object.url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+        // Soft Delete를 사용하므로 active 필드 제거
+        s3Object.key = key;
+        await this.s3ObjectRepository.save(s3Object);
+        await this.generateGetObjectPresignedUrl(s3Object);
+        await this.s3ObjectMetadataService.create({
+          s3Object: s3Object,
+          checksum: checksum,
+        });
+        this.eventEmitter.emit(
+          EventName.S3_OBJECT_CREATED,
+          new S3CreatedEvent(s3Object),
+        );
 
-      this.eventEmitter.emit(
-        EventName.S3_OBJECT_CREATED,
-        new S3CreatedEvent(s3Object),
-      );
-
-      return s3Object;
+        return s3Object;
+      }
+      return existsObject;
     } catch (error) {
       await this.s3ObjectRepository.softDelete(s3Object.id);
       throw new Error(`파일 업로드 실패: ${error.message}`);

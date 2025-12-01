@@ -181,6 +181,7 @@ export class AwsS3Controller {
           limitInfo: limitCheck,
         });
       }
+
       const result = await this.awsS3Service.uploaFiles(files, appName, user);
 
       result.forEach((r) => {

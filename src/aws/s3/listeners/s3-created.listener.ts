@@ -20,6 +20,7 @@ import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
 import { CreateS3MetadataDto } from '../dto/create-s3-metadata.dto';
 import { S3ObjectMetadataService } from '../s3-object-metadata.service';
 import { AwsTranscoderService } from '../processor/aws-transcoder.service';
+import { S3ObjectMetadata } from '../entities/s3-object-metadata.entity';
 
 @Injectable()
 export class S3CreatedListener {
@@ -126,12 +127,19 @@ export class S3CreatedListener {
     try {
       this.logger.info(`[IMAGE TO CAPTION START] ${s3Object.id}`);
       const result = await this.cloudRunEmotionService.imageToCaption(url);
-      const metadata = await this.s3ObjectMetadataService.create(
-        CreateS3MetadataDto.fromJson({
-          s3Object: s3Object,
-          caption: result.text,
-        }),
-      );
+      let metadata: S3ObjectMetadata;
+      if (s3Object.metadata) {
+        s3Object.metadata.caption = result.text;
+        metadata = await this.s3ObjectMetadataService.update(s3Object.metadata);
+      } else {
+        metadata = await this.s3ObjectMetadataService.create(
+          CreateS3MetadataDto.fromJson({
+            s3Object: s3Object,
+            caption: result.text,
+          }),
+        );
+      }
+
       this.logger.info(`[IMAGE TO CAPTION RESULT] ${metadata.id}`);
     } catch (error) {
       this.logger.error(

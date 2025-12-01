@@ -6,6 +6,7 @@ export async function calculateChecksum(
   hashAlgorithm: 'sha256' | 'sha512' = 'sha256',
 ): Promise<string> {
   const hash = crypto.createHash(hashAlgorithm);
+
   return new Promise((resolve, reject) => {
     stream.on('data', (chunk: Uint8Array) => {
       hash.update(chunk);
