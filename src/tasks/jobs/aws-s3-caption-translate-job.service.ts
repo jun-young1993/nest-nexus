@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { LibreService } from 'src/ai/translate/libre/libre.service';
+import { AwsS3Service } from 'src/aws/s3/aws-s3.service';
 import { S3ObjectMetadataService } from 'src/aws/s3/s3-object-metadata.service';
 import { AllConfigType } from 'src/config/config.type';
 import { createNestLogger } from 'src/factories/logger.factory';
@@ -14,6 +15,7 @@ export class AwsS3CaptionTranslateJobService {
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
     private readonly s3ObjectMetadataService: S3ObjectMetadataService,
+    private readonly s3ObjectService: AwsS3Service,
     private readonly libreService: LibreService,
   ) {}
 

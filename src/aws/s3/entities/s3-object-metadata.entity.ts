@@ -12,6 +12,9 @@ export class S3ObjectMetadata {
   @Column({ nullable: true, type: 'text' })
   captionKo?: string;
 
+  @Column({ nullable: true, type: 'text' })
+  checksum?: string;
+
   @OneToOne(() => S3Object, (s3Object) => s3Object.metadata)
   s3Object: S3Object;
 }

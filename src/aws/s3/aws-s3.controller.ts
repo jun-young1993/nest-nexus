@@ -92,7 +92,7 @@ export class AwsS3Controller {
       required: ['files'],
     },
   })
-  @UseInterceptors(FilesInterceptor('files', 5))
+  @UseInterceptors(FilesInterceptor('files', 100))
   @ApiResponse({
     status: 200,
     description: '파일 업로드 성공',

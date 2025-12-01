@@ -670,6 +670,12 @@ export class AwsS3Service {
     if (s3Object.hasThumbnail && reverse) {
       await this.generateGetObjectPresignedUrl(s3Object.thumbnail, false);
     }
+    if (!s3Object.key) {
+      this.logger.warn(
+        `S3Object ${s3Object.id} has no key, skipping presigned URL generation`,
+      );
+      return s3Object;
+    }
     if (
       s3Object.presignedUrlExpiresAt === null ||
       s3Object.presignedUrlExpiresAt < new Date() ||

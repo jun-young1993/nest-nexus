@@ -9,7 +9,21 @@ export class CreateS3MetadataDto {
     description: 'S3 객체 ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  caption: string;
+  caption?: string;
+
+  @IsOptional()
+  @ApiProperty({
+    description: 'S3 객체 ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  captionKo?: string;
+
+  @IsOptional()
+  @ApiProperty({
+    description: 'S3 객체 ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  checksum?: string;
 
   @IsNotEmpty()
   @ApiProperty({
