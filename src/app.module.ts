@@ -53,6 +53,7 @@ import { AiModule } from './ai/ai.module';
 import aiConfig from './config/ai.config';
 import transcoderConfig from './config/transcoder.config';
 import { S3ObjectProcessorModule } from './aws/s3/processor/s3-object-processor.module';
+import { AwsS3ClientModule } from './aws/aws-s3-client/aws-s3-client.module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { S3ObjectProcessorModule } from './aws/s3/processor/s3-object-processor.
     CloudRunEmotionModule,
     AiModule,
     S3ObjectProcessorModule,
+    AwsS3ClientModule,
   ],
   controllers: [],
   providers: [],
