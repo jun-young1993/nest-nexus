@@ -58,7 +58,6 @@ export class AwsS3ClientService {
         lastModified: object.LastModified ?? new Date(0),
         storageClass: object.StorageClass ?? '',
       })) ?? [];
-    console.log('result.NextContinuationToken', result.NextContinuationToken);
     return {
       items: items,
       nextContinuationToken: result.NextContinuationToken ?? null,
