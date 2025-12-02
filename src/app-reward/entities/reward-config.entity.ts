@@ -10,6 +10,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 export enum RewardName {
   TREE_MAIN = 'main',
   NOTICE_BONUS = 'notice_bonus',
+  STORAGE_LIMIT = 'storage_limit',
 }
 
 export enum RewardType {

@@ -49,6 +49,10 @@ export class UserRewardUsage {
   isActive: boolean; // 활성 상태
 
   @Field()
+  @Column()
+  rewardItemType: string;
+
+  @Field()
   @CreateDateColumn()
   createdAt: Date;
 
@@ -59,4 +63,4 @@ export class UserRewardUsage {
   @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'userId' })
   user: User;
-} 
+}
