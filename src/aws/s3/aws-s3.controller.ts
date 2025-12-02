@@ -36,7 +36,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { User } from 'src/user/entities/user.entity';
-import { AwsS3AppNames } from 'src/config/config.type';
+import { AwsS3AppNames, AwsS3AppNamesValues } from 'src/config/config.type';
 import { S3Object } from './entities/s3-object.entity';
 import { createNestLogger } from 'src/factories/logger.factory';
 import { FileLoggerValidator } from 'src/utils/pipes/file/file-logger-validator';
@@ -210,7 +210,8 @@ export class AwsS3Controller {
   @ApiParam({
     name: 'appName',
     description: '앱 이름 (baby-log)',
-    example: 'baby-log',
+    example: AwsS3AppNames.BABY_LOG,
+    enum: AwsS3AppNamesValues,
   })
   @Delete(':appName/delete/:id')
   @ApiParam({ name: 'id', description: 'S3 객체 ID' })

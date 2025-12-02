@@ -22,12 +22,17 @@ import { CreateS3ObjectShareDto } from './dto/create-s3-object-share';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { AwsS3Service } from './aws-s3.service';
+import { S3ObjectShare } from './entities/s3-object-share.entity';
 
 @ApiTags('S3 Object Shares')
 @Controller('s3-object-shares')
 @UseGuards(JwtAuthGuard)
 export class S3ObjectShareController {
-  constructor(private readonly s3ObjectShareService: S3ObjectShareService) {}
+  constructor(
+    private readonly s3ObjectShareService: S3ObjectShareService,
+    private readonly awsS3Service: AwsS3Service,
+  ) {}
 
   @Get(':id')
   @Public()
@@ -53,7 +58,31 @@ export class S3ObjectShareController {
     @Query('skip') skip?: number,
     @Query('take') take?: number,
   ) {
-    return this.s3ObjectShareService.findOne(id, skip, take);
+    try {
+      const s3Object = await this.awsS3Service.findOneOrFail(id);
+      const share = S3ObjectShare.fromJson({
+        id: s3Object.id,
+        userId: s3Object.user.id,
+        user: s3Object.user,
+        expiredAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        shareCode: null,
+        title: s3Object.originalName,
+        description: null,
+        s3Object: [s3Object],
+      });
+      return {
+        ...share,
+        s3Object: [s3Object],
+        pagination: {
+          total: 1,
+          skip: skip || 0,
+          take: take || 10,
+          totalPages: Math.ceil(1 / (take || 10)),
+        },
+      };
+    } catch (error) {
+      return this.s3ObjectShareService.findOne(id, skip, take);
+    }
   }
 
   @Post()
