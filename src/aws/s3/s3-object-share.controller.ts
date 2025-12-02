@@ -58,31 +58,7 @@ export class S3ObjectShareController {
     @Query('skip') skip?: number,
     @Query('take') take?: number,
   ) {
-    try {
-      const s3Object = await this.awsS3Service.findOneOrFail(id);
-      const share = S3ObjectShare.fromJson({
-        id: s3Object.id,
-        userId: s3Object.user.id,
-        user: s3Object.user,
-        expiredAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-        shareCode: null,
-        title: s3Object.originalName,
-        description: null,
-        s3Object: [s3Object],
-      });
-      return {
-        ...share,
-        s3Object: [s3Object],
-        pagination: {
-          total: 1,
-          skip: skip || 0,
-          take: take || 10,
-          totalPages: Math.ceil(1 / (take || 10)),
-        },
-      };
-    } catch (error) {
-      return this.s3ObjectShareService.findOne(id, skip, take);
-    }
+    return this.s3ObjectShareService.findOne(id, skip, take);
   }
 
   @Post()
@@ -97,5 +73,36 @@ export class S3ObjectShareController {
     @CurrentUser() user: User,
   ) {
     return this.s3ObjectShareService.create(createS3ObjectShareDto, user);
+  }
+
+  @Get('object/:id')
+  @Public()
+  @ApiParam({ name: 'id', description: 'S3 객체 ID' })
+  @ApiOperation({ summary: 'S3 객체 공유 조회' })
+  @ApiResponse({ status: 200, description: 'S3 객체 공유 조회 성공' })
+  @ApiResponse({ status: 404, description: 'S3 객체 공유를 찾을 수 없습니다.' })
+  @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
+  async findObjectShare(@Param('id') id: string) {
+    const s3Object = await this.awsS3Service.findOneOrFail(id);
+    const share = S3ObjectShare.fromJson({
+      id: s3Object.id,
+      userId: s3Object.user.id,
+      user: s3Object.user,
+      expiredAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      shareCode: null,
+      title: s3Object.originalName,
+      description: null,
+      s3Object: [s3Object],
+    });
+    return {
+      ...share,
+      s3Object: [s3Object],
+      pagination: {
+        total: 1,
+        skip: 0,
+        take: 10,
+        totalPages: Math.ceil(1 / (0 || 10)),
+      },
+    };
   }
 }
