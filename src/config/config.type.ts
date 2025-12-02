@@ -1,3 +1,5 @@
+import { AwsRegion } from 'src/aws/aws-s3-client/enums/aws-region.enums';
+
 export type AppConfig = {
   host: string;
   port: number;
@@ -73,20 +75,28 @@ export type MailConfig = {
 };
 
 type AwsS3AppByConfig = {
-  region: 'us-east-1';
-  bucket: 'juny-babylog-assets';
-};
-
-export type AwsS3AppNames = 'baby-log';
-
-export interface AwsS3AppConfig
-  extends Record<AwsS3AppNames, AwsS3AppByConfig> {
-  'baby-log': AwsS3AppByConfig;
-}
-
-export type AwsS3CredentialsConfig = {
+  region: AwsRegion;
+  bucket: string;
   accessKeyId: string;
   secretAccessKey: string;
+};
+
+export const AwsS3AppNames = {
+  BABY_LOG: 'baby-log',
+  YOUNG_YOUNG_FAMILY_ASSETS: 'young-young-family-assets',
+} as const;
+
+export type AwsS3AppNames = (typeof AwsS3AppNames)[keyof typeof AwsS3AppNames];
+
+// TypeORM enum으로 사용하기 위한 값 배열
+export const AwsS3AppNamesValues = Object.values(AwsS3AppNames) as [
+  AwsS3AppNames,
+  ...AwsS3AppNames[],
+];
+
+export type AwsS3AppConfig = Record<AwsS3AppNames, AwsS3AppByConfig>;
+
+export type AwsS3CredentialsConfig = {
   awsS3AppConfig: AwsS3AppConfig;
 };
 

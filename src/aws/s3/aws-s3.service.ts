@@ -40,6 +40,7 @@ import { formatBytes } from 'src/utils/formats/file-size-format';
 import { bufferToStream } from 'src/utils/stremes/buffer-to-stream';
 import { calculateChecksum } from 'src/utils/stremes/check-sum';
 import { S3ObjectMetadataService } from './s3-object-metadata.service';
+import { AwsS3ClientService } from '../aws-s3-client/aws-s3-client.service';
 
 export interface S3ObjectBinaryResponse {
   data: Buffer;
@@ -59,7 +60,19 @@ export class AwsS3Service {
     private readonly s3ObjectTagService: S3ObjectTagService,
     private readonly s3ObjectMetadataService: S3ObjectMetadataService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly awsS3ClientService: AwsS3ClientService,
   ) {}
+
+  async getClient(appName: AwsS3AppNames) {
+    const region = this.configService.get<AllConfigType>('awsS3Credentials', {
+      infer: true,
+    }).awsS3AppConfig[appName].region;
+
+    if (!region) {
+      throw new Error(`Invalid app name: ${appName}`);
+    }
+    return this.awsS3ClientService.getClient(appName);
+  }
 
   async createListener(s3Object: S3Object): Promise<void> {
     this.eventEmitter.emit(
@@ -124,26 +137,28 @@ export class AwsS3Service {
     user: User,
     destination: S3ObjectDestinationType = S3ObjectDestinationType.UPLOAD,
   ): Promise<S3Object> {
-    // 파일의 생성 날짜 가져오기
-    const s3Object = await this.s3ObjectRepository.save(
-      this.s3ObjectRepository.create({
-        originalName: file.originalname,
-        size: file.size,
-        mimetype: getMimetypeFromFilename(file.originalname),
-        user: user,
-        appName: appName,
-        destination: destination,
-      }),
-    );
-    try {
-      s3Object.tags = await this.createDateTag(s3Object);
+    const s3Client = await this.getClient(appName);
 
+    try {
       // 파일 크기 추가 예시
       await this.userStorageLimitService.addFileSize(
         user,
         StorageLimitType.S3_STORAGE,
         file.size,
       );
+
+      // 파일의 생성 날짜 가져오기
+      const s3Object = await this.s3ObjectRepository.save(
+        this.s3ObjectRepository.create({
+          originalName: file.originalname,
+          size: file.size,
+          mimetype: getMimetypeFromFilename(file.originalname),
+          user: user,
+          appName: appName,
+          destination: destination,
+        }),
+      );
+      s3Object.tags = await this.createDateTag(s3Object);
 
       const appConfig = this.configService.get<AllConfigType>('app', {
         infer: true,
@@ -180,7 +195,7 @@ export class AwsS3Service {
           ACL: 'private',
         });
 
-        await this.s3Client.send(command);
+        await s3Client.send(command);
         // s3Object.url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
         // Soft Delete를 사용하므로 active 필드 제거
         s3Object.key = key;
@@ -199,7 +214,6 @@ export class AwsS3Service {
       }
       return existsObject;
     } catch (error) {
-      await this.s3ObjectRepository.softDelete(s3Object.id);
       throw new Error(`파일 업로드 실패: ${error.message}`);
     }
   }
@@ -210,7 +224,7 @@ export class AwsS3Service {
     user: User,
   ): Promise<void> {
     const bucket = this.getBucket(appName);
-
+    const s3Client = await this.getClient(appName);
     const s3Object = await this.findOneOrFail(id);
 
     if (s3Object.user.id !== user.id) {
@@ -223,7 +237,8 @@ export class AwsS3Service {
       StorageLimitType.S3_STORAGE,
       s3Object.size,
     );
-    await this.s3Client.send(
+
+    await s3Client.send(
       new DeleteObjectCommand({
         Bucket: bucket,
         Key: s3Object.key,
@@ -575,7 +590,8 @@ export class AwsS3Service {
       Bucket: this.getBucket(s3Object.appName),
       Key: s3Object.key,
     });
-    const response = await this.s3Client.send(command);
+    const s3Client = await this.getClient(s3Object.appName);
+    const response = await s3Client.send(command);
     if (!response.Body) {
       throw new Error('S3 객체 데이터를 불러오지 못했습니다.');
     }
@@ -685,6 +701,7 @@ export class AwsS3Service {
     reverse: boolean = true,
     force: boolean = false,
   ): Promise<S3Object> {
+    const s3Client = await this.getClient(s3Object.appName);
     if (s3Object.hasThumbnail && reverse) {
       await this.generateGetObjectPresignedUrl(s3Object.thumbnail, false);
     }
@@ -705,7 +722,7 @@ export class AwsS3Service {
       });
 
       const expiresIn = 7 * 24 * 60 * 60;
-      const url = await getSignedUrl(this.s3Client, command, {
+      const url = await getSignedUrl(s3Client, command, {
         expiresIn: expiresIn,
       });
 

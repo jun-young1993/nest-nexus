@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiParam,
   ApiOperation,
@@ -6,6 +14,7 @@ import {
   ApiTags,
   ApiBody,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { S3ObjectShareService } from './s3-object-share.service';
@@ -23,12 +32,28 @@ export class S3ObjectShareController {
   @Get(':id')
   @Public()
   @ApiParam({ name: 'id', description: 'S3 객체 공유 ID' })
+  @ApiQuery({
+    name: 'skip',
+    description: '건너뛸 개수',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'take',
+    description: '조회할 개수',
+    required: false,
+    type: Number,
+  })
   @ApiOperation({ summary: 'S3 객체 공유 조회' })
   @ApiResponse({ status: 200, description: 'S3 객체 공유 조회 성공' })
   @ApiResponse({ status: 404, description: 'S3 객체 공유를 찾을 수 없습니다.' })
   @ApiResponse({ status: 401, description: '인증이 필요합니다.' })
-  async findOne(@Param('id') id: string) {
-    return this.s3ObjectShareService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @Query('skip') skip?: number,
+    @Query('take') take?: number,
+  ) {
+    return this.s3ObjectShareService.findOne(id, skip, take);
   }
 
   @Post()

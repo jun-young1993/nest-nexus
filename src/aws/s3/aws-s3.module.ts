@@ -35,6 +35,8 @@ import { S3ObjectShare } from './entities/s3-object-share.entity';
 import { S3ObjectShareController } from './s3-object-share.controller';
 import { S3ObjectShareService } from './s3-object-share.service';
 import { S3ObjectMigrationController } from '../s3-object-migration.controller';
+import { AwsS3ClientService } from '../aws-s3-client/aws-s3-client.service';
+import { AwsS3ClientController } from '../aws-s3-client/aws-s3-client.controller';
 
 interface AwsS3ModuleConfig {
   region?: string;
@@ -73,8 +75,10 @@ export class AwsS3Module {
         S3ObjectReplyReportController,
         S3ObjectShareController,
         S3ObjectMigrationController,
+        AwsS3ClientController,
       ],
       providers: [
+        AwsS3ClientService,
         AwsS3Service,
         S3ObjectTagService,
         S3ObjectLikeService,
@@ -121,6 +125,7 @@ export class AwsS3Module {
         S3ObjectMetadataService,
         AwsTranscoderService,
         S3ObjectShareService,
+        AwsS3ClientService,
       ],
     };
   }

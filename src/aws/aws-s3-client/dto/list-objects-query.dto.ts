@@ -1,7 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { AwsRegion } from '../enums/aws-region.enums';
+import { AwsS3AppNames, AwsS3AppNamesValues } from 'src/config/config.type';
 
 export class ListObjectsQueryDto {
   @ApiProperty({
@@ -10,6 +19,14 @@ export class ListObjectsQueryDto {
   })
   @IsString()
   bucket: string;
+
+  @ApiProperty({
+    description: 'Application name for the migrated objects',
+    enum: ['baby-log', 'young-young-family-assets'],
+    example: 'baby-log',
+  })
+  @IsIn(AwsS3AppNamesValues)
+  appName: AwsS3AppNames;
 
   @ApiProperty({
     description: 'AWS region of the bucket',
@@ -48,5 +65,3 @@ export class ListObjectsQueryDto {
   @Max(1000)
   pageSize?: number;
 }
-
-

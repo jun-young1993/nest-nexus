@@ -23,7 +23,7 @@ import {
 } from 'src/utils/file-type.util';
 import { Exclude, Expose } from 'class-transformer';
 import { S3ObjectDestinationType } from '../enum/s3-object-destination.type';
-import { AwsS3AppNames } from 'src/config/config.type';
+import { AwsS3AppNames, AwsS3AppNamesValues } from 'src/config/config.type';
 import { S3ObjectMetadata } from './s3-object-metadata.entity';
 import { S3ObjectShare } from './s3-object-share.entity';
 
@@ -59,7 +59,11 @@ export class S3Object {
   @Column({ nullable: false, default: S3ObjectDestinationType.UPLOAD })
   destination: S3ObjectDestinationType;
 
-  @Column({ nullable: false })
+  @Column({
+    type: 'enum',
+    enum: AwsS3AppNamesValues,
+    nullable: false,
+  })
   appName: AwsS3AppNames;
 
   @CreateDateColumn()

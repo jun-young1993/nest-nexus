@@ -39,21 +39,9 @@ export class S3ObjectShareService {
     return this.s3ObjectShareRepository.save(entity);
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, skip?: number, take?: number) {
     const share = await this.s3ObjectShareRepository.findOne({
-      relations: [
-        's3Object',
-        'user',
-        'user.userGroups',
-        's3Object.thumbnail',
-        's3Object.lowRes',
-        's3Object.tags',
-        's3Object.user',
-        's3Object.metadata',
-        's3Object.likes',
-        's3Object.replies',
-        's3Object.reports',
-      ],
+      relations: ['user', 'user.userGroups'],
       where: {
         id: id,
       },
@@ -61,6 +49,45 @@ export class S3ObjectShareService {
     if (!share) {
       throw new NotFoundException('S3 객체 공유를 찾을 수 없습니다.');
     }
-    return share;
+
+    // s3Object를 페이징 조회
+    const skipValue = skip || 0;
+    const takeValue = take || 10;
+
+    const [s3Objects, total] = await this.s3ObjectRepository
+      .createQueryBuilder('s3Object')
+      .leftJoinAndSelect('s3Object.thumbnail', 'thumbnail')
+      .leftJoinAndSelect('s3Object.lowRes', 'lowRes')
+      .leftJoinAndSelect('s3Object.tags', 'tags')
+      .leftJoinAndSelect('s3Object.user', 'user')
+      .leftJoinAndSelect('s3Object.metadata', 'metadata')
+      .leftJoinAndSelect('s3Object.likes', 'likes')
+      .leftJoinAndSelect('s3Object.replies', 'replies')
+      .leftJoinAndSelect('s3Object.reports', 'reports')
+      .innerJoin(
+        's3_object_share_s3_object',
+        'share_s3',
+        'share_s3.s3ObjectId = s3Object.id',
+      )
+      .where('share_s3.s3ObjectShareId = :shareId', { shareId: id })
+      .orderBy('s3Object.createdAt', 'DESC')
+      .skip(skipValue)
+      .take(takeValue)
+      .getManyAndCount();
+
+    // Presigned URL 생성
+    const s3ObjectsWithUrls =
+      await this.awsS3Service.generateGetObjectPresigendUrls(s3Objects);
+
+    return {
+      ...share,
+      s3Object: s3ObjectsWithUrls,
+      pagination: {
+        total,
+        skip: skipValue,
+        take: takeValue,
+        totalPages: Math.ceil(total / takeValue),
+      },
+    };
   }
 }
