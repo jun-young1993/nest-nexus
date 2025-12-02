@@ -55,7 +55,7 @@ export class S3ObjectShare {
 
   @Expose()
   get getShareUrl(): string {
-    return `${process.env.APP_DOMAIN}/media/share/object/${this.id}`;
+    return `${process.env.APP_DOMAIN}/media/share/object/single-fetch/${this.id}`;
   }
 
   static fromJson(json: any): S3ObjectShare {
