@@ -34,7 +34,7 @@ export class S3ObjectTagService {
     // 이름 중복 확인 (소문자로 변환하여 비교)
     const normalizedName = createS3ObjectTagDto.name.toLowerCase();
     const existingTag = await this.s3ObjectTagRepository.findOne({
-      where: { name: normalizedName },
+      where: { name: normalizedName, type: createS3ObjectTagDto.type },
     });
 
     if (existingTag) {
