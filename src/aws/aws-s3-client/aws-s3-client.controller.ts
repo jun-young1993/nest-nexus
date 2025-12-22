@@ -17,10 +17,12 @@ import { MigrateCreateLowResAndThumbnailQueryDto } from './dto/migrate-create-lo
 import { AwsS3Service } from '../s3/aws-s3.service';
 import { S3ObjectDestinationType } from '../s3/enum/s3-object-destination.type';
 import { createNestLogger } from 'src/factories/logger.factory';
-import { FileType, getFileType } from 'src/utils/file-type.util';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { S3Object } from '../s3/entities/s3-object.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventName } from 'src/enums/event-name.enum';
+import { S3CreatedEvent } from '../s3/events/s3-created.event';
 
 @ApiTags('AWS S3 Client')
 @Controller('aws/s3-client')
@@ -33,6 +35,7 @@ export class AwsS3ClientController {
     private readonly awsS3Service: AwsS3Service,
     @InjectRepository(S3Object)
     private readonly s3ObjectRepository: Repository<S3Object>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Get('objects')
@@ -103,19 +106,10 @@ export class AwsS3ClientController {
 
     for (const s3Object of s3ObjectsWithUrls) {
       try {
-        const fileType = getFileType(s3Object.originalName);
-        if (fileType !== FileType.IMAGE) {
-          new Error('Invalid file type');
-        }
-        if (!s3Object.thumbnail) {
-          const thumbnail =
-            await this.awsS3Service.createImageThumbnail(s3Object);
-          this.logger.info(`Thumbnail created: ${thumbnail.key}`);
-        }
-        if (!s3Object.lowRes) {
-          const lowRes = await this.awsS3Service.generateImageRowres(s3Object);
-          this.logger.info(`Low res created: ${lowRes.key}`);
-        }
+        this.eventEmitter.emit(
+          EventName.S3_OBJECT_CREATED,
+          new S3CreatedEvent(s3Object),
+        );
       } catch (error) {
         this.logger.error(
           `Failed to migrate create low res and thumbnail: ${s3Object.key}: ${error.message}`,
