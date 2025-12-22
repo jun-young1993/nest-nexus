@@ -82,6 +82,18 @@ export class AwsS3ClientController {
     summary: 'Migrate create low res and thumbnail',
     description: 'Migrate create low res and thumbnail',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request parameters',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+  })
   async migrateCreateLowResAndThumbnail(
     @Query() params: MigrateCreateLowResAndThumbnailQueryDto,
     @CurrentUser() user: User,
