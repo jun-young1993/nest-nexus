@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn } from 'class-validator';
+import { IsIn, IsInt, Min } from 'class-validator';
 import { AwsS3AppNames } from 'src/config/config.type';
 
 export class MigrateCreateLowResAndThumbnailQueryDto {
@@ -10,4 +10,12 @@ export class MigrateCreateLowResAndThumbnailQueryDto {
   })
   @IsIn(['baby-log', 'young-young-family-assets'])
   appName: AwsS3AppNames;
+
+  @ApiProperty({
+    description: 'Limit the number of objects to migrate',
+    example: 100,
+  })
+  @IsInt()
+  @Min(1)
+  limit: number;
 }

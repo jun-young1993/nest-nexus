@@ -97,6 +97,7 @@ export class AwsS3ClientController {
         destination: S3ObjectDestinationType.UPLOAD,
       })
       .andWhere('(thumbnail.id IS NULL OR lowRes.id IS NULL)')
+      .limit(params.limit)
       .getMany();
 
     const s3ObjectsWithUrls =

@@ -5,9 +5,11 @@ import { lastValueFrom } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { AllConfigType } from 'src/config/config.type';
 import { TranslateResponseDto } from './dto/translate-response.dto';
+import { createNestLogger } from 'src/factories/logger.factory';
 
 @Injectable()
 export class LibreService {
+  private readonly logger = createNestLogger(LibreService.name);
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService<AllConfigType>,
@@ -27,6 +29,7 @@ export class LibreService {
       infer: true,
     });
     const url = `${ip}:${port}/translate`;
+    this.logger.info(`[LIBRE TRANSLATE] ${text} -> ${source} -> ${target}`);
     const response = await lastValueFrom<AxiosResponse<TranslateResponseDto>>(
       this.httpService.post(url, {
         q: text,
