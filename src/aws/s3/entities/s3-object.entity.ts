@@ -232,7 +232,7 @@ export class S3Object {
   @Expose()
   get shareUrl(): string | null {
     if (this.destination === S3ObjectDestinationType.UPLOAD) {
-      return `${process.env.APP_BLOG_URL}/media/share/object/${this.id}`;
+      return `${process.env.APP_BLOG_URL}/media/share/object/single-fetch/${this.id}`;
     }
     return null;
   }
