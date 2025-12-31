@@ -65,15 +65,15 @@ export class PointTransaction {
   source: TransactionSource;
 
   @Field()
-  @Column({ type: 'int' })
+  @Column({ type: 'bigint' })
   amount: number; // 거래 금액 (양수: 획득, 음수: 사용)
 
   @Field()
-  @Column({ type: 'int' })
+  @Column({ type: 'bigint' })
   balanceBefore: number; // 거래 전 잔액
 
   @Field()
-  @Column({ type: 'int' })
+  @Column({ type: 'bigint' })
   balanceAfter: number; // 거래 후 잔액
 
   @Field({ nullable: true })

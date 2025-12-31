@@ -49,10 +49,6 @@ export class UserRewardUsage {
   isActive: boolean; // 활성 상태
 
   @Field()
-  @Column()
-  rewardItemType: string;
-
-  @Field()
   @CreateDateColumn()
   createdAt: Date;
 

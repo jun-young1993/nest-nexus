@@ -6,4 +6,5 @@ export const EventName = {
   PARKING_LOCATION_NOTICE_CREATED: `${PARKING_LOCATION}.notice.created`,
   S3_OBJECT_CREATED: `${S3_OBJECT}.created`,
   S3_VIDEO_METADATA_CREATED: `${S3_OBJECT}.video.metadata.created`,
+  REWARD_TRANSACTION: 'reward.transaction',
 } as const;

@@ -11,6 +11,7 @@ export enum RewardName {
   TREE_MAIN = 'main',
   NOTICE_BONUS = 'notice_bonus',
   STORAGE_LIMIT = 'storage_limit',
+  BABY_LOG_GROUP_LEADER_STORAGE_INCREASE = 'baby_log_group_leader_storage_increase',
 }
 
 export enum RewardType {

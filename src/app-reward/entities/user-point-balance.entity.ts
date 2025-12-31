@@ -24,19 +24,19 @@ export class UserPointBalance {
   userId: string;
 
   @Field()
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   currentPoints: number; // 현재 포인트
 
   @Field()
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   totalEarnedPoints: number; // 총 획득 포인트
 
   @Field()
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   totalSpentPoints: number; // 총 사용 포인트
 
   @Field()
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   totalWithdrawnPoints: number; // 총 출금 포인트
 
   @Field()

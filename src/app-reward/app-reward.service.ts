@@ -25,6 +25,9 @@ import {
 import { CreatePointTransactionDto } from './dto/create-point-transaction.dto';
 import { ProcessRewardDto } from './dto/process-reward.dto';
 import { CreatePointWithdrawalDto } from './dto/create-point-withdrawal.dto';
+import { EventName } from 'src/enums/event-name.enum';
+import { RewardTransactionEvent } from './events/reward-transaction.event';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AppRewardService {
@@ -42,6 +45,7 @@ export class AppRewardService {
     @InjectRepository(PointWithdrawal)
     private readonly pointWithdrawalRepository: Repository<PointWithdrawal>,
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -208,11 +212,16 @@ export class AppRewardService {
       }
     }
 
-    return await this.processPoint(
+    const result = await this.processPoint(
       processDto,
       rewardConfig,
       TransactionType.EARN,
     );
+    this.eventEmitter.emit(
+      EventName.REWARD_TRANSACTION,
+      new RewardTransactionEvent(result, rewardConfig),
+    );
+    return result;
   }
 
   public async processPoint(
