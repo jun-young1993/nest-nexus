@@ -158,6 +158,16 @@ export class UserStorageLimitService {
     return await this.userStorageLimitRepository.save(storageLimit);
   }
 
+  async increaseLimitValue(
+    users: User[],
+    limitType: StorageLimitType,
+    increment: number,
+  ): Promise<UserStorageLimit> {
+    const storageLimit = await this.findByUserAndTypeOrFail(users, limitType);
+    storageLimit.limitValue += increment;
+    return await this.userStorageLimitRepository.save(storageLimit);
+  }
+
   /**
    * 사용량 감소
    */

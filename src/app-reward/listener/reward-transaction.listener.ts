@@ -54,7 +54,7 @@ export class RewardTransactionListener {
       throw new NotFoundException('Group admin user not found');
     }
 
-    await this.userStorageLimitService.increaseUsage(
+    await this.userStorageLimitService.increaseLimitValue(
       [groupAdminUser],
       StorageLimitType.S3_STORAGE,
       pointTransaction.amount * 1024 * 1024 * 100,
