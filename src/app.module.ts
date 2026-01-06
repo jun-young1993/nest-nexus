@@ -53,6 +53,7 @@ import { AiModule } from './ai/ai.module';
 import aiConfig from './config/ai.config';
 import transcoderConfig from './config/transcoder.config';
 import { S3ObjectProcessorModule } from './aws/s3/processor/s3-object-processor.module';
+import { CloudRunDeepFaceModule } from './cloud-run/ai-hub/deep-face/cloud-run-deep-face.module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { S3ObjectProcessorModule } from './aws/s3/processor/s3-object-processor.
     CloudRunEmotionModule,
     AiModule,
     S3ObjectProcessorModule,
+    CloudRunDeepFaceModule,
   ],
   controllers: [],
   providers: [],

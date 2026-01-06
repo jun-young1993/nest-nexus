@@ -100,13 +100,19 @@ export type AwsS3CredentialsConfig = {
   awsS3AppConfig: AwsS3AppConfig;
 };
 
-export type CloudRunEmotionConfig = {
+export interface CloudRunBaseConfig {
   key_path: string;
   base_url: string;
-};
+}
 
+export interface CloudRunEmotionConfig extends CloudRunBaseConfig {}
+
+export interface CloudRunDeepFaceConfig extends CloudRunBaseConfig {}
 export type CloudRunConfig = {
   emotion: CloudRunEmotionConfig;
+  aiHub: {
+    deepFace: CloudRunDeepFaceConfig;
+  };
 };
 
 export type LibreTranslateConfig = {
