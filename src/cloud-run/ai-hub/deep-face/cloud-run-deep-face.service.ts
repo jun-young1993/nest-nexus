@@ -49,7 +49,9 @@ export class CloudRunDeepFaceService {
   async uploadTemp(files: Express.Multer.File[], user: User): Promise<any> {
     try {
       const dirPath = `storage/${user.id}`;
-      this.logger.info(`[UPLOAD TEMP FILE START] ${files} to ${dirPath}`);
+      this.logger.info(
+        `[UPLOAD TEMP FILE START] ${files.map((file) => file.originalname).join(', ')} to ${dirPath}`,
+      );
       const baseUrl = this.configService.get(
         'cloudRun.aiHub.deepFace.base_url',
         {

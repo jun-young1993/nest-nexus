@@ -78,3 +78,5 @@ node_modules/
 
 
 storage/*
+
+firebase-admin-service-account-keys.json

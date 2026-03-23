@@ -54,6 +54,7 @@ import aiConfig from './config/ai.config';
 import transcoderConfig from './config/transcoder.config';
 import { S3ObjectProcessorModule } from './aws/s3/processor/s3-object-processor.module';
 import { CloudRunDeepFaceModule } from './cloud-run/ai-hub/deep-face/cloud-run-deep-face.module';
+import firebaseAdminConfig from './config/firebase-admin.config';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { CloudRunDeepFaceModule } from './cloud-run/ai-hub/deep-face/cloud-run-d
         cloudRunConfig,
         aiConfig,
         transcoderConfig,
+        firebaseAdminConfig,
       ],
       envFilePath: ['.env'],
     }),

@@ -131,6 +131,10 @@ export type TranscoderConfig = {
   ffprobe_path: string;
 };
 
+export type FirebaseAdminConfig = {
+  serviceAccountKeysPath: string;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   alie: AlieConfig;
@@ -145,4 +149,5 @@ export type AllConfigType = {
   cloudRun: CloudRunConfig;
   ai: AiConfig;
   transcoder: TranscoderConfig;
+  firebaseAdmin: FirebaseAdminConfig;
 };
